@@ -8,9 +8,16 @@ import 'package:flux/data/models/habit_entry.dart';
 class AddEntryDialog extends StatefulWidget {
   final Habit habit;
   final int dayNumber;
+  final DateTime? selectedDate;
   final Function(HabitEntry) onSave;
 
-  const AddEntryDialog({super.key, required this.habit, required this.dayNumber, required this.onSave});
+  const AddEntryDialog({
+    super.key,
+    required this.habit,
+    required this.dayNumber,
+    this.selectedDate,
+    required this.onSave,
+  });
 
   @override
   _AddEntryDialogState createState() => _AddEntryDialogState();
@@ -405,7 +412,7 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                             final newValue = currentValue + 1;
                             _countController.text = newValue.toString();
                             setState(() {
-                              _sliderValue = newValue;
+                                _sliderValue = newValue;
                             });
                           },
                           icon: Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
@@ -436,52 +443,6 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
             ),
 
             SizedBox(height: 16),
-
-            // // Enhanced slider
-            // Container(
-            //   padding: EdgeInsets.all(16),
-            //   decoration: BoxDecoration(
-            //     color: Colors.grey.withValues(alpha: 0.05),
-            //     borderRadius: BorderRadius.circular(12),
-            //   ),
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       Row(
-            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //         children: [
-            //           Text('Quick Slider', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            //           Text('${_sliderValue.toString()} $unitName',
-            //                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold,
-            //                               color: Theme.of(context).colorScheme.primary)),
-            //         ],
-            //       ),
-            //       SizedBox(height: 8),
-            //       SliderTheme(
-            //         data: SliderTheme.of(context).copyWith(
-            //           thumbColor: Theme.of(context).colorScheme.primary,
-            //           activeTrackColor: Theme.of(context).colorScheme.primary,
-            //           inactiveTrackColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-            //           overlayColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-            //           thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12),
-            //           trackHeight: 6,
-            //         ),
-            //         child: Slider(
-            //           value: _sliderValue.toDouble(),
-            //           min: 0,
-            //           max: 50,
-            //           divisions: 50,
-            //           onChanged: (value) {
-            //             setState(() {
-            //               _sliderValue = value.round();
-            //               _countController.text = _sliderValue.toString();
-            //             });
-            //           },
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
           ] else ...[
             Text('Enter Amount', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             SizedBox(height: 12),
@@ -761,7 +722,7 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
     if (_isSkipped) {
       // Create skipped entry with reason
       final entry = HabitEntry(
-        date: DateTime.now(),
+        date: widget.selectedDate ?? DateTime.now(),
         count: 0,
         dayNumber: widget.dayNumber,
         isSkipped: true,
@@ -786,7 +747,7 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
     }
 
     final entry = HabitEntry(
-      date: DateTime.now(),
+      date: widget.selectedDate ?? DateTime.now(),
       count: count,
       dayNumber: widget.dayNumber,
       value: value,

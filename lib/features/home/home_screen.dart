@@ -1,7 +1,8 @@
 // lib/main.dart
-
 import 'package:flutter/material.dart';
-import 'package:flux/features/habits/add_habit_sheet.dart';
+import 'package:collection/collection.dart';
+import 'package:flux/features/habits/widgets/add_habit_sheet.dart';
+import 'package:flux/features/habits/widgets/add_entry_dialog.dart';
 import 'package:flux/main.dart';
 import 'package:flux/features/settings/settings_screen.dart';
 import 'package:flux/features/analytics/analytics_dashboard.dart';
@@ -12,11 +13,8 @@ import 'package:flux/data/models/habit_entry.dart';
 import 'package:flux/core/services/storage_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:flux/features/habits/bulk_edit_screen.dart';
 import 'package:flux/core/services/widget_service.dart';
-import 'package:flux/features/achievements/achievements_view.dart';
 import 'package:flux/features/backup_and_import/backup_import_screen.dart';
-import 'package:flux/features/gamification/points_screen.dart';
 import 'package:flux/core/services/keyboard_service.dart';
 import 'package:flux/core/widgets/keyboard_aware_widget.dart';
 import 'package:flux/core/widgets/focusable_button.dart';
@@ -54,6 +52,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   String? _selectedCategory;
   List<String> _categories = [];
   
+  // Date selection & horizontal Day Selector
+  DateTime _selectedDate = DateTime.now();
+  late ScrollController _daySelectorScrollController;
+  
   // Keyboard navigation
   late ScrollController _habitsScrollController;
   late ScrollController _dashboardScrollController;
@@ -68,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     // Initialize scroll controllers
     _habitsScrollController = ScrollController();
     _dashboardScrollController = ScrollController();
+    _daySelectorScrollController = ScrollController();
     
     // Initialize focus nodes for keyboard navigation
     _initializeFocusNodes();
@@ -76,6 +79,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _tabController.addListener(_onTabChanged);
     
     _loadHabits();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _centerToday();
+    });
   }
 
   @override
@@ -83,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _tabController.dispose();
     _habitsScrollController.dispose();
     _dashboardScrollController.dispose();
+    _daySelectorScrollController.dispose();
     
     // Dispose focus nodes
     for (var node in _focusableNodes) {
@@ -266,15 +274,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  void _openPointsScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PointsScreen(),
-      ),
-    );
-  }
-
   void _showYearInReview() {
     final currentYear = DateTime.now().year;
     final yearReview = ReportsService.generateYearInReview(_filteredHabits, currentYear);
@@ -327,24 +326,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  void _openBulkEdit() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BulkEditScreen(habits: _habits),
-      ),
-    ).then((_) => _loadHabits());
-  }
-
-  void _openAchievements() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AchievementsView(),
-      ),
-    );
-  }
-
   void _showKeyboardShortcuts() {
     showKeyboardShortcutsDialog(context);
   }
@@ -385,11 +366,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       onOpenAnalytics: _openAnalytics,
       onToggleArchive: _toggleArchiveView,
       onFilterByCategory: _showCategoryFilter,
-      onBulkEdit: _openBulkEdit,
       onBackup: _openBackupScreen,
       onYearReview: _showYearInReview,
-      onAchievements: _openAchievements,
-      onPoints: _openPointsScreen,
       onShowKeyboardShortcuts: _showKeyboardShortcuts,
       focusableNodes: _focusableNodes,
       child: Scaffold(
@@ -421,82 +399,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               tooltip: 'Analytics Dashboard (D)',
               focusNode: _focusableNodes.length > 3 ? _focusableNodes[3] : null,
             ),
-          if (!_showArchived && _filteredHabits.isNotEmpty)
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert),
-              onSelected: (value) {
-                switch (value) {
-                  case 'bulk_edit':
-                    _openBulkEdit();
-                    break;
-                  case 'points':
-                    _openPointsScreen();
-                    break;
-                  case 'backup':
-                    _openBackupScreen();
-                    break;
-                  case 'year_review':
-                    _showYearInReview();
-                    break;
-                  case 'achievements':
-                    _openAchievements();
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'bulk_edit',
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_note, size: 18),
-                      SizedBox(width: 8),
-                      Text('Bulk Edit'),
-                    ],
-                  ),
-                ),
-                PopupMenuDivider(),
-                PopupMenuItem(
-                  value: 'points',
-                  child: Row(
-                    children: [
-                      Icon(Icons.stars, size: 18),
-                      SizedBox(width: 8),
-                      Text('Points & Rewards'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'backup',
-                  child: Row(
-                    children: [
-                      Icon(Icons.backup, size: 18),
-                      SizedBox(width: 8),
-                      Text('Backup & Import'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'year_review',
-                  child: Row(
-                    children: [
-                      Icon(Icons.auto_awesome, size: 18),
-                      SizedBox(width: 8),
-                      Text('Year in Review'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'achievements',
-                  child: Row(
-                    children: [
-                      Icon(Icons.emoji_events, size: 18),
-                      SizedBox(width: 8),
-                      Text('Achievements'),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+
           FocusableIconButton(
             icon: Icon(_showArchived ? Icons.inventory_2_outlined : Icons.archive),
             onPressed: _toggleArchiveView,
@@ -536,7 +439,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               : TabBarView(
                   controller: _tabController,
                   children: [
-                    _filteredHabits.isEmpty ? _buildEmpty() : _buildHabitsList(_filteredHabits),
+                    Column(
+                      children: [
+                        _buildDaySelector(),
+                        Expanded(
+                          child: _filteredHabits.isEmpty ? _buildEmpty() : _buildHabitsList(_filteredHabits),
+                        ),
+                      ],
+                    ),
                     _buildDashboard(),
                   ],
                 ),
@@ -627,23 +537,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return ListView.separated(
       controller: _habitsScrollController,
       padding: EdgeInsets.all(16),
-      itemCount: habits.length, // Add 1 for QuickEntryWidget
+      itemCount: habits.length,
       separatorBuilder: (context, index) {
-        if (index == 0) return SizedBox(height: 16); // Space after quick entry
         return SizedBox(height: 8);
       },
       itemBuilder: (context, index) {
-        // if (index == 0) {
-        //   // Quick entry widget at the top
-        //   return QuickEntryWidget(
-        //     habits: _habits,
-        //     onUpdate: _loadHabits,
-        //   );
-        // }
-        
         final habit = habits[index];
         return HabitListItem(
           habit: habit,
+          selectedDate: _selectedDate,
+          onCompletionTap: () => _handleCompletionTap(habit),
           onTap: () async {
             await Navigator.push(
               context, 
@@ -654,6 +557,249 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         );
       },
     );
+  }
+
+  void _centerToday() {
+    if (!_daySelectorScrollController.hasClients) return;
+    final screenWidth = MediaQuery.of(context).size.width;
+    const double itemWidth = 70.0; // 58 width + 6 left + 6 right padding
+    final double offset = (25 * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+    _daySelectorScrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Widget _buildDaySelector() {
+    final today = DateTime.now();
+    final todayMidnight = DateTime(today.year, today.month, today.day);
+    
+    // Generate 30 days (25 before, today, 4 after)
+    final days = List.generate(30, (index) {
+      final date = todayMidnight.subtract(Duration(days: 25 - index));
+      return DateTime(date.year, date.month, date.day);
+    });
+
+    return Container(
+      height: 90,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.15),
+            width: 1,
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.builder(
+        controller: _daySelectorScrollController,
+        scrollDirection: Axis.horizontal,
+        itemCount: days.length,
+        itemBuilder: (context, index) {
+          final date = days[index];
+          final isSelected = date.year == _selectedDate.year &&
+              date.month == _selectedDate.month &&
+              date.day == _selectedDate.day;
+
+          final isToday = date.year == todayMidnight.year &&
+              date.month == todayMidnight.month &&
+              date.day == todayMidnight.day;
+
+          final weekdayStr = DateFormat('E').format(date);
+          final dayStr = DateFormat('d').format(date);
+          final monthStr = DateFormat('MMM').format(date);
+
+          final colorScheme = Theme.of(context).colorScheme;
+          final accentColor = colorScheme.primary;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedDate = date;
+                });
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 58,
+                decoration: BoxDecoration(
+                  color: isSelected 
+                      ? accentColor
+                      : isToday 
+                          ? accentColor.withValues(alpha: 0.1)
+                          : Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? accentColor
+                        : isToday
+                            ? accentColor
+                            : colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: isSelected ? [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ] : [],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      weekdayStr,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
+                        color: isSelected
+                            ? Colors.white
+                            : isToday
+                                ? accentColor
+                                : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      dayStr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? Colors.white
+                            : colorScheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      monthStr,
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.8)
+                            : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _handleCompletionTap(Habit habit) async {
+    final entry = habit.entries.firstWhereOrNull((e) =>
+        e.date.year == _selectedDate.year &&
+        e.date.month == _selectedDate.month &&
+        e.date.day == _selectedDate.day);
+
+    if (entry == null) {
+      // Habit is not done yet, show AddEntryDialog
+      final nextDay = habit.getNextDayNumber();
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => AddEntryDialog(
+          habit: habit,
+          dayNumber: nextDay,
+          selectedDate: _selectedDate,
+          onSave: (newEntry) async {
+            habit.entries.add(newEntry);
+            await StorageService.save(habit);
+            Navigator.of(context).pop();
+            _loadHabits();
+          },
+        ),
+      );
+    } else {
+      // Entry already exists, show options sheet
+      showModalBottomSheet(
+        context: context,
+        builder: (context) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit, color: Colors.blue),
+                title: const Text('Edit Entry Notes/Value'),
+                onTap: () {
+                  Navigator.pop(context); // Close selection sheet
+                  
+                  final nextDay = entry.dayNumber;
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => AddEntryDialog(
+                      habit: habit,
+                      dayNumber: nextDay,
+                      selectedDate: _selectedDate,
+                      onSave: (updatedEntry) async {
+                        // Remove old entry
+                        habit.entries.removeWhere((e) =>
+                            e.date.year == _selectedDate.year &&
+                            e.date.month == _selectedDate.month &&
+                            e.date.day == _selectedDate.day);
+                        
+                        // Add updated entry
+                        habit.entries.add(updatedEntry);
+                        await StorageService.save(habit);
+                        Navigator.of(context).pop();
+                        _loadHabits();
+                      },
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Delete Entry (Mark Incomplete)'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Entry'),
+                      content: const Text('Are you sure you want to mark this habit as incomplete for this day?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                  
+                  if (confirm == true) {
+                    await StorageService.deleteEntry(habit, entry);
+                    _loadHabits();
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel),
+                title: const Text('Cancel'),
+                onTap: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
   }
   
   Widget _buildDashboard() {

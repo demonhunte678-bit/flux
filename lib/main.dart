@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flux/core/enums/app_enums.dart';
 import 'package:flux/data/models/habit.dart';
+import 'package:flux/data/models/habit_entry.dart';
 import 'package:flux/features/home/home_screen.dart';
 import 'package:flux/core/services/settings_service.dart';
 import 'package:flux/core/services/notification_service.dart';
@@ -169,8 +170,16 @@ class _HabitTrackerAppState extends State<HabitTrackerApp> {
 class HabitListItem extends StatelessWidget {
   final Habit habit;
   final VoidCallback onTap;
+  final DateTime? selectedDate;
+  final VoidCallback? onCompletionTap;
   
-  const HabitListItem({super.key, required this.habit, required this.onTap});
+  const HabitListItem({
+    super.key, 
+    required this.habit, 
+    required this.onTap,
+    this.selectedDate,
+    this.onCompletionTap,
+  });
   
   @override
   Widget build(BuildContext context) {
@@ -344,6 +353,10 @@ class HabitListItem extends StatelessWidget {
                       ],
                     ],
                   ),
+                  if (selectedDate != null) ...[
+                    SizedBox(width: 12),
+                    _buildCompletionButton(context, isCompact),
+                  ],
                 ],
               ),
               if (habit.notes != null && habit.notes!.isNotEmpty) ...[
@@ -385,6 +398,73 @@ class HabitListItem extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  Widget _buildCompletionButton(BuildContext context, bool isCompact) {
+    final entry = _getEntryForSelectedDate();
+    final themeColor = habit.color ?? Theme.of(context).colorScheme.primary;
+    
+    Color buttonBgColor = Colors.transparent;
+    Color buttonBorderColor = themeColor;
+    Widget buttonIcon = Icon(
+      Icons.add,
+      color: themeColor.withValues(alpha: 0.6),
+      size: isCompact ? 16 : 20,
+    );
+
+    if (entry != null) {
+      if (entry.isSkipped) {
+        buttonBgColor = Colors.orange;
+        buttonBorderColor = Colors.orange;
+        buttonIcon = Icon(Icons.skip_next, color: Colors.white, size: isCompact ? 16 : 20);
+      } else {
+        final isPositive = habit.isPositiveDay(entry);
+        if (isPositive) {
+          buttonBgColor = themeColor;
+          buttonBorderColor = themeColor;
+          buttonIcon = Icon(Icons.check, color: Colors.white, size: isCompact ? 16 : 20);
+        } else {
+          buttonBgColor = Colors.red;
+          buttonBorderColor = Colors.red;
+          buttonIcon = Icon(Icons.close, color: Colors.white, size: isCompact ? 16 : 20);
+        }
+      }
+    }
+
+    return GestureDetector(
+      onTap: onCompletionTap,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        width: isCompact ? 32 : 40,
+        height: isCompact ? 32 : 40,
+        decoration: BoxDecoration(
+          color: buttonBgColor,
+          shape: BoxShape.circle,
+          border: Border.all(color: buttonBorderColor, width: 2),
+          boxShadow: entry != null ? [
+            BoxShadow(
+              color: buttonBgColor.withValues(alpha: 0.3),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            )
+          ] : [],
+        ),
+        child: Center(child: buttonIcon),
+      ),
+    );
+  }
+
+  HabitEntry? _getEntryForSelectedDate() {
+    if (selectedDate == null) return null;
+    final date = selectedDate!;
+    for (var entry in habit.entries) {
+      if (entry.date.year == date.year &&
+          entry.date.month == date.month &&
+          entry.date.day == date.day) {
+        return entry;
+      }
+    }
+    return null;
   }
   
   String _getHabitStatusText(Habit habit) {

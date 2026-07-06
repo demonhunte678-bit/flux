@@ -13,11 +13,8 @@ class KeyboardAwareWidget extends StatefulWidget {
   final VoidCallback? onOpenAnalytics;
   final VoidCallback? onToggleArchive;
   final VoidCallback? onFilterByCategory;
-  final VoidCallback? onBulkEdit;
   final VoidCallback? onBackup;
   final VoidCallback? onYearReview;
-  final VoidCallback? onAchievements;
-  final VoidCallback? onPoints;
   final VoidCallback? onShowKeyboardShortcuts;
   final List<FocusNode> focusableNodes;
 
@@ -34,11 +31,8 @@ class KeyboardAwareWidget extends StatefulWidget {
     this.onOpenAnalytics,
     this.onToggleArchive,
     this.onFilterByCategory,
-    this.onBulkEdit,
     this.onBackup,
     this.onYearReview,
-    this.onAchievements,
-    this.onPoints,
     this.onShowKeyboardShortcuts,
     this.focusableNodes = const [],
   });
@@ -68,11 +62,8 @@ class _KeyboardAwareWidgetState extends State<KeyboardAwareWidget> {
       onOpenAnalytics: widget.onOpenAnalytics,
       onToggleArchive: widget.onToggleArchive,
       onFilterByCategory: widget.onFilterByCategory,
-      onBulkEdit: widget.onBulkEdit,
       onBackup: widget.onBackup,
       onYearReview: widget.onYearReview,
-      onAchievements: widget.onAchievements,
-      onPoints: widget.onPoints,
       onShowKeyboardShortcuts: widget.onShowKeyboardShortcuts,
     );
 

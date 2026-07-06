@@ -1,9 +1,8 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'package:flux/core/enums/app_enums.dart';
 import 'package:flux/data/models/habit.dart';
 import 'package:flux/core/services/settings_service.dart';
+import 'package:flux/core/widgets/custom_form_field.dart';
 
 class AddHabitSheet extends StatefulWidget {
   final Function(Habit) onSave;
@@ -245,26 +244,20 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
             SizedBox(height: 8),
             _buildUnitSelector(),
             if (_unit == HabitUnit.Custom) ...[
-              SizedBox(height: 16),
-              TextFormField(
+              const SizedBox(height: 16),
+              CustomFormField(
                 controller: _customUnitCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Custom Unit Name',
-                  hintText: 'e.g., cups, sets, chapters',
-                  filled: true,
-                ),
+                labelText: 'Custom Unit Name',
+                hintText: 'e.g., cups, sets, chapters',
               ),
             ],
-            SizedBox(height: 16),
-            TextFormField(
+            const SizedBox(height: 16),
+            CustomFormField(
               controller: _targetValueCtrl,
-              decoration: InputDecoration(
-                labelText: _getTargetLabel(),
-                hintText: _getTargetHint(),
-                filled: true,
-                suffixText: _getUnitName(),
-              ),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              labelText: _getTargetLabel(),
+              hintText: _getTargetHint(),
+              suffixText: _getUnitName(),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
           ],
         ],
@@ -301,32 +294,24 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
   }
 
   Widget _buildTextField() {
-    return TextFormField(
+    return CustomFormField(
       controller: _nameCtrl,
-      decoration: InputDecoration(
-        hintText: 'Habit name',
-        labelText: 'Name',
-        prefixIcon: Icon(Icons.edit),
-        filled: true,
-      ),
+      labelText: 'Name',
+      hintText: 'Habit name',
+      prefixIcon: Icons.edit,
       textInputAction: TextInputAction.next,
       textCapitalization: TextCapitalization.sentences,
-      style: TextStyle(fontSize: 16),
     );
   }
   
   Widget _buildNotesField() {
-    return TextFormField(
+    return CustomFormField(
       controller: _notesCtrl,
-      decoration: InputDecoration(
-        hintText: 'Optional description or notes',
-        labelText: 'Notes',
-        prefixIcon: Icon(Icons.note),
-        filled: true,
-      ),
+      labelText: 'Notes',
+      hintText: 'Optional description or notes',
+      prefixIcon: Icons.note,
       textInputAction: TextInputAction.done,
       textCapitalization: TextCapitalization.sentences,
-      style: TextStyle(fontSize: 14),
       maxLines: 2,
     );
   }
@@ -362,13 +347,11 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
           Text('Or create new:', style: Theme.of(context).textTheme.bodySmall),
           SizedBox(height: 4),
         ],
-        TextFormField(
+        CustomFormField(
           controller: _categoryCtrl,
-          decoration: InputDecoration(
-            hintText: 'e.g., Fitness, Learning, Health',
-            prefixIcon: Icon(Icons.category),
-            filled: true,
-          ),
+          labelText: 'Category',
+          hintText: 'e.g., Fitness, Learning, Health',
+          prefixIcon: Icons.category,
           onChanged: (value) {
             if (value.isNotEmpty) {
               setState(() => _selectedCategory = null);
@@ -494,13 +477,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
   }
   
   Widget _buildTargetFrequencyField() {
-    return TextFormField(
+    return CustomFormField(
       controller: _targetFrequencyCtrl,
-      decoration: InputDecoration(
-        labelText: _frequency == HabitFrequency.XTimesPerWeek ? 'Times per week' : 'Times per month',
-        hintText: 'e.g., 3',
-        filled: true,
-      ),
+      labelText: _frequency == HabitFrequency.XTimesPerWeek ? 'Times per week' : 'Times per month',
+      hintText: 'e.g., 3',
       keyboardType: TextInputType.number,
     );
   }
