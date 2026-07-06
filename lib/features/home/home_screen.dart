@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flux/features/habits/widgets/add_habit_sheet.dart';
 import 'package:flux/features/habits/widgets/add_entry_dialog.dart';
+import 'package:flux/core/services/encouragement_service.dart';
 import 'package:flux/main.dart';
 import 'package:flux/features/settings/settings_screen.dart';
 import 'package:flux/features/analytics/analytics_dashboard.dart';
@@ -24,9 +25,10 @@ class HomeScreen extends StatefulWidget {
   final VoidCallback toggleTheme;
   final bool isDarkMode;
   final Function(String)? changeTheme;
-  
-  const HomeScreen({super.key, 
-    required this.toggleTheme, 
+
+  const HomeScreen({
+    super.key,
+    required this.toggleTheme,
     required this.isDarkMode,
     this.changeTheme,
   });
@@ -35,12 +37,12 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   List<Habit> _habits = [];
   List<Habit> _activeHabits = [];
   List<Habit> _archivedHabits = [];
   List<Habit> _filteredHabits = [];
-  late TabController _tabController;
+  int _currentIndex = 0;
   bool _isLoading = true;
   int _totalPositiveDays = 0;
   int _totalNegativeDays = 0;
@@ -51,11 +53,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   bool _showArchived = false;
   String? _selectedCategory;
   List<String> _categories = [];
-  
+  bool _showSuccessRate = true;
+  bool _showCurrentStreak = true;
+
   // Date selection & horizontal Day Selector
   DateTime _selectedDate = DateTime.now();
   late ScrollController _daySelectorScrollController;
-  
+
   // Keyboard navigation
   late ScrollController _habitsScrollController;
   late ScrollController _dashboardScrollController;
@@ -65,39 +69,38 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    
+
     // Initialize scroll controllers
     _habitsScrollController = ScrollController();
     _dashboardScrollController = ScrollController();
     _daySelectorScrollController = ScrollController();
-    
+
     // Initialize focus nodes for keyboard navigation
     _initializeFocusNodes();
-    
-    // Add listener to update scroll controller when tab changes
-    _tabController.addListener(_onTabChanged);
-    
+
     _loadHabits();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _centerToday();
+      // Ensure layout stabilizes and scrolls to today perfectly
+      Future.delayed(const Duration(milliseconds: 150), () {
+        _centerToday();
+      });
     });
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _habitsScrollController.dispose();
     _dashboardScrollController.dispose();
     _daySelectorScrollController.dispose();
-    
+
     // Dispose focus nodes
     for (var node in _focusableNodes) {
       node.dispose();
     }
     _focusableNodes.clear();
-    
+
     super.dispose();
   }
 
@@ -106,86 +109,94 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _focusableNodes = List.generate(20, (index) => FocusNode());
   }
 
-  void _onTabChanged() {
-    // Update the keyboard service with the current scroll controller
-    if (_tabController.indexIsChanging) {
-      final currentController = _tabController.index == 0 
-          ? _habitsScrollController 
-          : _dashboardScrollController;
-      _keyboardService.setScrollController(currentController);
-    }
+  void _onTabChanged(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    final currentController = index == 0
+        ? _habitsScrollController
+        : _dashboardScrollController;
+    _keyboardService.setScrollController(currentController);
   }
 
   Future<void> _loadHabits() async {
     setState(() => _isLoading = true);
     final all = await StorageService.loadAll();
-    
+    final showSuccessRate = await SettingsService.getShowSuccessRate();
+    final showCurrentStreak = await SettingsService.getShowCurrentStreak();
+
     // Filter active and archived habits
     final active = all.where((h) => !h.isArchived).toList();
     final archived = all.where((h) => h.isArchived).toList();
-    
+
     // Extract categories
-    final categories = active
-        .where((h) => h.category != null)
-        .map((h) => h.category!)
-        .toSet()
-        .toList()
-        ..sort();
-    
+    final categories =
+        active
+            .where((h) => h.category != null)
+            .map((h) => h.category!)
+            .toSet()
+            .toList()
+          ..sort();
+
     // Apply category filter
-    final filtered = _selectedCategory == null 
-        ? active 
+    final filtered = _selectedCategory == null
+        ? active
         : active.where((h) => h.category == _selectedCategory).toList();
-    
+
     // Calculate overall metrics (using filtered habits)
     int totalPositive = 0;
     int totalNegative = 0;
     int totalEntries = 0;
     int bestStreak = 0;
     String bestStreakHabit = '';
-    
+
     for (var habit in filtered) {
       totalPositive += habit.positiveCount;
       totalNegative += habit.negativeCount;
       totalEntries += habit.entries.length;
-      
+
       if (habit.currentStreak > bestStreak) {
         bestStreak = habit.currentStreak;
         bestStreakHabit = habit.formattedName;
       }
     }
-    
+
     setState(() {
       _habits = all;
       _activeHabits = active;
       _archivedHabits = archived;
-      _filteredHabits = filtered;
       _categories = categories;
+      _filteredHabits = filtered;
       _totalPositiveDays = totalPositive;
       _totalNegativeDays = totalNegative;
       _totalEntries = totalEntries;
-      
+      _showSuccessRate = showSuccessRate;
+      _showCurrentStreak = showCurrentStreak;
+
       int totalDays = totalPositive + totalNegative;
-      _overallSuccessRate = totalDays > 0 ? (totalPositive / totalDays) * 100 : 0;
-      
+      _overallSuccessRate = totalDays > 0
+          ? (totalPositive / totalDays) * 100
+          : 0;
+
       _bestCurrentStreak = bestStreak;
       _bestStreakHabit = bestStreakHabit;
       _isLoading = false;
     });
-    
+
     // Update home widgets
     await WidgetService.updateHomeWidgets();
   }
 
   void _showAddHabit() {
     // Get existing categories
-    final existingCategories = _activeHabits
-        .where((h) => h.category != null)
-        .map((h) => h.category!)
-        .toSet()
-        .toList()
-        ..sort();
-    
+    final existingCategories =
+        _activeHabits
+            .where((h) => h.category != null)
+            .map((h) => h.category!)
+            .toSet()
+            .toList()
+          ..sort();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -197,27 +208,29 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           await StorageService.save(h);
           Navigator.pop(context);
           _loadHabits();
-        }
+        },
       ),
     );
   }
-  
+
   void _openSettings() {
     Navigator.push(
-      context, 
-      MaterialPageRoute(builder: (_) => SettingsScreen(
-        toggleTheme: widget.toggleTheme,
-        isDarkMode: widget.isDarkMode,
-      ))
+      context,
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(
+          toggleTheme: widget.toggleTheme,
+          isDarkMode: widget.isDarkMode,
+        ),
+      ),
     ).then((_) => _loadHabits());
   }
-  
+
   void _toggleArchiveView() {
     setState(() {
       _showArchived = !_showArchived;
     });
   }
-  
+
   void _showCategoryFilter() {
     showDialog(
       context: context,
@@ -238,18 +251,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 },
               ),
             ),
-            ..._categories.map((category) => ListTile(
-              title: Text(category),
-              leading: Radio<String?>(
-                value: category,
-                groupValue: _selectedCategory,
-                onChanged: (value) {
-                  setState(() => _selectedCategory = value);
-                  _loadHabits();
-                  Navigator.pop(context);
-                },
+            ..._categories.map(
+              (category) => ListTile(
+                title: Text(category),
+                leading: Radio<String?>(
+                  value: category,
+                  groupValue: _selectedCategory,
+                  onChanged: (value) {
+                    setState(() => _selectedCategory = value);
+                    _loadHabits();
+                    Navigator.pop(context);
+                  },
+                ),
               ),
-            )),
+            ),
           ],
         ),
       ),
@@ -268,16 +283,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void _openBackupScreen() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => BackupImportScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => BackupImportScreen()),
     );
   }
 
   void _showYearInReview() {
     final currentYear = DateTime.now().year;
-    final yearReview = ReportsService.generateYearInReview(_filteredHabits, currentYear);
-    
+    final yearReview = ReportsService.generateYearInReview(
+      _filteredHabits,
+      currentYear,
+    );
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -294,23 +310,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ] else ...[
                 Text('🎯 Total Habits: ${yearReview.totalHabits}'),
                 Text('📅 Total Entries: ${yearReview.totalEntries}'),
-                Text('📊 Success Rate: ${yearReview.overallSuccessRate.toStringAsFixed(1)}%'),
+                Text(
+                  '📊 Success Rate: ${yearReview.overallSuccessRate.toStringAsFixed(1)}%',
+                ),
                 Text('🔥 Longest Streak: ${yearReview.longestStreak} days'),
                 SizedBox(height: 16),
                 if (yearReview.milestones.isNotEmpty) ...[
-                  Text('🏆 Key Milestones:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...yearReview.milestones.take(3).map((milestone) => Padding(
-                    padding: EdgeInsets.only(left: 8, top: 4),
-                    child: Text('• ${milestone.title}'),
-                  )),
+                  Text(
+                    '🏆 Key Milestones:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  ...yearReview.milestones
+                      .take(3)
+                      .map(
+                        (milestone) => Padding(
+                          padding: EdgeInsets.only(left: 8, top: 4),
+                          child: Text('• ${milestone.title}'),
+                        ),
+                      ),
                 ],
                 if (yearReview.insights.isNotEmpty) ...[
                   SizedBox(height: 16),
-                  Text('💡 Insights:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  ...yearReview.insights.take(3).map((insight) => Padding(
-                    padding: EdgeInsets.only(left: 8, top: 4),
-                    child: Text('• ${insight.title}: ${insight.description}'),
-                  )),
+                  Text(
+                    '💡 Insights:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  ...yearReview.insights
+                      .take(3)
+                      .map(
+                        (insight) => Padding(
+                          padding: EdgeInsets.only(left: 8, top: 4),
+                          child: Text(
+                            '• ${insight.title}: ${insight.description}',
+                          ),
+                        ),
+                      ),
                 ],
               ],
             ],
@@ -341,115 +375,174 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     // This would need to be implemented based on the platform
     // For now, we'll just show a message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Fullscreen toggle not implemented on this platform')),
+      SnackBar(
+        content: Text('Fullscreen toggle not implemented on this platform'),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardAwareWidget(
-      scrollController: _tabController.index == 0 ? _habitsScrollController : _dashboardScrollController,
-      onPreviousPage: () {
-        if (_tabController.index > 0) {
-          _tabController.animateTo(_tabController.index - 1);
-        }
-      },
-      onNextPage: () {
-        if (_tabController.index < _tabController.length - 1) {
-          _tabController.animateTo(_tabController.index + 1);
-        }
-      },
-      onClose: _handleClose,
-      onToggleFullscreen: _handleToggleFullscreen,
-      onAddHabit: _showAddHabit,
-      onOpenSettings: _openSettings,
-      onOpenAnalytics: _openAnalytics,
-      onToggleArchive: _toggleArchiveView,
-      onFilterByCategory: _showCategoryFilter,
-      onBackup: _openBackupScreen,
-      onYearReview: _showYearInReview,
-      onShowKeyboardShortcuts: _showKeyboardShortcuts,
-      focusableNodes: _focusableNodes,
-      child: Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_showArchived ? 'Archived Habits' : 'Flux', 
-              style: TextStyle(fontWeight: FontWeight.bold)),
-            if (!_showArchived && _selectedCategory != null)
-              Text(
-                'Category: $_selectedCategory',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal),
+    return Scaffold(
+      appBar: _showArchived
+          ? AppBar(
+              title: const Text('Archived Habits'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _toggleArchiveView,
               ),
-          ],
-        ),
-        actions: [
-          if (!_showArchived && _categories.isNotEmpty)
-            FocusableIconButton(
-              icon: Icon(_selectedCategory != null ? Icons.filter_alt : Icons.filter_alt_outlined),
-              onPressed: _showCategoryFilter,
-              tooltip: 'Filter by Category (F)',
-              focusNode: _focusableNodes.length > 2 ? _focusableNodes[2] : null,
+            )
+          : null,
+      floatingActionButton: !_showArchived
+          ? FloatingActionButton(
+              shape: const CircleBorder(),
+              onPressed: _showAddHabit,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              child: const Icon(Icons.add),
+            )
+          : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: !_showArchived
+          ? _buildCustomBottomNavigationBar()
+          : null,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _showArchived
+          ? _buildArchivedList()
+          : IndexedStack(
+              index: _currentIndex,
+              children: [
+                _buildHabitsTab(),
+                _buildDashboardTab(),
+                _buildStatisticsTab(),
+                _buildSettingsTab(),
+              ],
             ),
-          if (!_showArchived)
-            FocusableIconButton(
-              icon: Icon(Icons.analytics),
-              onPressed: _openAnalytics,
-              tooltip: 'Analytics Dashboard (D)',
-              focusNode: _focusableNodes.length > 3 ? _focusableNodes[3] : null,
-            ),
+    );
+  }
 
-          FocusableIconButton(
-            icon: Icon(_showArchived ? Icons.inventory_2_outlined : Icons.archive),
-            onPressed: _toggleArchiveView,
-            tooltip: _showArchived ? 'Show Active Habits' : 'Show Archived',
-            focusNode: _focusableNodes.length > 4 ? _focusableNodes[4] : null,
-          ),
-          FocusableIconButton(
-            icon: Icon(Icons.keyboard),
-            onPressed: _showKeyboardShortcuts,
-            tooltip: 'Keyboard Shortcuts (F1)',
-            focusNode: _focusableNodes.isNotEmpty ? _focusableNodes[0] : null,
-          ),
-          FocusableIconButton(
-            icon: Icon(Icons.settings),
-            onPressed: _openSettings,
-            tooltip: 'Settings (S)',
-            focusNode: _focusableNodes.length > 1 ? _focusableNodes[1] : null,
+  Widget _buildHabitsTab() {
+    return Column(
+      children: [
+        _buildHabitsHeader(),
+        _buildSuccessRateCard(),
+        _buildDaySelector(),
+        Expanded(
+          child: _filteredHabits.isEmpty
+              ? _buildEmpty()
+              : _buildHabitsList(_filteredHabits),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDashboardTab() {
+    return _buildDashboard();
+  }
+
+  Widget _buildStatisticsTab() {
+    return AnalyticsDashboard(habits: _filteredHabits);
+  }
+
+  Widget _buildSettingsTab() {
+    return SettingsScreen(
+      toggleTheme: widget.toggleTheme,
+      isDarkMode: widget.isDarkMode,
+      onSettingsChanged: () {
+        _loadHabits();
+      },
+    );
+  }
+
+  Widget _buildHabitsHeader() {
+    final encouragement = EncouragementService.getEncouragement(
+      _overallSuccessRate,
+      _filteredHabits.isNotEmpty,
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${_getGreeting()},",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  encouragement.subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
-        bottom: !_showArchived ? TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(text: 'Habits'),
-            Tab(text: 'Dashboard'),
-          ],
-        ) : null,
       ),
-      floatingActionButton: !_showArchived ? FocusableButton(
-        onPressed: _showAddHabit,
-        focusNode: _focusableNodes.length > 5 ? _focusableNodes[5] : null,
-        child: Icon(Icons.add),
-      ) : null,
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _showArchived 
-              ? _buildArchivedList()
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    Column(
-                      children: [
-                        _buildDaySelector(),
-                        Expanded(
-                          child: _filteredHabits.isEmpty ? _buildEmpty() : _buildHabitsList(_filteredHabits),
-                        ),
-                      ],
-                    ),
-                    _buildDashboard(),
-                  ],
-                ),
+    );
+  }
+
+  Widget _buildBottomNavItem(int index, IconData icon, String label) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = _currentIndex == index;
+    final color = isSelected ? colorScheme.primary : Colors.grey.shade400;
+
+    return InkWell(
+      onTap: () => _onTabChanged(index),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomBottomNavigationBar() {
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildBottomNavItem(0, Icons.home_rounded, "Home"),
+            _buildBottomNavItem(1, Icons.dashboard_rounded, "Dashboard"),
+            const SizedBox(width: 40), // Spacer for center FAB
+            _buildBottomNavItem(2, Icons.analytics_rounded, "Statistics"),
+            _buildBottomNavItem(3, Icons.settings_rounded, "Settings"),
+          ],
+        ),
       ),
     );
   }
@@ -482,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ),
       );
     }
-    
+
     return ListView.separated(
       controller: _habitsScrollController,
       padding: EdgeInsets.all(16),
@@ -494,8 +587,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           habit: habit,
           onTap: () async {
             await Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (_) => HabitDetailScreen(habit: habit))
+              context,
+              MaterialPageRoute(
+                builder: (_) => HabitDetailScreen(habit: habit),
+              ),
             );
             _loadHabits();
           },
@@ -510,10 +605,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       children: [
         Icon(Icons.add_circle_outline, size: 72, color: Colors.grey),
         SizedBox(height: 16),
-        Text(
-          'No habits yet',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('No habits yet', style: Theme.of(context).textTheme.titleLarge),
         SizedBox(height: 8),
         Text(
           'Start tracking your habits to build better routines',
@@ -549,8 +641,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           onCompletionTap: () => _handleCompletionTap(habit),
           onTap: () async {
             await Navigator.push(
-              context, 
-              MaterialPageRoute(builder: (_) => HabitDetailScreen(habit: habit))
+              context,
+              MaterialPageRoute(
+                builder: (_) => HabitDetailScreen(habit: habit),
+              ),
             );
             _loadHabits();
           },
@@ -559,11 +653,128 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return "Good morning";
+    } else if (hour >= 12 && hour < 17) {
+      return "Good afternoon";
+    } else if (hour >= 17 && hour < 21) {
+      return "Good evening";
+    } else {
+      return "Good night";
+    }
+  }
+
+  Widget _buildSuccessRateCard() {
+    if (!_showSuccessRate) return const SizedBox.shrink();
+    final successRate = _overallSuccessRate;
+    final hasData = _filteredHabits.isNotEmpty;
+
+    // Get encouragement data from the smart service
+    final encouragement = EncouragementService.getEncouragement(
+      successRate,
+      hasData,
+    );
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(
+          color: encouragement.color.withOpacity(0.3),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      encouragement.title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: encouragement.color,
+                      ),
+                    ),
+                    if (hasData) ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        '(${successRate.toStringAsFixed(0)}% Success)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: encouragement.color.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  encouragement.message,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.color?.withOpacity(0.8),
+                    height: 1.3,
+                  ),
+                ),
+                if (hasData) ...[
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: successRate / 100.0,
+                      minHeight: 6,
+                      backgroundColor: Colors.grey.withOpacity(0.15),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        encouragement.color,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: encouragement.color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              encouragement.icon,
+              color: encouragement.color,
+              size: 28,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _centerToday() {
     if (!_daySelectorScrollController.hasClients) return;
     final screenWidth = MediaQuery.of(context).size.width;
     const double itemWidth = 70.0; // 58 width + 6 left + 6 right padding
-    final double offset = (25 * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+    final double offset = (7 * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
     _daySelectorScrollController.animateTo(
       offset,
       duration: const Duration(milliseconds: 350),
@@ -574,10 +785,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget _buildDaySelector() {
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
-    
-    // Generate 30 days (25 before, today, 4 after)
-    final days = List.generate(30, (index) {
-      final date = todayMidnight.subtract(Duration(days: 25 - index));
+
+    // Generate 15 days (7 before, today, 7 after)
+    final days = List.generate(15, (index) {
+      final date = todayMidnight.subtract(Duration(days: 7 - index));
       return DateTime(date.year, date.month, date.day);
     });
 
@@ -599,15 +810,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         itemCount: days.length,
         itemBuilder: (context, index) {
           final date = days[index];
-          final isSelected = date.year == _selectedDate.year &&
+          final isSelected =
+              date.year == _selectedDate.year &&
               date.month == _selectedDate.month &&
               date.day == _selectedDate.day;
 
-          final isToday = date.year == todayMidnight.year &&
+          final isToday =
+              date.year == todayMidnight.year &&
               date.month == todayMidnight.month &&
               date.day == todayMidnight.day;
 
-          final weekdayStr = DateFormat('E').format(date);
+          final weekdayStr = isToday ? 'TODAY' : DateFormat('E').format(date);
           final dayStr = DateFormat('d').format(date);
           final monthStr = DateFormat('MMM').format(date);
 
@@ -627,27 +840,29 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 duration: const Duration(milliseconds: 200),
                 width: 58,
                 decoration: BoxDecoration(
-                  color: isSelected 
+                  color: isSelected
                       ? accentColor
-                      : isToday 
-                          ? accentColor.withValues(alpha: 0.1)
-                          : Colors.transparent,
+                      : isToday
+                      ? accentColor.withValues(alpha: 0.1)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected
                         ? accentColor
                         : isToday
-                            ? accentColor
-                            : colorScheme.outlineVariant.withValues(alpha: 0.3),
+                        ? accentColor
+                        : colorScheme.outlineVariant.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
-                  boxShadow: isSelected ? [
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: 0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ] : [],
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -655,13 +870,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     Text(
                       weekdayStr,
                       style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: isToday || isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontSize: 9,
+                        fontWeight: isToday || isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         color: isSelected
                             ? Colors.white
                             : isToday
-                                ? accentColor
-                                : colorScheme.onSurfaceVariant,
+                            ? accentColor
+                            : colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -682,7 +899,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         fontSize: 9,
                         color: isSelected
                             ? Colors.white.withValues(alpha: 0.8)
-                            : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            : colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.7,
+                              ),
                       ),
                     ),
                   ],
@@ -696,10 +915,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   void _handleCompletionTap(Habit habit) async {
-    final entry = habit.entries.firstWhereOrNull((e) =>
-        e.date.year == _selectedDate.year &&
-        e.date.month == _selectedDate.month &&
-        e.date.day == _selectedDate.day);
+    final entry = habit.entries.firstWhereOrNull(
+      (e) =>
+          e.date.year == _selectedDate.year &&
+          e.date.month == _selectedDate.month &&
+          e.date.day == _selectedDate.day,
+    );
 
     if (entry == null) {
       // Habit is not done yet, show AddEntryDialog
@@ -733,7 +954,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 title: const Text('Edit Entry Notes/Value'),
                 onTap: () {
                   Navigator.pop(context); // Close selection sheet
-                  
+
                   final nextDay = entry.dayNumber;
                   showModalBottomSheet(
                     context: context,
@@ -745,11 +966,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       selectedDate: _selectedDate,
                       onSave: (updatedEntry) async {
                         // Remove old entry
-                        habit.entries.removeWhere((e) =>
-                            e.date.year == _selectedDate.year &&
-                            e.date.month == _selectedDate.month &&
-                            e.date.day == _selectedDate.day);
-                        
+                        habit.entries.removeWhere(
+                          (e) =>
+                              e.date.year == _selectedDate.year &&
+                              e.date.month == _selectedDate.month &&
+                              e.date.day == _selectedDate.day,
+                        );
+
                         // Add updated entry
                         habit.entries.add(updatedEntry);
                         await StorageService.save(habit);
@@ -769,21 +992,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     context: context,
                     builder: (context) => AlertDialog(
                       title: const Text('Delete Entry'),
-                      content: const Text('Are you sure you want to mark this habit as incomplete for this day?'),
+                      content: const Text(
+                        'Are you sure you want to mark this habit as incomplete for this day?',
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
                           child: const Text('Cancel'),
                         ),
                         TextButton(
-                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.red,
+                          ),
                           onPressed: () => Navigator.pop(context, true),
                           child: const Text('Delete'),
                         ),
                       ],
                     ),
                   );
-                  
+
                   if (confirm == true) {
                     await StorageService.deleteEntry(habit, entry);
                     _loadHabits();
@@ -801,38 +1028,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       );
     }
   }
-  
+
   Widget _buildDashboard() {
     if (_habits.isEmpty) {
       return Center(
         child: Text(
-          'Add habits to see your statistics',
+          'No data available',
           style: TextStyle(color: Colors.grey),
         ),
       );
     }
-    
+
     return SingleChildScrollView(
       controller: _dashboardScrollController,
       padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('Overall Progress'),
           SizedBox(height: 12),
           _buildMetricsCards(),
           SizedBox(height: 24),
-          
-          _buildSectionTitle('Success Rate by Habit'),
-          SizedBox(height: 12),
-          _buildSuccessRateChart(),
-          SizedBox(height: 24),
-          
-          _buildSectionTitle('Habit Streaks'),
-          SizedBox(height: 12),
-          _buildStreaksList(),
-          SizedBox(height: 24),
-          
+
+          if (_showSuccessRate) ...[
+            _buildSectionTitle('Success Rate by Habit'),
+            SizedBox(height: 12),
+            _buildSuccessRateChart(),
+            SizedBox(height: 24),
+          ],
+
+          if (_showCurrentStreak) ...[
+            _buildSectionTitle('Habit Streaks'),
+            SizedBox(height: 12),
+            _buildStreaksList(),
+            SizedBox(height: 24),
+          ],
+
           _buildSectionTitle('Recent Entries'),
           SizedBox(height: 12),
           _buildRecentEntries(),
@@ -840,7 +1070,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -851,21 +1081,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildMetricsCards() {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(
-              child: _buildMetricCard(
-                title: 'Success Rate',
-                value: '${_overallSuccessRate.toStringAsFixed(1)}%',
-                icon: Icons.check_circle_outline,
-                color: Colors.green,
+            if (_showSuccessRate) ...[
+              Expanded(
+                child: _buildMetricCard(
+                  title: 'Success Rate',
+                  value: '${_overallSuccessRate.toStringAsFixed(1)}%',
+                  icon: Icons.check_circle_outline,
+                  color: Colors.green,
+                ),
               ),
-            ),
-            SizedBox(width: 12),
+              const SizedBox(width: 12),
+            ],
             Expanded(
               child: _buildMetricCard(
                 title: 'Total Entries',
@@ -876,7 +1108,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
           ],
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
@@ -887,7 +1119,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 color: Colors.green,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildMetricCard(
                 title: 'Negative Days',
@@ -898,8 +1130,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ),
           ],
         ),
-        SizedBox(height: 12),
-        if (_bestCurrentStreak > 0)
+        if (_showCurrentStreak && _bestCurrentStreak > 0) ...[
+          const SizedBox(height: 12),
           _buildMetricCard(
             title: 'Best Current Streak',
             value: '$_bestCurrentStreak days - $_bestStreakHabit',
@@ -907,10 +1139,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             color: Colors.orange,
             isWide: true,
           ),
+        ],
       ],
     );
   }
-  
+
   Widget _buildMetricCard({
     required String title,
     required String value,
@@ -941,10 +1174,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   SizedBox(height: 4),
                   Text(
@@ -963,12 +1193,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildSuccessRateChart() {
     if (_habits.isEmpty) {
       return SizedBox();
     }
-    
+
     return SizedBox(
       height: 220,
       child: Card(
@@ -1055,17 +1285,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildStreaksList() {
     if (_habits.isEmpty) {
       return SizedBox();
     }
-    
+
     // Sort habits by current streak
-    final sortedHabits = [..._habits]..sort((a, b) => b.currentStreak.compareTo(a.currentStreak));
-    
+    final sortedHabits = [..._habits]
+      ..sort((a, b) => b.currentStreak.compareTo(a.currentStreak));
+
     return Card(
-      elevation: 2, 
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ListView.separated(
         shrinkWrap: true,
@@ -1110,31 +1341,31 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildRecentEntries() {
     if (_habits.isEmpty) {
       return SizedBox();
     }
-    
+
     // Collect all entries from all habits
     List<MapEntry<Habit, HabitEntry>> allEntries = [];
-    
+
     for (var habit in _habits) {
       for (var entry in habit.entries) {
         allEntries.add(MapEntry(habit, entry));
       }
     }
-    
+
     // Sort by date (newest first)
     allEntries.sort((a, b) => b.value.date.compareTo(a.value.date));
-    
+
     // Take only the 5 most recent
     final recentEntries = allEntries.take(5).toList();
-    
+
     if (recentEntries.isEmpty) {
       return Center(child: Text('No entries yet'));
     }
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -1148,15 +1379,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           final habit = recentEntries[index].key;
           final entry = recentEntries[index].value;
           final isPositive = habit.isPositiveDay(entry);
-          
+
           return Row(
             children: [
               Container(
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: isPositive 
-                      ? Colors.green.withValues(alpha: 0.1) 
+                  color: isPositive
+                      ? Colors.green.withValues(alpha: 0.1)
                       : Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),

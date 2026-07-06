@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flux/core/enums/app_enums.dart';
 import 'package:flux/data/models/habit.dart';
+import 'package:flux/core/services/settings_service.dart';
 import 'package:flux/features/habits/widgets/add_entry_dialog.dart';
 import 'package:flux/data/models/habit_entry.dart';
 import 'package:flux/core/services/storage_service.dart';
@@ -23,11 +24,23 @@ class HabitDetailScreen extends StatefulWidget {
 
 class _HabitDetailScreenState extends State<HabitDetailScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _showSuccessRate = true;
+  bool _showCurrentStreak = true;
   
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadPreferences();
+  }
+  
+  Future<void> _loadPreferences() async {
+    final showSuccessRate = await SettingsService.getShowSuccessRate();
+    final showCurrentStreak = await SettingsService.getShowCurrentStreak();
+    setState(() {
+      _showSuccessRate = showSuccessRate;
+      _showCurrentStreak = showCurrentStreak;
+    });
   }
   
   @override
@@ -239,8 +252,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> with SingleTicker
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStreakCard(),
-          const SizedBox(height: 16),
+          if (_showCurrentStreak) ...[
+            _buildStreakCard(),
+            const SizedBox(height: 16),
+          ],
           _buildHabitInfoCard(),
           const SizedBox(height: 16),
           Card(
@@ -317,8 +332,10 @@ class _HabitDetailScreenState extends State<HabitDetailScreen> with SingleTicker
         children: [
           ActivityHeatmap(habits: [habit]),
           const SizedBox(height: 24),
-          SuccessRateTrendChart(habits: [habit]),
-          const SizedBox(height: 24),
+          if (_showSuccessRate) ...[
+            SuccessRateTrendChart(habits: [habit]),
+            const SizedBox(height: 24),
+          ],
           if (habit.unit != HabitUnit.Count || habit.targetValue != null) ...[
             ValueTrendChart(habits: [habit]),
             const SizedBox(height: 24),
