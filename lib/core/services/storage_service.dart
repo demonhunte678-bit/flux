@@ -68,4 +68,31 @@ class StorageService {
       print('Error during migration: $e');
     }
   }
+
+  static Future<File> _settingsFile() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return File('${dir.path}/settings.json');
+  }
+
+  static Future<Map<String, dynamic>> loadSettings() async {
+    try {
+      final file = await _settingsFile();
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        return jsonDecode(content) as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('Error loading settings file: $e');
+    }
+    return {};
+  }
+
+  static Future<void> saveSettings(Map<String, dynamic> settings) async {
+    try {
+      final file = await _settingsFile();
+      await file.writeAsString(jsonEncode(settings));
+    } catch (e) {
+      print('Error saving settings file: $e');
+    }
+  }
 }

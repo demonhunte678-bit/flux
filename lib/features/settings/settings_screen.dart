@@ -3,19 +3,8 @@ import 'package:flux/core/services/settings_service.dart';
 import 'package:flux/core/services/theme_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  final VoidCallback toggleTheme;
-  final bool isDarkMode;
-  final Function(String) changeTheme;
-  final VoidCallback? onSettingsChanged;
-  
-  const SettingsScreen({
-    super.key, 
-    required this.toggleTheme, 
-    required this.isDarkMode,
-    required this.changeTheme,
-    this.onSettingsChanged,
-  });
-  
+  const SettingsScreen({super.key});
+
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -26,22 +15,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _showSuccessRate = true;
   bool _showCurrentStreak = true;
   String _selectedTheme = 'Green';
+  bool _isDarkMode = false;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
   }
-  
+
   Future<void> _loadSettings() async {
     setState(() => _loading = true);
     _language = await SettingsService.getLanguage();
     _showSuccessRate = await SettingsService.getShowSuccessRate();
     _showCurrentStreak = await SettingsService.getShowCurrentStreak();
     _selectedTheme = await ThemeService.getCurrentTheme();
+    _isDarkMode = await SettingsService.isDarkMode();
     setState(() => _loading = false);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-  
+
   Widget _buildContent() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -74,18 +65,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSwitchTile(
                 title: 'Dark Mode',
                 subtitle: 'Toggle dark or light theme',
-                value: widget.isDarkMode,
-                onChanged: (_) => widget.toggleTheme(),
-                icon: widget.isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                value: _isDarkMode,
+                onChanged: (value) async {
+                  setState(() => _isDarkMode = value);
+                  await SettingsService.setDarkMode(value);
+                  if (ThemeService.onThemeChanged != null) {
+                    ThemeService.onThemeChanged!();
+                  }
+                },
+                icon: _isDarkMode
+                    ? Icons.dark_mode_outlined
+                    : Icons.light_mode_outlined,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Theme Color',
-                      style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     _buildColorGrid(),
@@ -105,9 +110,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value) async {
                   setState(() => _showSuccessRate = value);
                   await SettingsService.setShowSuccessRate(value);
-                  if (widget.onSettingsChanged != null) {
-                    widget.onSettingsChanged!();
-                  }
                 },
                 icon: Icons.percent_rounded,
               ),
@@ -118,9 +120,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onChanged: (value) async {
                   setState(() => _showCurrentStreak = value);
                   await SettingsService.setShowCurrentStreak(value);
-                  if (widget.onSettingsChanged != null) {
-                    widget.onSettingsChanged!();
-                  }
                 },
                 icon: Icons.local_fire_department_outlined,
               ),
@@ -142,8 +141,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-  
-  Widget _buildSettingsSection({required String title, required List<Widget> children}) {
+
+  Widget _buildSettingsSection({
+    required String title,
+    required List<Widget> children,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -207,8 +209,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: SwitchListTile(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-        subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+        ),
         value: value,
         onChanged: onChanged,
         secondary: Icon(icon, color: Theme.of(context).colorScheme.primary),
@@ -226,8 +234,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return ListTile(
       leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-      subtitle: Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+      ),
       trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -247,15 +261,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           final color = item.color;
           final name = item.colorName;
           final isSelected = _selectedTheme.toLowerCase() == name.toLowerCase();
-          
+
           return GestureDetector(
-            onTap: () {
+            onTap: () async {
               setState(() {
                 _selectedTheme = name;
               });
-              widget.changeTheme(name);
-              if (widget.onSettingsChanged != null) {
-                widget.onSettingsChanged!();
+              await ThemeService.setCurrentTheme(name);
+              if (ThemeService.onThemeChanged != null) {
+                ThemeService.onThemeChanged!();
               }
             },
             child: Container(
@@ -265,8 +279,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 color: color,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected 
-                      ? (widget.isDarkMode ? Colors.white : Colors.black87) 
+                  color: isSelected
+                      ? (_isDarkMode ? Colors.white : Colors.black87)
                       : Colors.transparent,
                   width: 3,
                 ),
@@ -295,10 +309,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool isDarkColor(Color color) {
     return color.computeLuminance() < 0.5;
   }
-  
+
   void _showLanguageSelector() {
     final languages = ['English', 'Arabic'];
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -315,9 +329,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   setState(() => _language = value);
                   SettingsService.setLanguage(value);
                   Navigator.pop(context);
-                  if (widget.onSettingsChanged != null) {
-                    widget.onSettingsChanged!();
-                  }
                 }
               },
             );

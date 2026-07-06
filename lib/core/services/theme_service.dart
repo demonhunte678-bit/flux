@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flux/core/services/settings_service.dart';
 
 class AccentColor {
   final String colorName;
@@ -9,10 +9,7 @@ class AccentColor {
 }
 
 class ThemeService {
-  static const String _themeKey = 'app_theme';
-  static const String _accentColorKey = 'accent_color';
-  static const String _customThemeKey = 'custom_theme';
-  
+  static VoidCallback? onThemeChanged;
   // Predefined accent colors with proper structure
   static final List<AccentColor> accentColors = [
     const AccentColor('Green', Color(0xFF1DB954)),
@@ -35,34 +32,36 @@ class ThemeService {
   ];
   
   static Future<bool> isDarkMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_themeKey) ?? false;
+    return await SettingsService.isDarkMode();
   }
   
   static Future<void> setDarkMode(bool isDark) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_themeKey, isDark);
+    await SettingsService.setDarkMode(isDark);
   }
   
   static Future<Color> getAccentColor() async {
-    final prefs = await SharedPreferences.getInstance();
-    final colorValue = prefs.getInt(_accentColorKey);
-    return colorValue != null ? Color(colorValue) : accentColors[0].color;
+    final themeName = await getCurrentTheme();
+    final accent = accentColors.firstWhere(
+      (c) => c.colorName.toLowerCase() == themeName.toLowerCase(),
+      orElse: () => accentColors[0],
+    );
+    return accent.color;
   }
   
   static Future<void> setAccentColor(Color color) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_accentColorKey, color.value);
+    final accent = accentColors.firstWhere(
+      (c) => c.color.value == color.value,
+      orElse: () => accentColors[0],
+    );
+    await setCurrentTheme(accent.colorName);
   }
   
   static Future<String> getCurrentTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_customThemeKey) ?? 'Green';
+    return await SettingsService.getSelectedTheme();
   }
   
   static Future<void> setCurrentTheme(String themeName) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_customThemeKey, themeName);
+    await SettingsService.setSelectedTheme(themeName);
   }
   
   static ThemeData createTheme({
@@ -84,11 +83,56 @@ class ThemeService {
         brightness: useDark ? Brightness.dark : Brightness.light,
         primary: primaryColor,
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: false,
         backgroundColor: Colors.transparent,
       ),
     );
+  }
+  
+  static List<Color> getGradientColors(Color primary) {
+    return [
+      primary,
+      primary.withOpacity(0.8),
+    ];
+  }
+  
+  static Color getComplementaryColor(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withHue((hsl.hue + 180) % 360).toColor();
+  }
+  
+  static Color getAnalogousColor(Color color, {double offset = 30}) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl.withHue((hsl.hue + offset) % 360).toColor();
+  }
+  
+  static List<Color> generatePalette(Color baseColor) {
+    final hsl = HSLColor.fromColor(baseColor);
+    return [
+      hsl.withLightness(0.9).toColor(),
+      hsl.withLightness(0.7).toColor(),
+      hsl.withLightness(0.5).toColor(),
+      hsl.withLightness(0.3).toColor(),
+      hsl.withLightness(0.1).toColor(),
+    ];
+  }
+  
+  static Color getAchievementColor(String rarity) {
+    switch (rarity.toLowerCase()) {
+      case 'common':
+        return Colors.grey;
+      case 'uncommon':
+        return Colors.green;
+      case 'rare':
+        return Colors.blue;
+      case 'legendary':
+        return Colors.purple;
+      case 'mythic':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
   }
 }

@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:flux/core/services/settings_service.dart';
 import 'package:flux/features/habits/widgets/add_habit_sheet.dart';
 import 'package:flux/features/habits/widgets/add_entry_dialog.dart';
 import 'package:flux/core/services/encouragement_service.dart';
@@ -216,12 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openSettings() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => SettingsScreen(
-          toggleTheme: widget.toggleTheme,
-          isDarkMode: widget.isDarkMode,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => SettingsScreen()),
     ).then((_) => _loadHabits());
   }
 
@@ -446,13 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSettingsTab() {
-    return SettingsScreen(
-      toggleTheme: widget.toggleTheme,
-      isDarkMode: widget.isDarkMode,
-      onSettingsChanged: () {
-        _loadHabits();
-      },
-    );
+    return SettingsScreen();
   }
 
   Widget _buildHabitsHeader() {
@@ -1032,10 +1022,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDashboard() {
     if (_habits.isEmpty) {
       return Center(
-        child: Text(
-          'No data available',
-          style: TextStyle(color: Colors.grey),
-        ),
+        child: Text('No data available', style: TextStyle(color: Colors.grey)),
       );
     }
 

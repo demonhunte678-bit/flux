@@ -92,6 +92,22 @@ class _HabitTrackerAppState extends State<HabitTrackerApp> {
     super.initState();
     _isDarkMode = widget.isDarkMode;
     _selectedTheme = widget.selectedTheme;
+    ThemeService.onThemeChanged = _reloadTheme;
+  }
+
+  @override
+  void dispose() {
+    ThemeService.onThemeChanged = null;
+    super.dispose();
+  }
+
+  Future<void> _reloadTheme() async {
+    final isDarkMode = await SettingsService.isDarkMode();
+    final selectedTheme = await ThemeService.getCurrentTheme();
+    setState(() {
+      _isDarkMode = isDarkMode;
+      _selectedTheme = selectedTheme;
+    });
   }
   
   void toggleTheme() {
