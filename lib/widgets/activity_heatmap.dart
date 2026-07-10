@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flux/index.dart';
 import 'package:intl/intl.dart';
 
 class ActivityHeatmap extends StatelessWidget {

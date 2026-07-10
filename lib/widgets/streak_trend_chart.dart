@@ -12,7 +12,7 @@ class StreakTrendChart extends StatelessWidget {
     return habits
         .map(
           (habit) => StreakDataPoint(
-            habitName: habit.formattedName,
+            habitName: habit.name,
             streak: habit.currentStreak,
             color: habit.color ?? Colors.orange,
           ),

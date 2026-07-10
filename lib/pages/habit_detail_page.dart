@@ -84,7 +84,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('What would you like to do with "${habit.formattedName}"?'),
+            Text('What would you like to do with "${habit.name}"?'),
             const SizedBox(height: 16),
             if (!habit.isPaused)
               ListTile(
@@ -169,7 +169,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
         content: Text(
-          'Are you sure you want to permanently delete "${habit.formattedName}"? This action cannot be undone.',
+          'Are you sure you want to permanently delete "${habit.name}"? This action cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -213,7 +213,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(habit.formattedName),
+            title: Text(habit.name),
             bottom: TabBar(
               controller: _tabController,
               tabs: const [

@@ -32,7 +32,7 @@ class SuccessRateTrendChart extends StatelessWidget {
       points.sort((a, b) => a.date.compareTo(b.date));
 
       return HabitTrendData(
-        habitName: habit.formattedName,
+        habitName: habit.name,
         points: points,
         color: habit.color ?? Colors.blue,
       );

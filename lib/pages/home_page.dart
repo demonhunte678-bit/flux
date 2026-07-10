@@ -125,7 +125,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
           if (habit.currentStreak > bestStreak) {
             bestStreak = habit.currentStreak;
-            bestStreakHabit = habit.formattedName;
+            bestStreakHabit = habit.name;
           }
         }
 

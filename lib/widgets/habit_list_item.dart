@@ -67,7 +67,7 @@ class HabitListItem extends ConsumerWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                habit.formattedName,
+                                habit.name,
                                 style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.bold,

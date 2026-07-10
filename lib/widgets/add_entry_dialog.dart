@@ -172,7 +172,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.habit.formattedName,
+                  widget.habit.name,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

@@ -289,7 +289,7 @@
 //       // First entry milestone
 //       if (habit.entries.isNotEmpty) {
 //         milestones.add(MilestoneData(
-//           title: 'Started "${habit.formattedName}"',
+//           title: 'Started "${habit.name}"',
 //           description: 'Began tracking this habit',
 //           date: habit.entries.first.date,
 //           type: MilestoneType.FirstEntry,
@@ -301,7 +301,7 @@
 //       if (habit.bestStreak >= 30) {
 //         milestones.add(MilestoneData(
 //           title: '30-Day Streak!',
-//           description: '${habit.formattedName} - ${habit.bestStreak} days',
+//           description: '${habit.name} - ${habit.bestStreak} days',
 //           date: _estimateStreakDate(habit, habit.bestStreak),
 //           type: MilestoneType.LongStreak,
 //           habit: habit,
@@ -311,7 +311,7 @@
 //       if (habit.bestStreak >= 100) {
 //         milestones.add(MilestoneData(
 //           title: '100-Day Streak! 🎉',
-//           description: '${habit.formattedName} - Amazing consistency!',
+//           description: '${habit.name} - Amazing consistency!',
 //           date: _estimateStreakDate(habit, 100),
 //           type: MilestoneType.MajorStreak,
 //           habit: habit,
@@ -322,7 +322,7 @@
 //       if (habit.entries.length >= 50) {
 //         milestones.add(MilestoneData(
 //           title: '50 Entries',
-//           description: '${habit.formattedName} - Half century!',
+//           description: '${habit.name} - Half century!',
 //           date: habit.entries.length >= 50 ? habit.entries[49].date : habit.entries.last.date,
 //           type: MilestoneType.EntryCount,
 //           habit: habit,
@@ -332,7 +332,7 @@
 //       if (habit.entries.length >= 100) {
 //         milestones.add(MilestoneData(
 //           title: '100 Entries! 🔥',
-//           description: '${habit.formattedName} - Incredible dedication!',
+//           description: '${habit.name} - Incredible dedication!',
 //           date: habit.entries.length >= 100 ? habit.entries[99].date : habit.entries.last.date,
 //           type: MilestoneType.MajorEntryCount,
 //           habit: habit,
@@ -359,7 +359,7 @@
 //       // Low success rate challenge
 //       if (habit.successRate < 50 && habit.entries.length >= 10) {
 //         challenges.add(ChallengeData(
-//           title: 'Struggled with ${habit.formattedName}',
+//           title: 'Struggled with ${habit.name}',
 //           description: 'Only ${habit.successRate.toStringAsFixed(1)}% success rate',
 //           severity: ChallengeSeverity.High,
 //           habit: habit,
@@ -371,7 +371,7 @@
 //       if (gaps.isNotEmpty && gaps.first > 7) {
 //         challenges.add(ChallengeData(
 //           title: 'Tracking Gap',
-//           description: '${gaps.first} days without tracking ${habit.formattedName}',
+//           description: '${gaps.first} days without tracking ${habit.name}',
 //           severity: ChallengeSeverity.Medium,
 //           habit: habit,
 //         ));
@@ -381,7 +381,7 @@
 //       if (_hasDeclinedPerformance(habit)) {
 //         challenges.add(ChallengeData(
 //           title: 'Performance Decline',
-//           description: '${habit.formattedName} success rate decreased over time',
+//           description: '${habit.name} success rate decreased over time',
 //           severity: ChallengeSeverity.Medium,
 //           habit: habit,
 //         ));

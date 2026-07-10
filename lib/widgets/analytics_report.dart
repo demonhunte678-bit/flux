@@ -257,8 +257,8 @@ class AnalyticsReport extends StatelessWidget {
         if (correlation.abs() > 0.3) {
           correlations.add(
             CorrelationData(
-              habit1: habit1.formattedName,
-              habit2: habit2.formattedName,
+              habit1: habit1.name,
+              habit2: habit2.name,
               coefficient: correlation,
             ),
           );
@@ -324,7 +324,7 @@ class AnalyticsReport extends StatelessWidget {
       InsightData(
         title: 'Best Performer',
         description:
-            '${bestHabit.formattedName} has ${bestHabit.successRate.toStringAsFixed(1)}% success rate',
+            '${bestHabit.name} has ${bestHabit.successRate.toStringAsFixed(1)}% success rate',
         icon: Icons.star,
         color: Colors.green,
       ),
@@ -338,7 +338,7 @@ class AnalyticsReport extends StatelessWidget {
         InsightData(
           title: 'Most Consistent',
           description:
-              '${mostConsistent.formattedName} has a ${mostConsistent.currentStreak}-day streak',
+              '${mostConsistent.name} has a ${mostConsistent.currentStreak}-day streak',
           icon: Icons.local_fire_department,
           color: Colors.orange,
         ),
@@ -393,7 +393,7 @@ class AnalyticsReport extends StatelessWidget {
     if (strugglingHabits.isNotEmpty) {
       recommendations.add(
         RecommendationData(
-          'Consider reviewing ${strugglingHabits.first.formattedName} - try adjusting the target or frequency',
+          'Consider reviewing ${strugglingHabits.first.name} - try adjusting the target or frequency',
         ),
       );
     }
@@ -410,7 +410,7 @@ class AnalyticsReport extends StatelessWidget {
     if (staleHabits.isNotEmpty) {
       recommendations.add(
         RecommendationData(
-          'You haven\'t logged ${staleHabits.first.formattedName} recently - consider adding an entry',
+          'You haven\'t logged ${staleHabits.first.name} recently - consider adding an entry',
         ),
       );
     }

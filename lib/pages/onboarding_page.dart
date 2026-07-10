@@ -985,7 +985,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HomeScreen(toggleTheme: () {}, isDarkMode: false),
+        builder: (context) => HomePage(),
       ),
     );
   }
