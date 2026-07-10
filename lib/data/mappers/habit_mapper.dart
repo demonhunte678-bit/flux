@@ -1,13 +1,5 @@
 import 'package:flutter/material.dart' show Color, IconData;
 import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 
 class HabitMapper {
   static Habit toDomain(HabitData row, List<HabitEntryData> entryRows) {

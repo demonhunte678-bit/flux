@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 import 'package:path_provider/path_provider.dart';
 
 class StorageService {

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 
 class HabitListItem extends ConsumerWidget {
   final Habit habit;

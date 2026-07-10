@@ -1,7 +1,5 @@
 import 'package:drift/drift.dart';
 import 'package:drift_sqflite/drift_sqflite.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(tables: [Habits, HabitEntries])

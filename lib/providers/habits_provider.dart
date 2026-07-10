@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 
 class HabitsNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
   HabitsNotifier() : super(const AsyncValue.loading()) {

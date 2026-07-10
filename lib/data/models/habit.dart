@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 import 'package:uuid/uuid.dart';
 
 class Habit {

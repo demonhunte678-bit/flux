@@ -1,6 +1,4 @@
 import 'package:drift/drift.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 
 class HabitEntryMapper {
   static HabitEntry toDomain(HabitEntryData row) {

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 import 'package:intl/intl.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 import 'package:flux/index.dart';
 
 class AddEntryDialog extends StatefulWidget {

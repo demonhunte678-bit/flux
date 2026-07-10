@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:flux/index.dart';
-import 'package:flux/index.dart';
 import 'chart_data_models.dart';
 
 class SuccessRateTrendChart extends StatelessWidget {
