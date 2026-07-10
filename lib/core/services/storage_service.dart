@@ -1,11 +1,6 @@
-// lib/main.dart
-
 import 'dart:convert';
 import 'dart:io';
-import 'package:flux/core/services/database_service.dart';
-import 'package:flux/data/models/habit.dart';
-import 'package:flux/data/models/habit_entry.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:path_provider/path_provider.dart';
 
 class StorageService {
   static Future<Directory> _dataDir() async {
@@ -17,7 +12,7 @@ class StorageService {
 
   static Future<List<Habit>> loadAll() async {
     try {
-      return await DatabaseService.instance.loadAllHabits();
+      return await HabitsRepository.instance.loadAllHabits();
     } catch (e) {
       print('Error loading habits: $e');
       return [];
@@ -25,22 +20,22 @@ class StorageService {
   }
 
   static Future<void> save(Habit habit) async {
-    await DatabaseService.instance.saveHabit(habit);
+    await HabitsRepository.instance.saveHabit(habit);
   }
 
   static Future<void> delete(Habit habit) async {
-    await DatabaseService.instance.deleteHabit(habit);
+    await HabitsRepository.instance.deleteHabit(habit.id);
   }
   
   static Future<void> updateEntry(Habit habit, HabitEntry oldEntry, HabitEntry newEntry) async {
-    await DatabaseService.instance.updateEntry(habit, oldEntry, newEntry);
+    await HabitsRepository.instance.updateEntry(habit, oldEntry, newEntry);
   }
   
   static Future<void> deleteEntry(Habit habit, HabitEntry entry) async {
-    await DatabaseService.instance.deleteEntry(habit, entry);
+    await HabitsRepository.instance.deleteEntry(habit, entry);
   }
   
-  // Migration method to move from JSON files to SQLite database
+  // Migration method to move from JSON files to Drift database
   static Future<void> migrateFromJsonToDatabase() async {
     try {
       final dir = await _dataDir();
@@ -51,9 +46,9 @@ class StorageService {
           .toList();
       
       // Save all habits to the database
-      await DatabaseService.instance.migrateFromJson(habits);
+      await HabitsRepository.instance.migrateFromJson(habits);
       
-      // Optionally, backup and remove the old JSON files
+      // Backup and remove the old JSON files
       final backupDir = Directory('${dir.path}/json_backup');
       if (!await backupDir.exists()) await backupDir.create();
       

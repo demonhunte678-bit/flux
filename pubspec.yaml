@@ -11,38 +11,38 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
-  fl_chart: ^1.0.0
-  path_provider: ^2.1.5
-  shared_preferences: ^2.2.2
-  intl: ^0.20.2
-  flutter_launcher_icons: ^0.14.4
+  cupertino_icons:
+  fl_chart:
+  path_provider:
+  shared_preferences:
+  intl:
+  flutter_launcher_icons:
 
-  table_calendar: ^3.0.9
-  share_plus: ^12.0.1
-  csv: ^6.0.0
-  syncfusion_flutter_charts: ^31.2.12
-  collection: ^1.18.0
+  share_plus:
+  csv:
+  syncfusion_flutter_charts:
+  collection:
 
-  flutter_local_notifications: ^19.5.0
-  home_widget: ^0.8.1
-  uuid: ^4.5.1
-  geolocator: ^14.0.2
-  permission_handler: ^12.0.1
-  confetti: ^0.8.0
-  flutter_staggered_animations: ^1.1.1
-  lottie: ^3.1.2
-  file_picker: ^10.3.7
+  uuid:
+  permission_handler:
+  lottie:
+  file_picker:
 
-  sqflite: ^2.3.2
-  path: ^1.8.3
-  sqflite_common_ffi: ^2.3.3
+  drift: ^2.20.0
+  sqlite3_flutter_libs: ^0.5.24
+  path:
 
-  timezone: ^0.10.1
+  timezone:
+  flutter_riverpod:
+  sqflite: ^2.4.3
+  sqflite_common_ffi: ^2.4.2
+  drift_sqflite: ^2.0.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  drift_dev: ^2.20.0
+  build_runner: ^2.4.11
   flutter_lints: ^6.0.0
 
 flutter:

@@ -1,6 +1,4 @@
-import 'package:flux/core/enums/app_enums.dart';
-import 'package:flux/core/services/storage_service.dart';
-
+import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
 class SettingsService {
   static const String SELECTED_THEME_KEY = 'selected_theme';
   static const String LANGUAGE_KEY = 'language';

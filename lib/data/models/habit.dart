@@ -1,13 +1,8 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
-import 'package:flux/core/enums/app_enums.dart'; // Import enums from the new file
-import 'package:flux/data/models/habit_entry.dart';
-import 'package:uuid/uuid.dart';
-import 'dart:math';
+import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:uuid/uuid.dart';
 
 class Habit {
-  String id; // Unique identifier
+  String id;
   String name;
   HabitType type;
   ReportDisplay displayMode;
@@ -16,38 +11,18 @@ class Habit {
   Color? color;
   bool isArchived;
   String? notes;
-  int? reminderHour;
-  int? reminderMinute;
-  bool hasReminder;
   
-  // New fields for enhanced functionality
-  String? category; // Habit category/group
-  HabitFrequency frequency; // How often the habit should occur
-  List<int> customDays; // For CustomDays frequency (0=Sunday, 6=Saturday)
-  int? targetFrequency; // For XTimesPerWeek/Month
-  double? targetValue; // Target value for measurable goals
-  HabitUnit unit; // Unit of measurement
-  String? customUnit; // Custom unit name
-  DateTime? pauseStartDate; // When habit was paused
-  DateTime? pauseEndDate; // When pause ends
-  bool isPaused; // Whether habit is currently paused
-  
-  // Gamification fields
-  int totalPoints;
-  int level;
-  double experiencePoints;
-  List<String> unlockedAchievements;
-  List<String> unlockedThemes;
-  List<IconData> unlockedIcons;
-  
-  // Location-based reminder
-  String? locationReminder;
-  double? reminderLatitude;
-  double? reminderLongitude;
-  double? reminderRadius;
-  
-  // Difficulty multiplier for points
-  double difficultyMultiplier;
+  // Enhanced functionality fields
+  String? category;
+  HabitFrequency frequency;
+  List<int> customDays;
+  int? targetFrequency;
+  double? targetValue;
+  HabitUnit unit;
+  String? customUnit;
+  DateTime? pauseStartDate;
+  DateTime? pauseEndDate;
+  bool isPaused;
   
   // Custom motivational messages
   List<String> motivationalMessages;
@@ -63,9 +38,6 @@ class Habit {
     this.color,
     this.isArchived = false,
     this.notes,
-    this.reminderHour,
-    this.reminderMinute,
-    this.hasReminder = false,
     this.category,
     this.frequency = HabitFrequency.Daily,
     this.customDays = const [],
@@ -77,26 +49,12 @@ class Habit {
     this.pauseEndDate,
     this.isPaused = false,
     List<HabitEntry>? entries,
-    this.totalPoints = 0,
-    this.level = 1,
-    this.experiencePoints = 0.0,
-    List<String>? unlockedAchievements,
-    List<String>? unlockedThemes,
-    List<IconData>? unlockedIcons,
-    this.locationReminder,
-    this.reminderLatitude,
-    this.reminderLongitude,
-    this.reminderRadius,
-    this.difficultyMultiplier = 1.0,
     List<String>? motivationalMessages,
     this.customSuccessMessage,
     this.customFailureMessage,
   }) : 
     id = id ?? const Uuid().v4(),
     entries = entries ?? [],
-    unlockedAchievements = unlockedAchievements ?? [],
-    unlockedThemes = unlockedThemes ?? ['default'],
-    unlockedIcons = unlockedIcons ?? [],
     motivationalMessages = motivationalMessages ?? [
       "You've got this! 💪",
       "Every day is a new opportunity! ✨",
@@ -114,9 +72,6 @@ class Habit {
         'color': color?.value,
         'isArchived': isArchived,
         'notes': notes,
-        'reminderHour': reminderHour,
-        'reminderMinute': reminderMinute,
-        'hasReminder': hasReminder,
         'category': category,
         'frequency': frequency.index,
         'customDays': customDays,
@@ -128,17 +83,6 @@ class Habit {
         'pauseEndDate': pauseEndDate?.toIso8601String(),
         'isPaused': isPaused,
         'entries': entries.map((e) => e.toJson()).toList(),
-        'totalPoints': totalPoints,
-        'level': level,
-        'experiencePoints': experiencePoints,
-        'unlockedAchievements': unlockedAchievements,
-        'unlockedThemes': unlockedThemes,
-        'unlockedIcons': unlockedIcons.map((i) => i.codePoint).toList(),
-        'locationReminder': locationReminder,
-        'reminderLatitude': reminderLatitude,
-        'reminderLongitude': reminderLongitude,
-        'reminderRadius': reminderRadius,
-        'difficultyMultiplier': difficultyMultiplier,
         'motivationalMessages': motivationalMessages,
         'customSuccessMessage': customSuccessMessage,
         'customFailureMessage': customFailureMessage,
@@ -153,9 +97,6 @@ class Habit {
         color: json['color'] != null ? Color(json['color']) : null,
         isArchived: json['isArchived'] ?? false,
         notes: json['notes'],
-        reminderHour: json['reminderHour'],
-        reminderMinute: json['reminderMinute'],
-        hasReminder: json['hasReminder'] ?? false,
         category: json['category'],
         frequency: HabitFrequency.values[json['frequency'] ?? 0],
         customDays: List<int>.from(json['customDays'] ?? []),
@@ -169,19 +110,6 @@ class Habit {
         entries: (json['entries'] as List?)
             ?.map((e) => HabitEntry.fromJson(e))
             .toList() ?? [],
-        totalPoints: json['totalPoints'] ?? 0,
-        level: json['level'] ?? 1,
-        experiencePoints: json['experiencePoints']?.toDouble() ?? 0.0,
-        unlockedAchievements: List<String>.from(json['unlockedAchievements'] ?? []),
-        unlockedThemes: List<String>.from(json['unlockedThemes'] ?? ['default']),
-        unlockedIcons: (json['unlockedIcons'] as List?)
-            ?.map((i) => IconData(i, fontFamily: 'MaterialIcons'))
-            .toList() ?? [],
-        locationReminder: json['locationReminder'],
-        reminderLatitude: json['reminderLatitude']?.toDouble(),
-        reminderLongitude: json['reminderLongitude']?.toDouble(),
-        reminderRadius: json['reminderRadius']?.toDouble(),
-        difficultyMultiplier: json['difficultyMultiplier']?.toDouble() ?? 1.0,
         motivationalMessages: List<String>.from(json['motivationalMessages'] ?? [
           "You've got this! 💪",
           "Every day is a new opportunity! ✨",
@@ -193,22 +121,18 @@ class Habit {
         customFailureMessage: json['customFailureMessage'],
       );
       
-  int getNextDayNumber() {
-    return entries.isEmpty ? 1 : entries.map((e) => e.dayNumber).reduce((a, b) => a > b ? a : b) + 1;
-  }
-  
   bool isPositiveDay(HabitEntry entry) {
-    if (entry.isSkipped) return true; // Skipped days don't break streaks
+    if (entry.isSkipped) return true;
     
     switch (type) {
       case HabitType.FailBased:
         if (targetValue != null && entry.value != null) {
-          return entry.value! <= targetValue!; // Success if under target for avoid habits
+          return entry.value! <= targetValue!;
         }
         return entry.count == 0;
       case HabitType.SuccessBased:
         if (targetValue != null && entry.value != null) {
-          return entry.value! >= targetValue!; // Success if meeting target
+          return entry.value! >= targetValue!;
         }
         return entry.count > 0;
       case HabitType.DoneBased:
@@ -216,7 +140,6 @@ class Habit {
     }
   }
   
-  // Check if habit is due today based on frequency
   bool isDueToday() {
     if (isPaused) return false;
     
@@ -227,11 +150,11 @@ class Habit {
       case HabitFrequency.Daily:
         return true;
       case HabitFrequency.Weekdays:
-        return now.weekday <= 5; // Monday = 1, Friday = 5
+        return now.weekday <= 5;
       case HabitFrequency.Weekends:
-        return now.weekday > 5; // Saturday = 6, Sunday = 7
+        return now.weekday > 5;
       case HabitFrequency.CustomDays:
-        final todayIndex = now.weekday % 7; // Convert to 0=Sunday format
+        final todayIndex = now.weekday % 7;
         return customDays.contains(todayIndex);
       case HabitFrequency.XTimesPerWeek:
       case HabitFrequency.XTimesPerMonth:
@@ -265,13 +188,11 @@ class Habit {
     return true;
   }
   
-  // Get time since last failure for avoid habits
   String getTimeSinceLastFailure() {
     if (type != HabitType.FailBased || entries.isEmpty) return "No data";
     
     final failureEntries = entries.where((e) => !isPositiveDay(e) && !e.isSkipped).toList();
     if (failureEntries.isEmpty) {
-      // Never failed, show time since first entry
       final firstEntry = entries.first;
       final duration = DateTime.now().difference(firstEntry.date);
       return _formatDuration(duration);
@@ -297,19 +218,16 @@ class Habit {
   int get negativeCount => entries.length - positiveCount;
   double get successRate => entries.isEmpty ? 0 : (positiveCount / entries.length) * 100;
   
-  // Calculate streaks considering frequency
   int get currentStreak {
     int streak = 0;
     if (entries.isEmpty) return 0;
     
     var sortedEntries = [...entries]..sort((a, b) => b.date.compareTo(a.date));
     
-    // For frequency-based habits, we need to check expected days
     if (frequency != HabitFrequency.Daily) {
       return _calculateFrequencyStreak(sortedEntries);
     }
     
-    // Daily habit streak calculation
     for (var entry in sortedEntries) {
       if (isPositiveDay(entry)) {
         streak++;
@@ -323,17 +241,13 @@ class Habit {
   
   int _calculateFrequencyStreak(List<HabitEntry> sortedEntries) {
     int streak = 0;
-    DateTime currentDate = DateTime.now();
-    
     for (var entry in sortedEntries) {
       if (isPositiveDay(entry)) {
         streak++;
-        currentDate = entry.date;
       } else {
         break;
       }
     }
-    
     return streak;
   }
   
@@ -359,26 +273,21 @@ class Habit {
     return currentBest;
   }
   
-  // Add extra utility methods
-  
   String get formattedName {
     return formatPascalCase(name);
   }
   
   bool get hasEntries => entries.isNotEmpty;
   
-  // Get total value/count aggregated
   double getTotalValue() {
     return entries.fold(0.0, (sum, e) => sum + (e.value ?? e.count.toDouble()));
   }
   
-  // Get average value per entry
   double getAverageValue() {
     if (entries.isEmpty) return 0.0;
     return getTotalValue() / entries.length;
   }
   
-  // Get unit display name
   String getUnitDisplayName() {
     switch (unit) {
       case HabitUnit.Count:
@@ -404,7 +313,6 @@ class Habit {
     }
   }
   
-  // Negative streak
   int get longestNegativeStreak {
     if (entries.isEmpty) return 0;
     
@@ -427,221 +335,17 @@ class Habit {
     return maxNegative;
   }
 
-  // Gamification Methods
-  
-  // Calculate points for an entry
-  int calculatePoints(HabitEntry entry) {
-    if (entry.isSkipped) return 0;
-    
-    int basePoints = 10;
-    
-    // Bonus for positive days
-    if (isPositiveDay(entry)) {
-      basePoints += 20;
-    }
-    
-    // Streak bonus
-    final streakMultiplier = (currentStreak / 7).floor() + 1; // Bonus every 7 days
-    basePoints += streakMultiplier * 5;
-    
-    // Difficulty multiplier
-    basePoints = (basePoints * difficultyMultiplier).round();
-    
-    // Type-based bonus
-    switch (type) {
-      case HabitType.FailBased:
-        basePoints += 15; // Harder to avoid than to do
-        break;
-      case HabitType.SuccessBased:
-        basePoints += 10;
-        break;
-      case HabitType.DoneBased:
-        basePoints += 5;
-        break;
-    }
-    
-    return basePoints;
-  }
-  
-  // Add points and check for level up
-  List<String> addPoints(int points) {
-    totalPoints += points;
-    experiencePoints += points.toDouble();
-    
-    List<String> levelUpMessages = [];
-    int newLevel = calculateLevel();
-    
-    while (level < newLevel) {
-      level++;
-      levelUpMessages.add("🎉 Level $level reached!");
-      
-      // Unlock rewards based on level
-      final rewards = getLevelRewards(level);
-      for (var reward in rewards) {
-        levelUpMessages.add("🎁 Unlocked: $reward");
-      }
-    }
-    
-    return levelUpMessages;
-  }
-  
-  // Calculate current level based on experience points
-  int calculateLevel() {
-    // Level formula: level = sqrt(experiencePoints / 100) + 1
-    // This means: Level 2 = 100 XP, Level 3 = 400 XP, Level 4 = 900 XP, etc.
-    return sqrt(experiencePoints / 100).floor() + 1;
-  }
-  
-  // Get experience points needed for next level
-  int getXPForNextLevel() {
-    final nextLevel = level + 1;
-    return (nextLevel - 1) * (nextLevel - 1) * 100;
-  }
-  
-  // Get current level progress as percentage
-  double getLevelProgress() {
-    final currentLevelXP = (level - 1) * (level - 1) * 100;
-    final nextLevelXP = getXPForNextLevel();
-    final currentProgress = experiencePoints - currentLevelXP;
-    final totalNeeded = nextLevelXP - currentLevelXP;
-    
-    return totalNeeded > 0 ? (currentProgress / totalNeeded).clamp(0.0, 1.0) : 1.0;
-  }
-  
-  // Get rewards for reaching a level
-  List<String> getLevelRewards(int level) {
-    List<String> rewards = [];
-    
-    // Every 5 levels: new theme
-    if (level % 5 == 0) {
-      final newTheme = "theme_level_$level";
-      if (!unlockedThemes.contains(newTheme)) {
-        unlockedThemes.add(newTheme);
-        rewards.add("New Theme: Level $level");
-      }
-    }
-    
-    // Every 3 levels: new icon
-    if (level % 3 == 0) {
-      final iconOptions = [
-        Icons.star_border, Icons.favorite_border, Icons.diamond,
-        Icons.local_fire_department, Icons.emoji_events, Icons.military_tech,
-        Icons.workspace_premium, Icons.verified, Icons.trending_up,
-      ];
-      
-      final iconIndex = (level ~/ 3 - 1) % iconOptions.length;
-      final newIcon = iconOptions[iconIndex];
-      
-      if (!unlockedIcons.any((i) => i.codePoint == newIcon.codePoint)) {
-        unlockedIcons.add(newIcon);
-        rewards.add("New Icon unlocked");
-      }
-    }
-    
-    return rewards;
-  }
-  
-  // Check for new achievements
-  List<String> checkAchievements() {
-    List<String> newAchievements = [];
-    
-    // Streak achievements
-    final streakAchievements = {
-      7: "first_week",
-      30: "first_month", 
-      100: "centurion",
-      365: "year_warrior"
-    };
-    
-    for (var entry in streakAchievements.entries) {
-      final achievementId = entry.value;
-      if (currentStreak >= entry.key && !unlockedAchievements.contains(achievementId)) {
-        unlockedAchievements.add(achievementId);
-        newAchievements.add("🏆 ${_getAchievementName(achievementId)}");
-      }
-    }
-    
-    // Entry count achievements
-    final entryAchievements = {
-      10: "getting_started",
-      50: "half_century",
-      100: "century_club",
-      500: "dedication_master"
-    };
-    
-    for (var entry in entryAchievements.entries) {
-      final achievementId = entry.value;
-      if (entries.length >= entry.key && !unlockedAchievements.contains(achievementId)) {
-        unlockedAchievements.add(achievementId);
-        newAchievements.add("🏆 ${_getAchievementName(achievementId)}");
-      }
-    }
-    
-    // Success rate achievements
-    if (successRate >= 80 && entries.length >= 20 && !unlockedAchievements.contains("consistency_king")) {
-      unlockedAchievements.add("consistency_king");
-      newAchievements.add("🏆 ${_getAchievementName("consistency_king")}");
-    }
-    
-    if (successRate >= 95 && entries.length >= 50 && !unlockedAchievements.contains("perfectionist")) {
-      unlockedAchievements.add("perfectionist");
-      newAchievements.add("🏆 ${_getAchievementName("perfectionist")}");
-    }
-    
-    // Points achievements
-    final pointsAchievements = {
-      1000: "first_thousand",
-      5000: "point_collector", 
-      10000: "point_master",
-      25000: "legend"
-    };
-    
-    for (var entry in pointsAchievements.entries) {
-      final achievementId = entry.value;
-      if (totalPoints >= entry.key && !unlockedAchievements.contains(achievementId)) {
-        unlockedAchievements.add(achievementId);
-        newAchievements.add("🏆 ${_getAchievementName(achievementId)}");
-      }
-    }
-    
-    return newAchievements;
-  }
-  
-  String _getAchievementName(String achievementId) {
-    final names = {
-      "first_week": "First Week Warrior",
-      "first_month": "Month Master", 
-      "centurion": "100-Day Centurion",
-      "year_warrior": "Year Warrior",
-      "getting_started": "Getting Started",
-      "half_century": "Half Century",
-      "century_club": "Century Club",
-      "dedication_master": "Dedication Master",
-      "consistency_king": "Consistency King",
-      "perfectionist": "Perfectionist",
-      "first_thousand": "First Thousand",
-      "point_collector": "Point Collector",
-      "point_master": "Point Master",
-      "legend": "Legend"
-    };
-    
-    return names[achievementId] ?? achievementId;
-  }
-  
-  // Get a random motivational message
   String getRandomMotivationalMessage() {
     if (motivationalMessages.isEmpty) return "Keep going! 💪";
     motivationalMessages.shuffle();
     return motivationalMessages.first;
   }
   
-  // Check if this is a milestone streak
   bool isStreakMilestone() {
     final milestones = [7, 14, 21, 30, 50, 75, 100, 150, 200, 365];
     return milestones.contains(currentStreak);
   }
   
-  // Get milestone message for current streak
   String getMilestoneMessage() {
     switch (currentStreak) {
       case 7:
@@ -667,19 +371,5 @@ class Habit {
       default:
         return "🎉 Amazing streak! Keep the momentum going!";
     }
-  }
-  
-  // Update difficulty multiplier
-  void updateDifficulty(double newMultiplier) {
-    difficultyMultiplier = newMultiplier.clamp(0.5, 3.0);
-  }
-  
-  // Get difficulty level name
-  String getDifficultyName() {
-    if (difficultyMultiplier <= 0.7) return "Easy";
-    if (difficultyMultiplier <= 1.0) return "Normal";
-    if (difficultyMultiplier <= 1.5) return "Hard";
-    if (difficultyMultiplier <= 2.0) return "Expert";
-    return "Master";
   }
 }

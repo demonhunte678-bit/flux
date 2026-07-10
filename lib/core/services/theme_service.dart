@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flux/core/services/settings_service.dart';
-
+import 'package:flux/index.dart';
 class AccentColor {
   final String colorName;
   final Color color;
