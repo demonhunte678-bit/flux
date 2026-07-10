@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'chart_data_models.dart';
+import 'package:flux/index.dart';
 
 class SuccessRateTrendChart extends StatelessWidget {
   final List<Habit> habits;

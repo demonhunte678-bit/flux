@@ -26,7 +26,7 @@ dependencies:
   uuid:
   permission_handler:
   lottie:
-  file_picker:
+  file_picker: ^11.0.2
 
   drift: ^2.20.0
   sqlite3_flutter_libs: ^0.6.0+eol

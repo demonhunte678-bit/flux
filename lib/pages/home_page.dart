@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flux/index.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

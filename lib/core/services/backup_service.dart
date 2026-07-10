@@ -32,7 +32,7 @@ class BackupService {
         selectedDirectory =
             directory?.path ?? (await getApplicationDocumentsDirectory()).path;
       } else {
-        selectedDirectory = await FilePicker.platform.getDirectoryPath(
+        selectedDirectory = await FilePicker.getDirectoryPath(
           dialogTitle: 'Choose backup location',
         );
       }
@@ -54,7 +54,7 @@ class BackupService {
   // Import database backup with file picker dialog
   static Future<ImportBackupResult> importDatabaseBackup() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
+      FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['db'],
         dialogTitle: 'Select database backup file to import',

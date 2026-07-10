@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'chart_data_models.dart';
+import 'package:flux/index.dart';
 
 class AnalyticsReport extends StatelessWidget {
   final List<Habit> habits;

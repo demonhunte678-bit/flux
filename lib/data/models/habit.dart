@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flux/index.dart';
 
 class Habit {
   String id;
@@ -292,10 +293,6 @@ class Habit {
     }
 
     return currentBest;
-  }
-
-  String get formattedName {
-    return formatPascalCase(name);
   }
 
   bool get hasEntries => entries.isNotEmpty;
