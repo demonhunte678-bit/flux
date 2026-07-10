@@ -1,23 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class AddHabitSheet extends StatefulWidget {
   final Function(Habit) onSave;
   final List<String> existingCategories;
-  
-  const AddHabitSheet({super.key, required this.onSave, this.existingCategories = const []});
-  
-  @override 
+
+  const AddHabitSheet({
+    super.key,
+    required this.onSave,
+    this.existingCategories = const [],
+  });
+
+  @override
   _AddHabitSheetState createState() => _AddHabitSheetState();
 }
 
-class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateMixin {
+class _AddHabitSheetState extends State<AddHabitSheet>
+    with TickerProviderStateMixin {
   final _nameCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
   final _categoryCtrl = TextEditingController();
   final _targetValueCtrl = TextEditingController();
   final _targetFrequencyCtrl = TextEditingController();
   final _customUnitCtrl = TextEditingController();
-  
+
   HabitType _type = HabitType.DoneBased;
   IconData _icon = Icons.star;
   Color _color = const Color(0xFF1DB954);
@@ -26,35 +38,72 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
   final List<int> _customDays = [];
   String? _selectedCategory;
   bool _hasMeasurableGoal = false;
-  
+
   late TabController _tabController;
-  
+
   final _icons = [
-    Icons.star, Icons.fitness_center, Icons.book, Icons.brush, 
-    Icons.run_circle, Icons.water_drop, Icons.food_bank, Icons.bed,
-    Icons.emoji_emotions, Icons.self_improvement, Icons.music_note, 
-    Icons.code, Icons.sports_basketball, Icons.smoking_rooms, 
-    Icons.local_drink, Icons.monitor, Icons.health_and_safety,
-    Icons.directions_run, Icons.dark_mode, Icons.light_mode,
-    Icons.pets, Icons.nature, Icons.volunteer_activism, Icons.school,
-    Icons.alarm, Icons.piano, Icons.savings, Icons.attach_money
+    Icons.star,
+    Icons.fitness_center,
+    Icons.book,
+    Icons.brush,
+    Icons.run_circle,
+    Icons.water_drop,
+    Icons.food_bank,
+    Icons.bed,
+    Icons.emoji_emotions,
+    Icons.self_improvement,
+    Icons.music_note,
+    Icons.code,
+    Icons.sports_basketball,
+    Icons.smoking_rooms,
+    Icons.local_drink,
+    Icons.monitor,
+    Icons.health_and_safety,
+    Icons.directions_run,
+    Icons.dark_mode,
+    Icons.light_mode,
+    Icons.pets,
+    Icons.nature,
+    Icons.volunteer_activism,
+    Icons.school,
+    Icons.alarm,
+    Icons.piano,
+    Icons.savings,
+    Icons.attach_money,
   ];
-  
+
   final List<Color> _colorOptions = [
-    const Color(0xFF1DB954), const Color(0xFF2196F3), const Color(0xFFF44336), const Color(0xFFFF9800),
-    const Color(0xFF9C27B0), const Color(0xFF795548), const Color(0xFF607D8B), const Color(0xFF009688),
-    const Color(0xFFE91E63), const Color(0xFF4CAF50), const Color(0xFF673AB7), const Color(0xFFFF5722),
+    const Color(0xFF1DB954),
+    const Color(0xFF2196F3),
+    const Color(0xFFF44336),
+    const Color(0xFFFF9800),
+    const Color(0xFF9C27B0),
+    const Color(0xFF795548),
+    const Color(0xFF607D8B),
+    const Color(0xFF009688),
+    const Color(0xFFE91E63),
+    const Color(0xFF4CAF50),
+    const Color(0xFF673AB7),
+    const Color(0xFFFF5722),
   ];
-  
-  final List<String> _weekDays = const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
+
+  final List<String> _weekDays = const [
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+  ];
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadDefaults();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -66,7 +115,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
     _customUnitCtrl.dispose();
     super.dispose();
   }
-  
+
   Future<void> _loadDefaults() async {
     _type = await SettingsService.getDefaultHabitType();
     setState(() {});
@@ -80,25 +129,21 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         bottom: MediaQuery.of(context).viewInsets.bottom + 16,
         top: 16,
         left: 16,
-        right: 16
+        right: 16,
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10,
-            spreadRadius: 5,
-          ),
+          BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 5),
         ],
       ),
       child: Column(
         children: [
           Center(
             child: Container(
-              width: 40, 
-              height: 4, 
+              width: 40,
+              height: 4,
               decoration: BoxDecoration(
                 color: Colors.grey.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(4),
@@ -107,10 +152,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
           ),
           const SizedBox(height: 16),
           Text(
-            'Create New Habit', 
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            'Create New Habit',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           TabBar(
@@ -159,7 +204,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildBasicTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -173,10 +218,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
           _buildCategoryField(),
           const SizedBox(height: 24),
           Text(
-            'Habit Type', 
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            'Habit Type',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           _buildHabitTypeSelector(),
@@ -184,7 +229,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildScheduleTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -192,10 +237,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'How often should this habit occur?', 
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            'How often should this habit occur?',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 16),
           _buildFrequencySelector(),
@@ -203,7 +248,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
             const SizedBox(height: 16),
             _buildCustomDaysSelector(),
           ],
-          if (_frequency == HabitFrequency.XTimesPerWeek || _frequency == HabitFrequency.XTimesPerMonth) ...[
+          if (_frequency == HabitFrequency.XTimesPerWeek ||
+              _frequency == HabitFrequency.XTimesPerMonth) ...[
             const SizedBox(height: 16),
             _buildTargetFrequencyField(),
           ],
@@ -211,7 +257,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildGoalsTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -220,7 +266,9 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         children: [
           SwitchListTile(
             title: const Text('Set Measurable Goal'),
-            subtitle: const Text('Track specific values instead of just counts'),
+            subtitle: const Text(
+              'Track specific values instead of just counts',
+            ),
             value: _hasMeasurableGoal,
             onChanged: (value) {
               setState(() {
@@ -235,10 +283,10 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
           if (_hasMeasurableGoal) ...[
             const SizedBox(height: 16),
             Text(
-              'Unit of Measurement', 
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              'Unit of Measurement',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             _buildUnitSelector(),
@@ -256,14 +304,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
               labelText: _getTargetLabel(),
               hintText: _getTargetHint(),
               suffixText: _getUnitName(),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
           ],
         ],
       ),
     );
   }
-  
+
   Widget _buildStyleTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -271,19 +321,19 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Icon', 
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            'Icon',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           _buildIconSelector(),
           const SizedBox(height: 24),
           Text(
-            'Color', 
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            'Color',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           _buildColorSelector(),
@@ -302,7 +352,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       textCapitalization: TextCapitalization.sentences,
     );
   }
-  
+
   Widget _buildNotesField() {
     return CustomFormField(
       controller: _notesCtrl,
@@ -314,33 +364,35 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       maxLines: 2,
     );
   }
-  
+
   Widget _buildCategoryField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Category (Optional)', 
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          'Category (Optional)',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         if (widget.existingCategories.isNotEmpty) ...[
           Wrap(
             spacing: 8,
-            children: widget.existingCategories.map((category) =>
-              FilterChip(
-                label: Text(category),
-                selected: _selectedCategory == category,
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedCategory = selected ? category : null;
-                    _categoryCtrl.text = selected ? category : '';
-                  });
-                },
-              )
-            ).toList(),
+            children: widget.existingCategories
+                .map(
+                  (category) => FilterChip(
+                    label: Text(category),
+                    selected: _selectedCategory == category,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedCategory = selected ? category : null;
+                        _categoryCtrl.text = selected ? category : '';
+                      });
+                    },
+                  ),
+                )
+                .toList(),
           ),
           const SizedBox(height: 8),
           Text('Or create new:', style: Theme.of(context).textTheme.bodySmall),
@@ -360,20 +412,22 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ],
     );
   }
-  
+
   Widget _buildHabitTypeSelector() {
     return Container(
       height: 54,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+        ),
       ),
       child: Row(
         children: HabitType.values.map((type) {
           final isSelected = _type == type;
           String typeLabel;
-          
+
           switch (type) {
             case HabitType.FailBased:
               typeLabel = 'Avoid';
@@ -385,15 +439,15 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
               typeLabel = 'Check';
               break;
           }
-          
+
           return Expanded(
             child: GestureDetector(
               onTap: () => setState(() => _type = type),
               child: Container(
                 decoration: BoxDecoration(
-                  color: isSelected 
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 margin: const EdgeInsets.all(4),
@@ -402,9 +456,9 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
                   typeLabel,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isSelected 
-                      ? Colors.white 
-                      : Theme.of(context).textTheme.bodyMedium?.color,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                 ),
               ),
@@ -414,13 +468,13 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildFrequencySelector() {
     return Column(
       children: HabitFrequency.values.map((frequency) {
         final isSelected = _frequency == frequency;
         String label = _getFrequencyLabel(frequency);
-        
+
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 4),
           child: RadioListTile<HabitFrequency>(
@@ -440,16 +494,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       }).toList(),
     );
   }
-  
+
   Widget _buildCustomDaysSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Select Days', 
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          'Select Days',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -474,16 +528,18 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ],
     );
   }
-  
+
   Widget _buildTargetFrequencyField() {
     return CustomFormField(
       controller: _targetFrequencyCtrl,
-      labelText: _frequency == HabitFrequency.XTimesPerWeek ? 'Times per week' : 'Times per month',
+      labelText: _frequency == HabitFrequency.XTimesPerWeek
+          ? 'Times per week'
+          : 'Times per month',
       hintText: 'e.g., 3',
       keyboardType: TextInputType.number,
     );
   }
-  
+
   Widget _buildUnitSelector() {
     return DropdownButtonFormField<HabitUnit>(
       initialValue: _unit,
@@ -504,13 +560,15 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       },
     );
   }
-  
+
   Widget _buildIconSelector() {
     return Container(
       height: 220,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+        ),
       ),
       child: GridView.builder(
         padding: const EdgeInsets.all(8),
@@ -524,7 +582,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         itemBuilder: (context, index) {
           final icon = _icons[index];
           final isSelected = _icon == icon;
-          
+
           return Material(
             color: Colors.transparent,
             child: InkWell(
@@ -533,22 +591,26 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: isSelected 
-                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) 
-                    : Theme.of(context).cardColor,
+                  color: isSelected
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.2)
+                      : Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: isSelected 
-                      ? Theme.of(context).colorScheme.primary 
-                      : Theme.of(context).dividerColor,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).dividerColor,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
                 child: Icon(
                   icon,
-                  color: isSelected 
-                    ? Theme.of(context).colorScheme.primary 
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
                   size: 24,
                 ),
               ),
@@ -558,7 +620,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
       ),
     );
   }
-  
+
   Widget _buildColorSelector() {
     return SizedBox(
       height: 60,
@@ -567,8 +629,8 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         itemCount: _colorOptions.length,
         itemBuilder: (context, index) {
           final color = _colorOptions[index];
-          final isSelected = _color.value == color.value;
-          
+          final isSelected = _color.toARGB32() == color.toARGB32();
+
           return GestureDetector(
             onTap: () => setState(() => _color = color),
             child: Container(
@@ -590,16 +652,16 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
                   ),
                 ],
               ),
-              child: isSelected 
-                ? const Icon(Icons.check, color: Colors.white)
-                : null,
+              child: isSelected
+                  ? const Icon(Icons.check, color: Colors.white)
+                  : null,
             ),
           );
         },
       ),
     );
   }
-  
+
   String _getFrequencyLabel(HabitFrequency frequency) {
     switch (frequency) {
       case HabitFrequency.Daily:
@@ -616,7 +678,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         return 'X times per month';
     }
   }
-  
+
   String _getUnitDisplayName(HabitUnit unit) {
     switch (unit) {
       case HabitUnit.Count:
@@ -641,7 +703,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         return 'Custom Unit';
     }
   }
-  
+
   String _getTargetLabel() {
     switch (_type) {
       case HabitType.FailBased:
@@ -652,7 +714,7 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         return 'Target amount';
     }
   }
-  
+
   String _getTargetHint() {
     switch (_type) {
       case HabitType.FailBased:
@@ -663,43 +725,56 @@ class _AddHabitSheetState extends State<AddHabitSheet> with TickerProviderStateM
         return 'e.g., 10 (meditate 10 minutes)';
     }
   }
-  
+
   String _getUnitName() {
     if (_unit == HabitUnit.Custom && _customUnitCtrl.text.isNotEmpty) {
       return _customUnitCtrl.text;
     }
     return _getUnitDisplayName(_unit);
   }
-  
+
   void _createHabit() {
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) return;
-    
-    final category = _selectedCategory ?? (_categoryCtrl.text.trim().isNotEmpty ? _categoryCtrl.text.trim() : null);
-    
-    final targetValue = _hasMeasurableGoal && _targetValueCtrl.text.isNotEmpty 
-        ? double.tryParse(_targetValueCtrl.text) 
+
+    final category =
+        _selectedCategory ??
+        (_categoryCtrl.text.trim().isNotEmpty
+            ? _categoryCtrl.text.trim()
+            : null);
+
+    final targetValue = _hasMeasurableGoal && _targetValueCtrl.text.isNotEmpty
+        ? double.tryParse(_targetValueCtrl.text)
         : null;
-        
-    final targetFrequency = (_frequency == HabitFrequency.XTimesPerWeek || _frequency == HabitFrequency.XTimesPerMonth) && _targetFrequencyCtrl.text.isNotEmpty
+
+    final targetFrequency =
+        (_frequency == HabitFrequency.XTimesPerWeek ||
+                _frequency == HabitFrequency.XTimesPerMonth) &&
+            _targetFrequencyCtrl.text.isNotEmpty
         ? int.tryParse(_targetFrequencyCtrl.text)
         : null;
-    
-    final customUnit = _unit == HabitUnit.Custom ? _customUnitCtrl.text.trim() : null;
-    
-    widget.onSave(Habit(
-      name: name,
-      type: _type,
-      icon: _icon,
-      color: _color,
-      notes: _notesCtrl.text.trim().isNotEmpty ? _notesCtrl.text.trim() : null,
-      category: category,
-      frequency: _frequency,
-      customDays: _frequency == HabitFrequency.CustomDays ? _customDays : [],
-      targetFrequency: targetFrequency,
-      targetValue: targetValue,
-      unit: _hasMeasurableGoal ? _unit : HabitUnit.Count,
-      customUnit: customUnit,
-    ));
+
+    final customUnit = _unit == HabitUnit.Custom
+        ? _customUnitCtrl.text.trim()
+        : null;
+
+    widget.onSave(
+      Habit(
+        name: name,
+        type: _type,
+        icon: _icon,
+        color: _color,
+        notes: _notesCtrl.text.trim().isNotEmpty
+            ? _notesCtrl.text.trim()
+            : null,
+        category: category,
+        frequency: _frequency,
+        customDays: _frequency == HabitFrequency.CustomDays ? _customDays : [],
+        targetFrequency: targetFrequency,
+        targetValue: targetValue,
+        unit: _hasMeasurableGoal ? _unit : HabitUnit.Count,
+        customUnit: customUnit,
+      ),
+    );
   }
 }

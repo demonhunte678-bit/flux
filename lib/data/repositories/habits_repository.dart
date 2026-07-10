@@ -1,11 +1,18 @@
 import 'package:drift/drift.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class HabitsRepository {
   final AppDatabase _db;
 
   HabitsRepository(this._db);
 
-  static final HabitsRepository instance = HabitsRepository(AppDatabase.instance);
+  static final HabitsRepository instance = HabitsRepository(
+    AppDatabase.instance,
+  );
 
   Future<List<Habit>> loadAllHabits() async {
     final habitRows = await _db.select(_db.habits).get();
@@ -29,7 +36,9 @@ class HabitsRepository {
       await _db.into(_db.habits).insertOnConflictUpdate(dbHabit);
 
       // Remove existing entries and replace
-      await (_db.delete(_db.habitEntries)..where((tbl) => tbl.habitId.equals(habit.id))).go();
+      await (_db.delete(
+        _db.habitEntries,
+      )..where((tbl) => tbl.habitId.equals(habit.id))).go();
 
       for (final entry in habit.entries) {
         final companion = HabitEntryMapper.toCompanion(habit.id, entry);
@@ -42,24 +51,32 @@ class HabitsRepository {
     await (_db.delete(_db.habits)..where((tbl) => tbl.id.equals(habitId))).go();
   }
 
-  Future<void> updateEntry(Habit habit, HabitEntry oldEntry, HabitEntry newEntry) async {
+  Future<void> updateEntry(
+    Habit habit,
+    HabitEntry oldEntry,
+    HabitEntry newEntry,
+  ) async {
     await _db.transaction(() async {
       // Find the entry that matches habitId and date
       final query = _db.update(_db.habitEntries)
         ..where((tbl) => tbl.habitId.equals(habit.id))
         ..where((tbl) => tbl.date.equals(oldEntry.date));
 
-      await query.write(HabitEntriesCompanion(
-        date: Value(newEntry.date),
-        count: Value(newEntry.count),
-        value: Value(newEntry.value),
-        unit: Value(newEntry.unit),
-        notes: Value(newEntry.notes),
-        isSkipped: Value(newEntry.isSkipped),
-      ));
+      await query.write(
+        HabitEntriesCompanion(
+          date: Value(newEntry.date),
+          count: Value(newEntry.count),
+          value: Value(newEntry.value),
+          unit: Value(newEntry.unit),
+          notes: Value(newEntry.notes),
+          isSkipped: Value(newEntry.isSkipped),
+        ),
+      );
 
       // Update in-memory list
-      final index = habit.entries.indexWhere((e) => _isSameDay(e.date, oldEntry.date));
+      final index = habit.entries.indexWhere(
+        (e) => _isSameDay(e.date, oldEntry.date),
+      );
       if (index != -1) {
         habit.entries[index] = newEntry;
       }

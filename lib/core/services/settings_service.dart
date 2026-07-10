@@ -1,4 +1,5 @@
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class SettingsService {
   static const String SELECTED_THEME_KEY = 'selected_theme';
   static const String LANGUAGE_KEY = 'language';
@@ -72,5 +73,6 @@ class SettingsService {
   // Fallbacks for display settings referenced elsewhere in the app
   static Future<bool> getShowHabitIcons() async => true;
   static Future<bool> getCompactMode() async => false;
-  static Future<HabitType> getDefaultHabitType() async => HabitType.SuccessBased;
+  static Future<HabitType> getDefaultHabitType() async =>
+      HabitType.SuccessBased;
 }

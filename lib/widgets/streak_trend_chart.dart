@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:flux/index.dart';import 'chart_data_models.dart';
+import 'package:flux/index.dart';
+import 'chart_data_models.dart';
 
 class StreakTrendChart extends StatelessWidget {
   final List<Habit> habits;
@@ -8,17 +9,21 @@ class StreakTrendChart extends StatelessWidget {
   const StreakTrendChart({super.key, required this.habits});
 
   List<StreakDataPoint> _generateStreakData() {
-    return habits.map((habit) => StreakDataPoint(
-      habitName: habit.formattedName,
-      streak: habit.currentStreak,
-      color: habit.color ?? Colors.orange,
-    )).toList();
+    return habits
+        .map(
+          (habit) => StreakDataPoint(
+            habitName: habit.formattedName,
+            streak: habit.currentStreak,
+            color: habit.color ?? Colors.orange,
+          ),
+        )
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final chartData = _generateStreakData();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -51,12 +56,14 @@ class StreakTrendChart extends StatelessWidget {
                     xValueMapper: (point, _) => point.habitName,
                     yValueMapper: (point, _) => point.streak,
                     pointColorMapper: (point, _) => point.color,
-                    borderRadius: const BorderRadius.horizontal(right: Radius.circular(6)),
+                    borderRadius: const BorderRadius.horizontal(
+                      right: Radius.circular(6),
+                    ),
                     dataLabelSettings: const DataLabelSettings(
                       isVisible: true,
                       labelPosition: ChartDataLabelPosition.outside,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),

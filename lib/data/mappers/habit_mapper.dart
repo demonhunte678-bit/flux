@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart' show Color, IconData;
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class HabitMapper {
   static Habit toDomain(HabitData row, List<HabitEntryData> entryRows) {
     final entries = entryRows.map(HabitEntryMapper.toDomain).toList();
@@ -8,7 +17,9 @@ class HabitMapper {
       name: row.name,
       type: HabitType.values[row.type],
       displayMode: ReportDisplay.values[row.displayMode],
-      icon: row.icon != null ? IconData(row.icon!, fontFamily: 'MaterialIcons') : null,
+      icon: row.icon != null
+          ? IconData(row.icon!, fontFamily: 'MaterialIcons')
+          : null,
       color: row.color != null ? Color(row.color!) : null,
       isArchived: row.isArchived,
       notes: row.notes,

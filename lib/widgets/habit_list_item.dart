@@ -1,29 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class HabitListItem extends ConsumerWidget {
   final Habit habit;
   final VoidCallback onTap;
   final DateTime? selectedDate;
   final VoidCallback? onCompletionTap;
-  
+
   const HabitListItem({
-    super.key, 
-    required this.habit, 
+    super.key,
+    required this.habit,
     required this.onTap,
     this.selectedDate,
     this.onCompletionTap,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsState = ref.watch(settingsProvider);
-    
+
     const showIcons = true;
     final showSuccessRate = settingsState.showSuccessRate;
     final showCurrentStreak = settingsState.showCurrentStreak;
     const isCompact = false;
-    
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -41,13 +46,18 @@ class HabitListItem extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: habit.color?.withValues(alpha: 0.1) ?? 
-                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                        color:
+                            habit.color?.withValues(alpha: 0.1) ??
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         habit.icon ?? Icons.star,
-                        color: habit.color ?? Theme.of(context).colorScheme.primary,
+                        color:
+                            habit.color ??
+                            Theme.of(context).colorScheme.primary,
                         size: 28,
                       ),
                     ),
@@ -62,10 +72,11 @@ class HabitListItem extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 habit.formattedName,
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -74,8 +85,8 @@ class HabitListItem extends ConsumerWidget {
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, 
-                                  vertical: 4
+                                  horizontal: 8,
+                                  vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
@@ -113,24 +124,31 @@ class HabitListItem extends ConsumerWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (habit.type == HabitType.FailBased && habit.hasEntries) ...[
+                      if (habit.type == HabitType.FailBased &&
+                          habit.hasEntries) ...[
                         Text(
                           habit.getTimeSinceLastFailure(),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: habit.color ?? Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color:
+                                    habit.color ??
+                                    Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                           textAlign: TextAlign.end,
                         ),
                       ] else if (showSuccessRate) ...[
                         Text(
                           '${habit.successRate.toStringAsFixed(0)}%',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: habit.color ?? Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color:
+                                    habit.color ??
+                                    Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
                           textAlign: TextAlign.end,
                         ),
                       ],
@@ -140,16 +158,16 @@ class HabitListItem extends ConsumerWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.trending_up, 
-                              size: 14, 
-                              color: Colors.grey
+                              Icons.trending_up,
+                              size: 14,
+                              color: Colors.grey,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '${habit.currentStreak} day${habit.currentStreak != 1 ? 's' : ''}',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                fontSize: 12,
-                              ),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodySmall?.copyWith(fontSize: 12),
                             ),
                           ],
                         ),
@@ -171,13 +189,15 @@ class HabitListItem extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Text(
                     habit.notes!,
                     style: TextStyle(
-                      fontSize: 12, 
+                      fontSize: 12,
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 2,
@@ -189,9 +209,9 @@ class HabitListItem extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   _getHabitStatusText(habit),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontSize: 11,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -202,11 +222,11 @@ class HabitListItem extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildCompletionButton(BuildContext context, bool isCompact) {
     final entry = _getEntryForSelectedDate();
     final themeColor = habit.color ?? Theme.of(context).colorScheme.primary;
-    
+
     Color buttonBgColor = Colors.transparent;
     Color buttonBorderColor = themeColor;
     Widget buttonIcon = Icon(
@@ -244,13 +264,15 @@ class HabitListItem extends ConsumerWidget {
           color: buttonBgColor,
           shape: BoxShape.circle,
           border: Border.all(color: buttonBorderColor, width: 2),
-          boxShadow: entry != null ? [
-            BoxShadow(
-              color: buttonBgColor.withValues(alpha: 0.3),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ] : [],
+          boxShadow: entry != null
+              ? [
+                  BoxShadow(
+                    color: buttonBgColor.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
         ),
         child: Center(child: buttonIcon),
       ),
@@ -269,14 +291,20 @@ class HabitListItem extends ConsumerWidget {
     }
     return null;
   }
-  
+
   String _getHabitStatusText(Habit habit) {
     switch (habit.type) {
       case HabitType.FailBased:
-        final total = habit.entries.fold(0.0, (sum, e) => sum + (e.value ?? e.count.toDouble()));
+        final total = habit.entries.fold(
+          0.0,
+          (sum, e) => sum + (e.value ?? e.count.toDouble()),
+        );
         return 'Failures: ${total.toStringAsFixed(1)} ${habit.getUnitDisplayName()}';
       case HabitType.SuccessBased:
-        final total = habit.entries.fold(0.0, (sum, e) => sum + (e.value ?? e.count.toDouble()));
+        final total = habit.entries.fold(
+          0.0,
+          (sum, e) => sum + (e.value ?? e.count.toDouble()),
+        );
         return 'Successes: ${total.toStringAsFixed(1)} ${habit.getUnitDisplayName()}';
       case HabitType.DoneBased:
         final total = habit.entries.fold(0, (sum, e) => sum + e.count);

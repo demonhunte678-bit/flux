@@ -11,7 +11,7 @@ class Habits extends Table {
   IntColumn get color => integer().nullable()();
   BoolColumn get isArchived => boolean()();
   TextColumn get notes => text().nullable()();
-  
+
   // New fields
   TextColumn get category => text().nullable()();
   IntColumn get frequency => integer()();
@@ -23,9 +23,10 @@ class Habits extends Table {
   DateTimeColumn get pauseStartDate => dateTime().nullable()();
   DateTimeColumn get pauseEndDate => dateTime().nullable()();
   BoolColumn get isPaused => boolean()();
-  
+
   // Custom motivational messages
-  TextColumn get motivationalMessages => text().map(const StringListConverter())();
+  TextColumn get motivationalMessages =>
+      text().map(const StringListConverter())();
   TextColumn get customSuccessMessage => text().nullable()();
   TextColumn get customFailureMessage => text().nullable()();
 
@@ -35,7 +36,7 @@ class Habits extends Table {
 
 class IntListConverter extends TypeConverter<List<int>, String> {
   const IntListConverter();
-  
+
   @override
   List<int> fromSql(String fromDb) {
     try {
@@ -44,7 +45,7 @@ class IntListConverter extends TypeConverter<List<int>, String> {
       return [];
     }
   }
-  
+
   @override
   String toSql(List<int> value) {
     return json.encode(value);
@@ -53,7 +54,7 @@ class IntListConverter extends TypeConverter<List<int>, String> {
 
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
-  
+
   @override
   List<String> fromSql(String fromDb) {
     try {
@@ -62,7 +63,7 @@ class StringListConverter extends TypeConverter<List<String>, String> {
       return [];
     }
   }
-  
+
   @override
   String toSql(List<String> value) {
     return json.encode(value);

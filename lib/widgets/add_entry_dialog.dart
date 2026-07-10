@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:intl/intl.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:intl/intl.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class AddEntryDialog extends StatefulWidget {
   final Habit habit;
   final DateTime? selectedDate;
@@ -17,7 +22,8 @@ class AddEntryDialog extends StatefulWidget {
   _AddEntryDialogState createState() => _AddEntryDialogState();
 }
 
-class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStateMixin {
+class _AddEntryDialogState extends State<AddEntryDialog>
+    with TickerProviderStateMixin {
   final TextEditingController _countController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
@@ -32,8 +38,13 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
     _animationController.forward();
 
     // Initialize with target value if available
@@ -53,10 +64,13 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
   }
 
   String get _getMainTitle {
-    final dateStr = widget.selectedDate != null ? DateFormat('EEE, MMM d').format(widget.selectedDate!) : 'Today';
+    final dateStr = widget.selectedDate != null
+        ? DateFormat('EEE, MMM d').format(widget.selectedDate!)
+        : 'Today';
     if (_isSkipped) return 'Skipping $dateStr';
 
-    if (widget.habit.unit != HabitUnit.Count && widget.habit.targetValue != null) {
+    if (widget.habit.unit != HabitUnit.Count &&
+        widget.habit.targetValue != null) {
       switch (widget.habit.type) {
         case HabitType.FailBased:
           return 'Track Failure';
@@ -84,7 +98,9 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 5)],
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 5),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -101,7 +117,7 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                     _buildMainContent(),
                     if (widget.habit.targetValue != null && !_isSkipped) ...[
                       const SizedBox(height: 10),
-                      _buildTargetProgressIndicator()
+                      _buildTargetProgressIndicator(),
                     ],
                     const SizedBox(height: 10),
                     _buildNotesSection(),
@@ -128,20 +144,31 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            widget.habit.color?.withValues(alpha: 0.8) ?? Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+            widget.habit.color?.withValues(alpha: 0.8) ??
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
             widget.habit.color ?? Theme.of(context).colorScheme.primary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
-            child: Icon(widget.habit.icon ?? Icons.star, color: Colors.white, size: 32),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              widget.habit.icon ?? Icons.star,
+              color: Colors.white,
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -150,10 +177,20 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
               children: [
                 Text(
                   widget.habit.formattedName,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text(_getMainTitle, style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.9))),
+                Text(
+                  _getMainTitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
               ],
             ),
           ),
@@ -167,13 +204,24 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _isSkipped ? Colors.orange.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.05),
+        color: _isSkipped
+            ? Colors.orange.withValues(alpha: 0.1)
+            : Colors.grey.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _isSkipped ? Colors.orange.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.2), width: 2),
+        border: Border.all(
+          color: _isSkipped
+              ? Colors.orange.withValues(alpha: 0.3)
+              : Colors.grey.withValues(alpha: 0.2),
+          width: 2,
+        ),
       ),
       child: Row(
         children: [
-          Icon(_isSkipped ? Icons.skip_next : Icons.schedule, color: _isSkipped ? Colors.orange : Colors.grey, size: 28),
+          Icon(
+            _isSkipped ? Icons.skip_next : Icons.schedule,
+            color: _isSkipped ? Colors.orange : Colors.grey,
+            size: 28,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -181,10 +229,17 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
               children: [
                 Text(
                   'Skip this day?',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _isSkipped ? Colors.orange : null),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: _isSkipped ? Colors.orange : null,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Text("Won't break your streak or affect statistics", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(
+                  "Won't break your streak or affect statistics",
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
               ],
             ),
           ),
@@ -209,7 +264,8 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
   }
 
   Widget _buildMainContent() {
-    if (widget.habit.type == HabitType.DoneBased && widget.habit.unit == HabitUnit.Count) {
+    if (widget.habit.type == HabitType.DoneBased &&
+        widget.habit.unit == HabitUnit.Count) {
       return _buildDoneTypeInput();
     } else {
       return _buildValueInput();
@@ -222,14 +278,19 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         children: [
           Row(
             children: [
               const Expanded(
-                child: Text('Did you complete this habit today?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                child: Text(
+                  'Did you complete this habit today?',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
               ),
               Switch(
                 value: _isDone,
@@ -248,19 +309,32 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
             height: 80,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: _isDone ? Colors.green.withValues(alpha: 0.15) : Colors.red.withValues(alpha: 0.15),
+              color: _isDone
+                  ? Colors.green.withValues(alpha: 0.15)
+                  : Colors.red.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _isDone ? Colors.green : Colors.red, width: 2),
+              border: Border.all(
+                color: _isDone ? Colors.green : Colors.red,
+                width: 2,
+              ),
             ),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(_isDone ? Icons.check_circle : Icons.cancel, color: _isDone ? Colors.green : Colors.red, size: 32),
+                  Icon(
+                    _isDone ? Icons.check_circle : Icons.cancel,
+                    color: _isDone ? Colors.green : Colors.red,
+                    size: 32,
+                  ),
                   const SizedBox(width: 12),
                   Text(
                     _isDone ? 'Completed ✓' : 'Not Completed ✗',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _isDone ? Colors.green : Colors.red),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _isDone ? Colors.green : Colors.red,
+                    ),
                   ),
                 ],
               ),
@@ -285,14 +359,29 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Theme.of(context).colorScheme.primary.withValues(alpha: 0.1), Theme.of(context).colorScheme.primary.withValues(alpha: 0.05)],
+                  colors: [
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.05),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.track_changes, color: Theme.of(context).colorScheme.primary, size: 20),
+                  Icon(
+                    Icons.track_changes,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -300,10 +389,20 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                       children: [
                         Text(
                           'Target Goal',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Theme.of(context).colorScheme.primary),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                         const SizedBox(height: 4),
-                        Text('${widget.habit.targetValue} $unitName', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text(
+                          '${widget.habit.targetValue} $unitName',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -331,12 +430,19 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                         width: 30,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.1),
                         ),
                         child: IconButton(
-                          style: IconButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                          style: IconButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           onPressed: () {
-                            final currentValue = int.tryParse(_countController.text) ?? 0;
+                            final currentValue =
+                                int.tryParse(_countController.text) ?? 0;
                             if (currentValue > 0) {
                               final newValue = currentValue - 1;
                               _countController.text = newValue.toString();
@@ -345,7 +451,10 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                               });
                             }
                           },
-                          icon: Icon(Icons.remove, color: Theme.of(context).colorScheme.primary),
+                          icon: Icon(
+                            Icons.remove,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           iconSize: 16,
                         ),
                       ),
@@ -355,17 +464,28 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
+                            border: Border.all(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: TextFormField(
                             controller: _countController,
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             decoration: InputDecoration(
                               hintText: '0',
                               suffixText: unitName,
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 12,
+                              ),
                             ),
                             keyboardType: TextInputType.number,
                             onChanged: (value) {
@@ -383,19 +503,29 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                         width: 30,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.1),
                         ),
                         child: IconButton(
-                          style: IconButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                          style: IconButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
                           onPressed: () {
-                            final currentValue = int.tryParse(_countController.text) ?? 0;
+                            final currentValue =
+                                int.tryParse(_countController.text) ?? 0;
                             final newValue = currentValue + 1;
                             _countController.text = newValue.toString();
                             setState(() {
                               _sliderValue = newValue;
                             });
                           },
-                          icon: Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
+                          icon: Icon(
+                            Icons.add,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                           iconSize: 16,
                         ),
                       ),
@@ -422,7 +552,10 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
             ),
             const SizedBox(height: 16),
           ] else ...[
-            const Text('Enter Amount', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const Text(
+              'Enter Amount',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _valueController,
@@ -432,17 +565,29 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                 suffixText: unitName,
                 filled: true,
                 fillColor: Theme.of(context).colorScheme.surface,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+                  borderSide: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).dividerColor.withValues(alpha: 0.5),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
                 ),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
           ],
         ],
@@ -457,18 +602,31 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
         : (double.tryParse(_valueController.text) ?? 0.0);
 
     final progress = (currentValue / targetValue).clamp(0.0, 1.0);
-    final isOnTrack = widget.habit.type == HabitType.FailBased ? currentValue <= targetValue : currentValue >= targetValue;
+    final isOnTrack = widget.habit.type == HabitType.FailBased
+        ? currentValue <= targetValue
+        : currentValue >= targetValue;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isOnTrack
-              ? [Colors.green.withValues(alpha: 0.1), Colors.green.withValues(alpha: 0.05)]
-              : [Colors.orange.withValues(alpha: 0.1), Colors.orange.withValues(alpha: 0.05)],
+              ? [
+                  Colors.green.withValues(alpha: 0.1),
+                  Colors.green.withValues(alpha: 0.05),
+                ]
+              : [
+                  Colors.orange.withValues(alpha: 0.1),
+                  Colors.orange.withValues(alpha: 0.05),
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isOnTrack ? Colors.green.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3), width: 2),
+        border: Border.all(
+          color: isOnTrack
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.3),
+          width: 2,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,8 +635,15 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: isOnTrack ? Colors.green : Colors.orange, borderRadius: BorderRadius.circular(8)),
-                child: Icon(isOnTrack ? Icons.check_circle : Icons.warning, color: Colors.white, size: 20),
+                decoration: BoxDecoration(
+                  color: isOnTrack ? Colors.green : Colors.orange,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  isOnTrack ? Icons.check_circle : Icons.warning,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -487,12 +652,20 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
                   children: [
                     Text(
                       'Progress Status',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600],
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _getProgressText(isOnTrack, currentValue, targetValue),
-                      style: TextStyle(fontWeight: FontWeight.bold, color: isOnTrack ? Colors.green : Colors.orange, fontSize: 14),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: isOnTrack ? Colors.green : Colors.orange,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -506,7 +679,9 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
               value: progress,
               minHeight: 8,
               backgroundColor: Colors.grey.withValues(alpha: 0.2),
-              valueColor: AlwaysStoppedAnimation<Color>(isOnTrack ? Colors.green : Colors.orange),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isOnTrack ? Colors.green : Colors.orange,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -525,33 +700,52 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.note_add, color: Theme.of(context).colorScheme.primary, size: 20),
+              Icon(
+                Icons.note_add,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
               const SizedBox(width: 8),
-              const Text('Notes (Optional)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const Text(
+                'Notes (Optional)',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
             ],
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _notesController,
             decoration: InputDecoration(
-              hintText: widget.habit.type == HabitType.FailBased ? 'What triggered this? Any insights...' : 'How did it go? Any thoughts...',
+              hintText: widget.habit.type == HabitType.FailBased
+                  ? 'What triggered this? Any insights...'
+                  : 'How did it go? Any thoughts...',
               filled: true,
               fillColor: Theme.of(context).cardColor,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.5)),
+                borderSide: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2,
+                ),
               ),
             ),
             maxLines: 3,
@@ -579,7 +773,11 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
               const SizedBox(width: 8),
               Text(
                 'Why are you skipping today?',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.orange[800]),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.orange[800],
+                ),
               ),
             ],
           ),
@@ -590,10 +788,15 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
               hintText: 'e.g., sick, traveling, planned rest day...',
               filled: true,
               fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.orange.withValues(alpha: 0.3)),
+                borderSide: BorderSide(
+                  color: Colors.orange.withValues(alpha: 0.3),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -616,9 +819,14 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
             onPressed: () => Navigator.of(context).pop(),
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: const Text('Cancel', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
           ),
         ),
         const SizedBox(width: 16),
@@ -626,13 +834,21 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
           child: ElevatedButton(
             onPressed: _saveEntry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isSkipped ? Colors.orange : (widget.habit.color ?? Theme.of(context).colorScheme.primary),
+              backgroundColor: _isSkipped
+                  ? Colors.orange
+                  : (widget.habit.color ??
+                        Theme.of(context).colorScheme.primary),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 2,
             ),
-            child: Text(_isSkipped ? 'Skip Day' : 'Save Entry', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text(
+              _isSkipped ? 'Skip Day' : 'Save Entry',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
       ],
@@ -682,14 +898,21 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
           }
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: value == -1 ? Colors.grey : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-          foregroundColor: value == -1 ? Colors.white : Theme.of(context).colorScheme.primary,
+          backgroundColor: value == -1
+              ? Colors.grey
+              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          foregroundColor: value == -1
+              ? Colors.white
+              : Theme.of(context).colorScheme.primary,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           minimumSize: const Size(50, 32),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
         ),
-        child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -700,7 +923,9 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
         date: widget.selectedDate ?? DateTime.now(),
         count: 0,
         isSkipped: true,
-        notes: _skipReasonController.text.trim().isNotEmpty ? 'Skip reason: ${_skipReasonController.text.trim()}' : 'Skipped day',
+        notes: _skipReasonController.text.trim().isNotEmpty
+            ? 'Skip reason: ${_skipReasonController.text.trim()}'
+            : 'Skipped day',
       );
       widget.onSave(entry);
       return;
@@ -709,7 +934,8 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
     int count = 0;
     double? value;
 
-    if (widget.habit.type == HabitType.DoneBased && widget.habit.unit == HabitUnit.Count) {
+    if (widget.habit.type == HabitType.DoneBased &&
+        widget.habit.unit == HabitUnit.Count) {
       count = _isDone ? 1 : 0;
     } else if (widget.habit.unit == HabitUnit.Count) {
       count = int.tryParse(_countController.text) ?? _sliderValue;
@@ -724,8 +950,12 @@ class _AddEntryDialogState extends State<AddEntryDialog> with TickerProviderStat
       date: widget.selectedDate ?? DateTime.now(),
       count: count,
       value: value,
-      unit: widget.habit.unit != HabitUnit.Count ? widget.habit.getUnitDisplayName() : null,
-      notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+      unit: widget.habit.unit != HabitUnit.Count
+          ? widget.habit.getUnitDisplayName()
+          : null,
+      notes: _notesController.text.trim().isNotEmpty
+          ? _notesController.text.trim()
+          : null,
       isSkipped: false,
     );
 

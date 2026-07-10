@@ -10,5 +10,5 @@ enum HabitUnit {
   Grams,
   Pounds,
   Dollars,
-  Custom
+  Custom,
 }

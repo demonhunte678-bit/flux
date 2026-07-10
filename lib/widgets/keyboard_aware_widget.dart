@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flux/index.dart';
+
 class KeyboardAwareWidget extends StatefulWidget {
   final Widget child;
   final ScrollController? scrollController;
@@ -74,12 +75,12 @@ class _KeyboardAwareWidgetState extends State<KeyboardAwareWidget> {
   @override
   void didUpdateWidget(KeyboardAwareWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // Update scroll controller if it changed
     if (oldWidget.scrollController != widget.scrollController) {
       _keyboardService.setScrollController(widget.scrollController);
     }
-    
+
     // Update focusable nodes if they changed
     if (oldWidget.focusableNodes != widget.focusableNodes) {
       _keyboardService.setFocusableNodes(widget.focusableNodes);

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
+
 class SettingsState {
   final bool showSuccessRate;
   final bool showCurrentStreak;
@@ -26,11 +27,13 @@ class SettingsState {
 
 class SettingsNotifier extends StateNotifier<SettingsState> {
   SettingsNotifier()
-      : super(SettingsState(
+    : super(
+        SettingsState(
           showSuccessRate: true,
           showCurrentStreak: true,
           language: 'English',
-        )) {
+        ),
+      ) {
     _loadSettings();
   }
 
@@ -61,6 +64,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   }
 }
 
-final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
-  return SettingsNotifier();
-});
+final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
+  (ref) {
+    return SettingsNotifier();
+  },
+);

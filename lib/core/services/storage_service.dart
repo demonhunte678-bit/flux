@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:path_provider/path_provider.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:path_provider/path_provider.dart';
 
 class StorageService {
   static Future<Directory> _dataDir() async {
@@ -26,15 +29,19 @@ class StorageService {
   static Future<void> delete(Habit habit) async {
     await HabitsRepository.instance.deleteHabit(habit.id);
   }
-  
-  static Future<void> updateEntry(Habit habit, HabitEntry oldEntry, HabitEntry newEntry) async {
+
+  static Future<void> updateEntry(
+    Habit habit,
+    HabitEntry oldEntry,
+    HabitEntry newEntry,
+  ) async {
     await HabitsRepository.instance.updateEntry(habit, oldEntry, newEntry);
   }
-  
+
   static Future<void> deleteEntry(Habit habit, HabitEntry entry) async {
     await HabitsRepository.instance.deleteEntry(habit, entry);
   }
-  
+
   // Migration method to move from JSON files to Drift database
   static Future<void> migrateFromJsonToDatabase() async {
     try {
@@ -44,20 +51,22 @@ class StorageService {
           .whereType<File>()
           .map((f) => Habit.fromJson(jsonDecode(f.readAsStringSync())))
           .toList();
-      
+
       // Save all habits to the database
       await HabitsRepository.instance.migrateFromJson(habits);
-      
+
       // Backup and remove the old JSON files
       final backupDir = Directory('${dir.path}/json_backup');
       if (!await backupDir.exists()) await backupDir.create();
-      
+
       for (var file in files.whereType<File>()) {
-        final backupFile = File('${backupDir.path}/${file.path.split('/').last}');
+        final backupFile = File(
+          '${backupDir.path}/${file.path.split('/').last}',
+        );
         await file.copy(backupFile.path);
         await file.delete();
       }
-      
+
       print('Migration completed successfully!');
     } catch (e) {
       print('Error during migration: $e');

@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   final Function(String?)? onComplete;
@@ -11,7 +18,8 @@ class OnboardingPage extends ConsumerStatefulWidget {
   ConsumerState<OnboardingPage> createState() => _OnboardingPageState();
 }
 
-class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProviderStateMixin {
+class _OnboardingPageState extends ConsumerState<OnboardingPage>
+    with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   int _currentStep = 0;
 
@@ -63,17 +71,25 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
   @override
   void initState() {
     super.initState();
-    _headerAnimationController = AnimationController(duration: Duration(milliseconds: 800), vsync: this);
+    _headerAnimationController = AnimationController(
+      duration: Duration(milliseconds: 800),
+      vsync: this,
+    );
 
-    _headerColorAnimation = ColorTween(
-      begin: _stepColors[0],
-      end: _stepColors[0],
-    ).animate(CurvedAnimation(parent: _headerAnimationController, curve: Curves.easeInOut));
+    _headerColorAnimation =
+        ColorTween(begin: _stepColors[0], end: _stepColors[0]).animate(
+          CurvedAnimation(
+            parent: _headerAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
-    _headerHeightAnimation = Tween<double>(
-      begin: 120.0,
-      end: 120.0,
-    ).animate(CurvedAnimation(parent: _headerAnimationController, curve: Curves.easeInOut));
+    _headerHeightAnimation = Tween<double>(begin: 120.0, end: 120.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
@@ -83,10 +99,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
   }
 
   void _animateHeaderColor() {
-    _headerColorAnimation = ColorTween(
-      begin: _headerColorAnimation.value,
-      end: _stepColors[_currentStep],
-    ).animate(CurvedAnimation(parent: _headerAnimationController, curve: Curves.easeInOut));
+    _headerColorAnimation =
+        ColorTween(
+          begin: _headerColorAnimation.value,
+          end: _stepColors[_currentStep],
+        ).animate(
+          CurvedAnimation(
+            parent: _headerAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     _headerAnimationController.reset();
     _headerAnimationController.forward();
@@ -140,12 +162,22 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
               end: Alignment.bottomRight,
               colors: [
                 _headerColorAnimation.value ?? _stepColors[_currentStep],
-                (_headerColorAnimation.value ?? _stepColors[_currentStep]).withValues(alpha: 0.8),
+                (_headerColorAnimation.value ?? _stepColors[_currentStep])
+                    .withValues(alpha: 0.8),
               ],
             ),
-            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(30),
+              bottomRight: Radius.circular(30),
+            ),
             boxShadow: [
-              BoxShadow(color: (_headerColorAnimation.value ?? _stepColors[_currentStep]).withValues(alpha: 0.3), blurRadius: 15, offset: Offset(0, 5)),
+              BoxShadow(
+                color:
+                    (_headerColorAnimation.value ?? _stepColors[_currentStep])
+                        .withValues(alpha: 0.3),
+                blurRadius: 15,
+                offset: Offset(0, 5),
+              ),
             ],
           ),
           child: Padding(
@@ -154,7 +186,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
               children: [
                 Text(
                   'Flux Setup',
-                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: 16),
                 Row(
@@ -164,7 +200,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
                         height: 4,
                         margin: EdgeInsets.symmetric(horizontal: 2),
                         decoration: BoxDecoration(
-                          color: index <= _currentStep ? Colors.white : Colors.white.withValues(alpha: 0.3),
+                          color: index <= _currentStep
+                              ? Colors.white
+                              : Colors.white.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -174,7 +212,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
                 SizedBox(height: 8),
                 Text(
                   '${_currentStep + 1}/${_steps.length} - ${_steps[_currentStep]}',
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14),
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -192,26 +233,46 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           Container(
             width: 120,
             height: 120,
-            decoration: BoxDecoration(color: _stepColors[_currentStep].withValues(alpha: 0.1), shape: BoxShape.circle),
-            child: Icon(Icons.explore, size: 60, color: _stepColors[_currentStep]),
+            decoration: BoxDecoration(
+              color: _stepColors[_currentStep].withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.explore,
+              size: 60,
+              color: _stepColors[_currentStep],
+            ),
           ),
           SizedBox(height: 32),
           Text(
             'Welcome to Flux!',
-            style: TextStyle(color: Colors.black87, fontSize: 28, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
           Text(
             'Let\'s build amazing habits together! Choose your path to get started with personalized recommendations.',
-            style: TextStyle(color: Colors.grey[600], fontSize: 16, height: 1.5),
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 32),
           Row(
             children: [
               Expanded(
-                child: _buildOptionButton(title: 'Quick Start', subtitle: 'Set up manually', icon: Icons.flash_on, onTap: () => _skipToEnd()),
+                child: _buildOptionButton(
+                  title: 'Quick Start',
+                  subtitle: 'Set up manually',
+                  icon: Icons.flash_on,
+                  onTap: () => _skipToEnd(),
+                ),
               ),
               SizedBox(width: 16),
               Expanded(
@@ -257,17 +318,42 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
 
   Widget _buildAreasStep() {
     final areas = [
-      {'title': '🏃 Health & Fitness', 'subtitle': 'exercise, diet, sleep', 'value': 'health'},
-      {'title': '💼 Career & Work', 'subtitle': 'focus, skills, organization', 'value': 'career'},
-      {'title': '📚 Personal Growth', 'subtitle': 'learning, reading, hobbies', 'value': 'growth'},
-      {'title': '💰 Finances', 'subtitle': 'saving, budgeting, mindful spending', 'value': 'finances'},
-      {'title': '😊 Mental Well-being', 'subtitle': 'mindfulness, journaling, relaxation', 'value': 'mental'},
-      {'title': '🏡 Home & Organization', 'subtitle': 'tidying, chores', 'value': 'home'},
+      {
+        'title': '🏃 Health & Fitness',
+        'subtitle': 'exercise, diet, sleep',
+        'value': 'health',
+      },
+      {
+        'title': '💼 Career & Work',
+        'subtitle': 'focus, skills, organization',
+        'value': 'career',
+      },
+      {
+        'title': '📚 Personal Growth',
+        'subtitle': 'learning, reading, hobbies',
+        'value': 'growth',
+      },
+      {
+        'title': '💰 Finances',
+        'subtitle': 'saving, budgeting, mindful spending',
+        'value': 'finances',
+      },
+      {
+        'title': '😊 Mental Well-being',
+        'subtitle': 'mindfulness, journaling, relaxation',
+        'value': 'mental',
+      },
+      {
+        'title': '🏡 Home & Organization',
+        'subtitle': 'tidying, chores',
+        'value': 'home',
+      },
     ];
 
     return _buildStepContainer(
       title: 'Choose Your Focus Areas',
-      subtitle: 'Which areas of your life would you like to improve? (Select up to 3)',
+      subtitle:
+          'Which areas of your life would you like to improve? (Select up to 3)',
       child: Column(
         children: areas.map((area) {
           return _buildMultiSelectionCard(
@@ -287,7 +373,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
         title: 'Setting Your Goals',
         subtitle: 'Please select some areas first',
         child: Center(
-          child: Text('Go back and select some areas of focus first', style: TextStyle(color: Colors.grey[600])),
+          child: Text(
+            'Go back and select some areas of focus first',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
         ),
       );
     }
@@ -296,7 +385,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
       title: 'Set Specific Goals',
       subtitle: 'For each area, choose what you\'d like to focus on',
       child: Column(
-        children: _selectedAreas.map((area) => _buildGoalSection(area)).toList(),
+        children: _selectedAreas
+            .map((area) => _buildGoalSection(area))
+            .toList(),
       ),
     );
   }
@@ -318,12 +409,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
         children: [
           Text(
             _getAreaTitle(area),
-            style: TextStyle(color: _stepColors[_currentStep], fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: _stepColors[_currentStep],
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 8),
           ...goalOptions.map((goal) {
             return CheckboxListTile(
-              title: Text(goal, style: TextStyle(color: Colors.black87, fontSize: 14)),
+              title: Text(
+                goal,
+                style: TextStyle(color: Colors.black87, fontSize: 14),
+              ),
               value: selectedGoals.contains(goal),
               onChanged: (value) => _toggleGoalSelection(area, goal),
               activeColor: _stepColors[_currentStep],
@@ -356,7 +454,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           SizedBox(height: 16),
           _buildLifestyleQuestion(
             'Daily time for new habits:',
-            ['⏳ Just a few minutes (<15)', '⏱️ A good moment (15-30)', '🕰️ A dedicated slot (30-60)', '🗓️ It\'s flexible!'],
+            [
+              '⏳ Just a few minutes (<15)',
+              '⏱️ A good moment (15-30)',
+              '🕰️ A dedicated slot (30-60)',
+              '🗓️ It\'s flexible!',
+            ],
             _timeAvailability,
             (value) => setState(() => _timeAvailability = value),
           ),
@@ -373,7 +476,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
         children: [
           _buildLifestyleQuestion(
             'I prefer habits that are:',
-            ['✅ Simple yes/no tracking', '📈 Goal-based with targets', '📉 Avoiding bad behaviors'],
+            [
+              '✅ Simple yes/no tracking',
+              '📈 Goal-based with targets',
+              '📉 Avoiding bad behaviors',
+            ],
             _habitPreference,
             (value) => setState(() => _habitPreference = value),
           ),
@@ -396,7 +503,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
 
     return _buildStepContainer(
       title: 'Your Starter Habits',
-      subtitle: 'Based on your preferences, here are some great habits to begin with',
+      subtitle:
+          'Based on your preferences, here are some great habits to begin with',
       child: Column(
         children: _suggestedHabits.map((habit) {
           return _buildHabitSuggestionCard(habit);
@@ -412,9 +520,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
       child: Column(
         children: [
           SwitchListTile(
-            title: Text('Enable Reminders', style: TextStyle(color: Colors.black87, fontSize: 16)),
+            title: Text(
+              'Enable Reminders',
+              style: TextStyle(color: Colors.black87, fontSize: 16),
+            ),
             subtitle: Text(
-              _wantsReminders ? '🔔 Yes, keep me motivated!' : '🔕 No, I\'ll remember myself',
+              _wantsReminders
+                  ? '🔔 Yes, keep me motivated!'
+                  : '🔕 No, I\'ll remember myself',
               style: TextStyle(color: Colors.grey[600]),
             ),
             value: _wantsReminders,
@@ -423,10 +536,21 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           ),
           if (_wantsReminders) ...[
             SizedBox(height: 16),
-            Text('When would you like to be reminded?', style: TextStyle(color: Colors.black87, fontSize: 16)),
+            Text(
+              'When would you like to be reminded?',
+              style: TextStyle(color: Colors.black87, fontSize: 16),
+            ),
             SizedBox(height: 8),
-            ...['🌅 Morning (8-9 AM)', '☀️ Afternoon (1-2 PM)', '🌙 Evening (7-8 PM)'].map((time) {
-              return _buildSelectionCard(title: time, isSelected: _reminderTime == time, onTap: () => setState(() => _reminderTime = time));
+            ...[
+              '🌅 Morning (8-9 AM)',
+              '☀️ Afternoon (1-2 PM)',
+              '🌙 Evening (7-8 PM)',
+            ].map((time) {
+              return _buildSelectionCard(
+                title: time,
+                isSelected: _reminderTime == time,
+                onTap: () => setState(() => _reminderTime = time),
+              );
             }),
           ],
         ],
@@ -464,19 +588,34 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           Container(
             width: 120,
             height: 120,
-            decoration: BoxDecoration(color: _stepColors[_currentStep].withValues(alpha: 0.1), shape: BoxShape.circle),
-            child: Icon(Icons.celebration, size: 60, color: _stepColors[_currentStep]),
+            decoration: BoxDecoration(
+              color: _stepColors[_currentStep].withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.celebration,
+              size: 60,
+              color: _stepColors[_currentStep],
+            ),
           ),
           SizedBox(height: 32),
           Text(
             'You\'re All Set!',
-            style: TextStyle(color: Colors.black87, fontSize: 28, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 16),
           Text(
             'Your personalized habits are ready! Start your journey towards better habits and watch yourself grow.',
-            style: TextStyle(color: Colors.grey[600], fontSize: 16, height: 1.5),
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 32),
@@ -498,7 +637,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
     );
   }
 
-  Widget _buildStepContainer({String? title, String? subtitle, required Widget child}) {
+  Widget _buildStepContainer({
+    String? title,
+    String? subtitle,
+    required Widget child,
+  }) {
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
@@ -507,11 +650,25 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           if (title != null) ...[
             Text(
               title,
-              style: TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             SizedBox(height: 8),
           ],
-          if (subtitle != null) ...[Text(subtitle, style: TextStyle(color: Colors.grey[600], fontSize: 16, height: 1.4)), SizedBox(height: 24)],
+          if (subtitle != null) ...[
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+            SizedBox(height: 24),
+          ],
           Expanded(child: SingleChildScrollView(child: child)),
         ],
       ),
@@ -529,8 +686,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
       decoration: BoxDecoration(
         color: isPrimary ? _stepColors[_currentStep] : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isPrimary ? _stepColors[_currentStep] : Colors.grey[300]!, width: 2),
-        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 10, offset: Offset(0, 5))],
+        border: Border.all(
+          color: isPrimary ? _stepColors[_currentStep] : Colors.grey[300]!,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
       child: InkWell(
         onTap: onTap,
@@ -539,17 +705,30 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           padding: EdgeInsets.all(16),
           child: Column(
             children: [
-              Icon(icon, size: 32, color: isPrimary ? Colors.white : _stepColors[_currentStep]),
+              Icon(
+                icon,
+                size: 32,
+                color: isPrimary ? Colors.white : _stepColors[_currentStep],
+              ),
               SizedBox(height: 8),
               Text(
                 title,
-                style: TextStyle(color: isPrimary ? Colors.white : Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: isPrimary ? Colors.white : Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(color: isPrimary ? Colors.white.withValues(alpha: 0.8) : Colors.grey[600], fontSize: 12),
+                style: TextStyle(
+                  color: isPrimary
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : Colors.grey[600],
+                  fontSize: 12,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -559,48 +738,97 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
     );
   }
 
-  Widget _buildSelectionCard({required String title, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildSelectionCard({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return Container(
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected ? _stepColors[_currentStep].withValues(alpha: 0.1) : Colors.white,
+        color: isSelected
+            ? _stepColors[_currentStep].withValues(alpha: 0.1)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isSelected ? _stepColors[_currentStep] : Colors.grey[300]!, width: 2),
-        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 5, offset: Offset(0, 2))],
+        border: Border.all(
+          color: isSelected ? _stepColors[_currentStep] : Colors.grey[300]!,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: ListTile(
         title: Text(
           title,
-          style: TextStyle(color: Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
-        trailing: isSelected ? Icon(Icons.check, color: _stepColors[_currentStep]) : null,
+        trailing: isSelected
+            ? Icon(Icons.check, color: _stepColors[_currentStep])
+            : null,
         onTap: onTap,
       ),
     );
   }
 
-  Widget _buildMultiSelectionCard({required String title, required String subtitle, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildMultiSelectionCard({
+    required String title,
+    required String subtitle,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return Container(
       margin: EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: isSelected ? _stepColors[_currentStep].withValues(alpha: 0.1) : Colors.white,
+        color: isSelected
+            ? _stepColors[_currentStep].withValues(alpha: 0.1)
+            : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isSelected ? _stepColors[_currentStep] : Colors.grey[300]!, width: 2),
-        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 5, offset: Offset(0, 2))],
+        border: Border.all(
+          color: isSelected ? _stepColors[_currentStep] : Colors.grey[300]!,
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.1),
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: ListTile(
         title: Text(
           title,
-          style: TextStyle(color: Colors.black87, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
-        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-        trailing: isSelected ? Icon(Icons.check, color: _stepColors[_currentStep]) : null,
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+        ),
+        trailing: isSelected
+            ? Icon(Icons.check, color: _stepColors[_currentStep])
+            : null,
         onTap: onTap,
       ),
     );
   }
 
-  Widget _buildLifestyleQuestion(String question, List<String> options, String? selectedValue, Function(String) onChanged) {
+  Widget _buildLifestyleQuestion(
+    String question,
+    List<String> options,
+    String? selectedValue,
+    Function(String) onChanged,
+  ) {
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -613,12 +841,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
         children: [
           Text(
             question,
-            style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 8),
           ...options.map((option) {
             return RadioListTile<String>(
-              title: Text(option, style: TextStyle(color: Colors.black87, fontSize: 14)),
+              title: Text(
+                option,
+                style: TextStyle(color: Colors.black87, fontSize: 14),
+              ),
               value: option,
               groupValue: selectedValue,
               onChanged: (value) => onChanged(value!),
@@ -646,19 +881,33 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
         children: [
           Row(
             children: [
-              Icon(habit.icon ?? Icons.star, color: _stepColors[_currentStep], size: 24),
+              Icon(
+                habit.icon ?? Icons.star,
+                color: _stepColors[_currentStep],
+                size: 24,
+              ),
               SizedBox(width: 12),
               Expanded(
                 child: Text(
                   habit.name,
-                  style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 8),
-          Text('Type: ${habit.type.toString().split('.').last}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-          Text('Frequency: ${habit.frequency.toString().split('.').last}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          Text(
+            'Type: ${habit.type.toString().split('.').last}',
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
+          Text(
+            'Frequency: ${habit.frequency.toString().split('.').last}',
+            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          ),
           SizedBox(height: 12),
           Row(
             children: [
@@ -668,7 +917,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
                   icon: Icon(isSelected ? Icons.remove : Icons.add),
                   label: Text(isSelected ? 'Remove' : 'Add this Habit'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isSelected ? Colors.red : _stepColors[_currentStep],
+                    backgroundColor: isSelected
+                        ? Colors.red
+                        : _stepColors[_currentStep],
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -689,7 +940,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
             Expanded(
               child: ElevatedButton(
                 onPressed: _previousStep,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[200], foregroundColor: Colors.black87, elevation: 0),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[200],
+                  foregroundColor: Colors.black87,
+                  elevation: 0,
+                ),
                 child: Text('Back'),
               ),
             ),
@@ -697,8 +952,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           Expanded(
             child: ElevatedButton(
               onPressed: _canProceed() ? _nextStep : null,
-              style: ElevatedButton.styleFrom(backgroundColor: _stepColors[_currentStep], foregroundColor: Colors.white),
-              child: Text(_currentStep == _steps.length - 1 ? 'Complete' : 'Next'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _stepColors[_currentStep],
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                _currentStep == _steps.length - 1 ? 'Complete' : 'Next',
+              ),
             ),
           ),
         ],
@@ -709,7 +969,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
   // Helper methods
   void _nextStep() {
     if (_currentStep < _steps.length - 1) {
-      _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+      _pageController.nextPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     } else {
       _completeOnboarding();
     }
@@ -717,12 +980,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
 
   void _previousStep() {
     if (_currentStep > 0) {
-      _pageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+      _pageController.previousPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
   void _skipToEnd() {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomeScreen(toggleTheme: () {}, isDarkMode: false)));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(toggleTheme: () {}, isDarkMode: false),
+      ),
+    );
   }
 
   bool _canProceed() {
@@ -734,7 +1005,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
       case 3:
         return _selectedGoals.isNotEmpty;
       case 4:
-        return _energyLevel != null && _timePreference != null && _timeAvailability != null;
+        return _energyLevel != null &&
+            _timePreference != null &&
+            _timeAvailability != null;
       case 5:
         return _habitPreference != null && _startingApproach != null;
       case 8:
@@ -1006,12 +1279,24 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
     await prefs.setStringList('onboarding_areas', _selectedAreas);
     await prefs.setString('onboarding_energy', _energyLevel ?? '');
     await prefs.setString('onboarding_time_preference', _timePreference ?? '');
-    await prefs.setString('onboarding_time_availability', _timeAvailability ?? '');
-    await prefs.setString('onboarding_habit_preference', _habitPreference ?? '');
-    await prefs.setString('onboarding_starting_approach', _startingApproach ?? '');
+    await prefs.setString(
+      'onboarding_time_availability',
+      _timeAvailability ?? '',
+    );
+    await prefs.setString(
+      'onboarding_habit_preference',
+      _habitPreference ?? '',
+    );
+    await prefs.setString(
+      'onboarding_starting_approach',
+      _startingApproach ?? '',
+    );
     await prefs.setBool('onboarding_wants_reminders', _wantsReminders);
     await prefs.setString('onboarding_reminder_time', _reminderTime ?? '');
-    await prefs.setString('onboarding_selected_theme', _selectedTheme ?? 'Default');
+    await prefs.setString(
+      'onboarding_selected_theme',
+      _selectedTheme ?? 'Default',
+    );
 
     // Call completion callback
     if (widget.onComplete != null) {
@@ -1020,9 +1305,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
     }
@@ -1031,7 +1314,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
   List<String> _getGoalOptions(String area) {
     switch (area) {
       case 'health':
-        return ['💧 Drink More Water', '🍎 Eat Healthier Meals', '🏋️ Exercise Regularly', '😴 Improve Sleep Quality', '🚶‍♀️ Walk More Steps'];
+        return [
+          '💧 Drink More Water',
+          '🍎 Eat Healthier Meals',
+          '🏋️ Exercise Regularly',
+          '😴 Improve Sleep Quality',
+          '🚶‍♀️ Walk More Steps',
+        ];
       case 'growth':
         return [
           '📖 Read More Books/Articles',
@@ -1041,13 +1330,37 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> with TickerProv
           '✍️ Journal Regularly',
         ];
       case 'career':
-        return ['📚 Learn New Skills', '🎯 Set Daily Goals', '📝 Organize Tasks', '🤝 Network More', '💡 Practice Creativity'];
+        return [
+          '📚 Learn New Skills',
+          '🎯 Set Daily Goals',
+          '📝 Organize Tasks',
+          '🤝 Network More',
+          '💡 Practice Creativity',
+        ];
       case 'finances':
-        return ['💰 Track Expenses', '🏦 Save Money Daily', '📊 Review Budget', '💳 Reduce Spending', '📈 Learn About Investing'];
+        return [
+          '💰 Track Expenses',
+          '🏦 Save Money Daily',
+          '📊 Review Budget',
+          '💳 Reduce Spending',
+          '📈 Learn About Investing',
+        ];
       case 'mental':
-        return ['🧘 Meditate Daily', '📝 Practice Gratitude', '🌱 Positive Affirmations', '🎵 Listen to Calming Music', '🌿 Spend Time in Nature'];
+        return [
+          '🧘 Meditate Daily',
+          '📝 Practice Gratitude',
+          '🌱 Positive Affirmations',
+          '🎵 Listen to Calming Music',
+          '🌿 Spend Time in Nature',
+        ];
       case 'home':
-        return ['🧹 Tidy Up Daily', '🍽️ Clean After Meals', '📦 Declutter Regularly', '🌱 Care for Plants', '🛏️ Make Bed Daily'];
+        return [
+          '🧹 Tidy Up Daily',
+          '🍽️ Clean After Meals',
+          '📦 Declutter Regularly',
+          '🌱 Care for Plants',
+          '🛏️ Make Bed Daily',
+        ];
       default:
         return [];
     }

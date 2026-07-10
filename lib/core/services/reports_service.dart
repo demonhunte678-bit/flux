@@ -6,12 +6,12 @@
 //   static YearInReviewData generateYearInReview(List<Habit> habits, int year) {
 //     final startDate = DateTime(year, 1, 1);
 //     final endDate = DateTime(year, 12, 31);
-    
+
 //     // Filter entries for the year
 //     final yearHabits = habits.map((habit) {
 //       final yearEntries = habit.entries.where((entry) =>
 //           entry.date.year == year).toList();
-      
+
 //       return Habit(
 //         id: habit.id,
 //         name: habit.name,
@@ -31,11 +31,11 @@
 //         entries: yearEntries,
 //       );
 //     }).where((h) => h.entries.isNotEmpty).toList();
-    
+
 //     if (yearHabits.isEmpty) {
 //       return YearInReviewData.empty(year);
 //     }
-    
+
 //     // Calculate statistics
 //     final totalEntries = yearHabits.fold(0, (sum, h) => sum + h.entries.length);
 //     final totalDaysTracked = yearHabits
@@ -43,11 +43,11 @@
 //         .map((e) => '${e.date.year}-${e.date.month}-${e.date.day}')
 //         .toSet()
 //         .length;
-    
+
 //     // Find best habit
-//     final bestHabit = yearHabits.reduce((a, b) => 
+//     final bestHabit = yearHabits.reduce((a, b) =>
 //         a.successRate > b.successRate ? a : b);
-    
+
 //     // Find longest streak
 //     var longestStreak = 0;
 //     Habit? longestStreakHabit;
@@ -57,11 +57,11 @@
 //         longestStreakHabit = habit;
 //       }
 //     }
-    
+
 //     // Most consistent habit (highest number of entries)
-//     final mostConsistent = yearHabits.reduce((a, b) => 
+//     final mostConsistent = yearHabits.reduce((a, b) =>
 //         a.entries.length > b.entries.length ? a : b);
-    
+
 //     // Monthly breakdown
 //     final monthlyData = <int, MonthlyData>{};
 //     for (int month = 1; month <= 12; month++) {
@@ -69,12 +69,12 @@
 //           .expand((h) => h.entries)
 //           .where((e) => e.date.month == month)
 //           .toList();
-      
+
 //       final successfulEntries = monthEntries.where((e) {
 //         final habit = yearHabits.firstWhere((h) => h.entries.contains(e));
 //         return habit.isPositiveDay(e);
 //       }).length;
-      
+
 //       monthlyData[month] = MonthlyData(
 //         month: month,
 //         totalEntries: monthEntries.length,
@@ -82,7 +82,7 @@
 //         successRate: monthEntries.isEmpty ? 0.0 : (successfulEntries / monthEntries.length) * 100,
 //       );
 //     }
-    
+
 //     // Category breakdown
 //     final categoryStats = <String, CategoryStats>{};
 //     for (var habit in yearHabits) {
@@ -95,21 +95,21 @@
 //           successfulEntries: 0,
 //         );
 //       }
-      
+
 //       categoryStats[category]!.habits.add(habit);
 //       categoryStats[category]!.totalEntries += habit.entries.length;
 //       categoryStats[category]!.successfulEntries += habit.positiveCount;
 //     }
-    
+
 //     // Milestones achieved
 //     final milestones = _calculateMilestones(yearHabits);
-    
+
 //     // Challenges overcome
 //     final challenges = _identifyChallenges(yearHabits);
-    
+
 //     // Growth insights
 //     final insights = _generateGrowthInsights(yearHabits);
-    
+
 //     return YearInReviewData(
 //       year: year,
 //       totalHabits: yearHabits.length,
@@ -127,16 +127,16 @@
 //       insights: insights,
 //     );
 //   }
-  
+
 //   // Generate Monthly Report
 //   static MonthlyReportData generateMonthlyReport(List<Habit> habits, int year, int month) {
 //     final startDate = DateTime(year, month, 1);
 //     final endDate = DateTime(year, month + 1, 0); // Last day of month
-    
+
 //     final monthHabits = habits.map((habit) {
 //       final monthEntries = habit.entries.where((entry) =>
 //           entry.date.year == year && entry.date.month == month).toList();
-      
+
 //       return Habit(
 //         id: habit.id,
 //         name: habit.name,
@@ -156,30 +156,30 @@
 //         entries: monthEntries,
 //       );
 //     }).toList();
-    
+
 //     // Weekly breakdown
 //     final weeklyData = <int, WeeklyData>{};
 //     final calendar = List.generate(endDate.day, (i) => DateTime(year, month, i + 1));
-    
+
 //     for (int week = 1; week <= 5; week++) {
 //       final weekDays = calendar.where((date) {
 //         final weekOfMonth = ((date.day - 1) ~/ 7) + 1;
 //         return weekOfMonth == week;
 //       }).toList();
-      
+
 //       if (weekDays.isEmpty) continue;
-      
+
 //       final weekEntries = monthHabits
 //           .expand((h) => h.entries)
-//           .where((e) => weekDays.any((d) => 
+//           .where((e) => weekDays.any((d) =>
 //               d.year == e.date.year && d.month == e.date.month && d.day == e.date.day))
 //           .toList();
-      
+
 //       final successfulEntries = weekEntries.where((e) {
 //         final habit = monthHabits.firstWhere((h) => h.entries.contains(e));
 //         return habit.isPositiveDay(e);
 //       }).length;
-      
+
 //       weeklyData[week] = WeeklyData(
 //         week: week,
 //         startDate: weekDays.first,
@@ -189,37 +189,37 @@
 //         successRate: weekEntries.isEmpty ? 0.0 : (successfulEntries / weekEntries.length) * 100,
 //       );
 //     }
-    
+
 //     // Top performing habits
 //     final activeHabits = monthHabits.where((h) => h.entries.isNotEmpty).toList();
 //     activeHabits.sort((a, b) => b.successRate.compareTo(a.successRate));
-    
+
 //     // Identify trends
 //     final trends = _identifyMonthlyTrends(monthHabits);
-    
+
 //     return MonthlyReportData(
 //       year: year,
 //       month: month,
 //       monthName: DateFormat('MMMM').format(DateTime(year, month)),
 //       totalHabits: activeHabits.length,
 //       totalEntries: activeHabits.fold(0, (sum, h) => sum + h.entries.length),
-//       averageSuccessRate: activeHabits.isEmpty ? 0.0 : 
+//       averageSuccessRate: activeHabits.isEmpty ? 0.0 :
 //           activeHabits.fold(0.0, (sum, h) => sum + h.successRate) / activeHabits.length,
 //       topPerformers: activeHabits.take(3).toList(),
 //       weeklyData: weeklyData,
 //       trends: trends,
 //     );
 //   }
-  
+
 //   // Generate Weekly Report
 //   static WeeklyReportData generateWeeklyReport(List<Habit> habits, DateTime weekStart) {
 //     final weekEnd = weekStart.add(Duration(days: 6));
-    
+
 //     final weekHabits = habits.map((habit) {
 //       final weekEntries = habit.entries.where((entry) =>
 //           entry.date.isAfter(weekStart.subtract(Duration(days: 1))) &&
 //           entry.date.isBefore(weekEnd.add(Duration(days: 1)))).toList();
-      
+
 //       return Habit(
 //         id: habit.id,
 //         name: habit.name,
@@ -239,24 +239,24 @@
 //         entries: weekEntries,
 //       );
 //     }).toList();
-    
+
 //     // Daily breakdown
 //     final dailyData = <DateTime, DailyData>{};
 //     for (int i = 0; i < 7; i++) {
 //       final date = weekStart.add(Duration(days: i));
 //       final dayEntries = weekHabits
 //           .expand((h) => h.entries)
-//           .where((e) => 
-//               e.date.year == date.year && 
-//               e.date.month == date.month && 
+//           .where((e) =>
+//               e.date.year == date.year &&
+//               e.date.month == date.month &&
 //               e.date.day == date.day)
 //           .toList();
-      
+
 //       final successfulEntries = dayEntries.where((e) {
 //         final habit = weekHabits.firstWhere((h) => h.entries.contains(e));
 //         return habit.isPositiveDay(e);
 //       }).length;
-      
+
 //       dailyData[date] = DailyData(
 //         date: date,
 //         totalEntries: dayEntries.length,
@@ -264,11 +264,11 @@
 //         successRate: dayEntries.isEmpty ? 0.0 : (successfulEntries / dayEntries.length) * 100,
 //       );
 //     }
-    
+
 //     // Find best and worst days
 //     final activeDays = dailyData.values.where((d) => d.totalEntries > 0).toList();
 //     activeDays.sort((a, b) => b.successRate.compareTo(a.successRate));
-    
+
 //     return WeeklyReportData(
 //       weekStart: weekStart,
 //       weekEnd: weekEnd,
@@ -280,11 +280,11 @@
 //       dailyData: dailyData,
 //     );
 //   }
-  
+
 //   // Private helper methods
 //   static List<MilestoneData> _calculateMilestones(List<Habit> habits) {
 //     List<MilestoneData> milestones = [];
-    
+
 //     for (var habit in habits) {
 //       // First entry milestone
 //       if (habit.entries.isNotEmpty) {
@@ -296,7 +296,7 @@
 //           habit: habit,
 //         ));
 //       }
-      
+
 //       // Streak milestones
 //       if (habit.bestStreak >= 30) {
 //         milestones.add(MilestoneData(
@@ -307,7 +307,7 @@
 //           habit: habit,
 //         ));
 //       }
-      
+
 //       if (habit.bestStreak >= 100) {
 //         milestones.add(MilestoneData(
 //           title: '100-Day Streak! 🎉',
@@ -317,7 +317,7 @@
 //           habit: habit,
 //         ));
 //       }
-      
+
 //       // Entry count milestones
 //       if (habit.entries.length >= 50) {
 //         milestones.add(MilestoneData(
@@ -328,7 +328,7 @@
 //           habit: habit,
 //         ));
 //       }
-      
+
 //       if (habit.entries.length >= 100) {
 //         milestones.add(MilestoneData(
 //           title: '100 Entries! 🔥',
@@ -339,11 +339,11 @@
 //         ));
 //       }
 //     }
-    
+
 //     milestones.sort((a, b) => a.date.compareTo(b.date));
 //     return milestones;
 //   }
-  
+
 //   static DateTime _estimateStreakDate(Habit habit, int streakLength) {
 //     final sortedEntries = [...habit.entries]..sort((a, b) => a.date.compareTo(b.date));
 //     if (sortedEntries.length >= streakLength) {
@@ -351,10 +351,10 @@
 //     }
 //     return sortedEntries.last.date;
 //   }
-  
+
 //   static List<ChallengeData> _identifyChallenges(List<Habit> habits) {
 //     List<ChallengeData> challenges = [];
-    
+
 //     for (var habit in habits) {
 //       // Low success rate challenge
 //       if (habit.successRate < 50 && habit.entries.length >= 10) {
@@ -365,7 +365,7 @@
 //           habit: habit,
 //         ));
 //       }
-      
+
 //       // Long gaps in tracking
 //       final gaps = _findLargestGaps(habit.entries);
 //       if (gaps.isNotEmpty && gaps.first > 7) {
@@ -376,7 +376,7 @@
 //           habit: habit,
 //         ));
 //       }
-      
+
 //       // Declined performance
 //       if (_hasDeclinedPerformance(habit)) {
 //         challenges.add(ChallengeData(
@@ -387,43 +387,43 @@
 //         ));
 //       }
 //     }
-    
+
 //     return challenges;
 //   }
-  
+
 //   static List<int> _findLargestGaps(List<HabitEntry> entries) {
 //     if (entries.length < 2) return [];
-    
+
 //     final sortedEntries = [...entries]..sort((a, b) => a.date.compareTo(b.date));
 //     List<int> gaps = [];
-    
+
 //     for (int i = 1; i < sortedEntries.length; i++) {
 //       final gap = sortedEntries[i].date.difference(sortedEntries[i - 1].date).inDays - 1;
 //       if (gap > 0) {
 //         gaps.add(gap);
 //       }
 //     }
-    
+
 //     gaps.sort((a, b) => b.compareTo(a)); // Largest first
 //     return gaps;
 //   }
-  
+
 //   static bool _hasDeclinedPerformance(Habit habit) {
 //     if (habit.entries.length < 10) return false;
-    
+
 //     final sortedEntries = [...habit.entries]..sort((a, b) => a.date.compareTo(b.date));
 //     final firstHalf = sortedEntries.take(sortedEntries.length ~/ 2).toList();
 //     final secondHalf = sortedEntries.skip(sortedEntries.length ~/ 2).toList();
-    
+
 //     final firstHalfSuccessRate = firstHalf.where((e) => habit.isPositiveDay(e)).length / firstHalf.length;
 //     final secondHalfSuccessRate = secondHalf.where((e) => habit.isPositiveDay(e)).length / secondHalf.length;
-    
+
 //     return secondHalfSuccessRate < firstHalfSuccessRate - 0.2; // 20% decline
 //   }
-  
+
 //   static List<InsightData> _generateGrowthInsights(List<Habit> habits) {
 //     List<InsightData> insights = [];
-    
+
 //     // Overall growth
 //     final totalHabits = habits.length;
 //     if (totalHabits > 0) {
@@ -434,7 +434,7 @@
 //         color: Colors.blue,
 //       ));
 //     }
-    
+
 //     // Category insights
 //     final categories = habits.where((h) => h.category != null).map((h) => h.category!).toSet();
 //     if (categories.length > 1) {
@@ -445,7 +445,7 @@
 //         color: Colors.green,
 //       ));
 //     }
-    
+
 //     // Consistency insights
 //     final consistentHabits = habits.where((h) => h.successRate > 80).length;
 //     if (consistentHabits > 0) {
@@ -456,13 +456,13 @@
 //         color: Colors.orange,
 //       ));
 //     }
-    
+
 //     return insights;
 //   }
-  
+
 //   static List<TrendData> _identifyMonthlyTrends(List<Habit> habits) {
 //     List<TrendData> trends = [];
-    
+
 //     // Check for improving habits
 //     final improvingHabits = habits.where((h) => _isImproving(h)).toList();
 //     if (improvingHabits.isNotEmpty) {
@@ -473,7 +473,7 @@
 //         habits: improvingHabits,
 //       ));
 //     }
-    
+
 //     // Check for declining habits
 //     final decliningHabits = habits.where((h) => _isDecline(h)).toList();
 //     if (decliningHabits.isNotEmpty) {
@@ -484,25 +484,25 @@
 //         habits: decliningHabits,
 //       ));
 //     }
-    
+
 //     return trends;
 //   }
-  
+
 //   static bool _isImproving(Habit habit) {
 //     if (habit.entries.length < 6) return false;
-    
+
 //     final recent = habit.entries.take(habit.entries.length ~/ 2).where((e) => habit.isPositiveDay(e)).length;
 //     final older = habit.entries.skip(habit.entries.length ~/ 2).where((e) => habit.isPositiveDay(e)).length;
-    
+
 //     return recent > older;
 //   }
-  
+
 //   static bool _isDecline(Habit habit) {
 //     if (habit.entries.length < 6) return false;
-    
+
 //     final recent = habit.entries.take(habit.entries.length ~/ 2).where((e) => habit.isPositiveDay(e)).length;
 //     final older = habit.entries.skip(habit.entries.length ~/ 2).where((e) => habit.isPositiveDay(e)).length;
-    
+
 //     return recent < older * 0.8; // 20% decline
 //   }
 // }
@@ -523,7 +523,7 @@
 //   final List<MilestoneData> milestones;
 //   final List<ChallengeData> challenges;
 //   final List<InsightData> insights;
-  
+
 //   YearInReviewData({
 //     required this.year,
 //     required this.totalHabits,
@@ -540,7 +540,7 @@
 //     required this.challenges,
 //     required this.insights,
 //   });
-  
+
 //   static YearInReviewData empty(int year) {
 //     return YearInReviewData(
 //       year: year,
@@ -571,7 +571,7 @@
 //   final List<Habit> topPerformers;
 //   final Map<int, WeeklyData> weeklyData;
 //   final List<TrendData> trends;
-  
+
 //   MonthlyReportData({
 //     required this.year,
 //     required this.month,
@@ -593,7 +593,7 @@
 //   final DailyData? bestDay;
 //   final DailyData? worstDay;
 //   final Map<DateTime, DailyData> dailyData;
-  
+
 //   WeeklyReportData({
 //     required this.weekStart,
 //     required this.weekEnd,
@@ -610,7 +610,7 @@
 //   final int totalEntries;
 //   final int successfulEntries;
 //   final double successRate;
-  
+
 //   MonthlyData({
 //     required this.month,
 //     required this.totalEntries,
@@ -626,7 +626,7 @@
 //   final int totalEntries;
 //   final int successfulEntries;
 //   final double successRate;
-  
+
 //   WeeklyData({
 //     required this.week,
 //     required this.startDate,
@@ -642,7 +642,7 @@
 //   final int totalEntries;
 //   final int successfulEntries;
 //   final double successRate;
-  
+
 //   DailyData({
 //     required this.date,
 //     required this.totalEntries,
@@ -656,14 +656,14 @@
 //   final List<Habit> habits;
 //   int totalEntries;
 //   int successfulEntries;
-  
+
 //   CategoryStats({
 //     required this.name,
 //     required this.habits,
 //     required this.totalEntries,
 //     required this.successfulEntries,
 //   });
-  
+
 //   double get successRate => totalEntries > 0 ? (successfulEntries / totalEntries) * 100 : 0.0;
 // }
 
@@ -673,7 +673,7 @@
 //   final DateTime date;
 //   final MilestoneType type;
 //   final Habit habit;
-  
+
 //   MilestoneData({
 //     required this.title,
 //     required this.description,
@@ -688,7 +688,7 @@
 //   final String description;
 //   final ChallengeSeverity severity;
 //   final Habit habit;
-  
+
 //   ChallengeData({
 //     required this.title,
 //     required this.description,
@@ -702,7 +702,7 @@
 //   final String description;
 //   final IconData icon;
 //   final Color color;
-  
+
 //   InsightData({
 //     required this.title,
 //     required this.description,
@@ -716,7 +716,7 @@
 //   final String description;
 //   final TrendType type;
 //   final List<Habit> habits;
-  
+
 //   TrendData({
 //     required this.title,
 //     required this.description,
@@ -743,4 +743,4 @@
 //   Positive,
 //   Negative,
 //   Neutral,
-// } 
+// }

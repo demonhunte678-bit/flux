@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'chart_data_models.dart';
+import 'package:flux/index.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class HabitTypeDistributionChart extends StatelessWidget {
   final List<Habit> habits;
@@ -9,15 +9,15 @@ class HabitTypeDistributionChart extends StatelessWidget {
 
   List<PieDataPoint> _generateHabitTypeData() {
     final Map<HabitType, int> typeCount = {};
-    
+
     for (var habit in habits) {
       typeCount[habit.type] = (typeCount[habit.type] ?? 0) + 1;
     }
-    
+
     return typeCount.entries.map((entry) {
       String label;
       Color color;
-      
+
       switch (entry.key) {
         case HabitType.SuccessBased:
           label = 'Achieve';
@@ -32,7 +32,7 @@ class HabitTypeDistributionChart extends StatelessWidget {
           color = Colors.blue;
           break;
       }
-      
+
       return PieDataPoint(label, entry.value.toDouble(), color);
     }).toList();
   }
@@ -40,7 +40,7 @@ class HabitTypeDistributionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final typeData = _generateHabitTypeData();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -57,7 +57,10 @@ class HabitTypeDistributionChart extends StatelessWidget {
             SizedBox(
               height: 300,
               child: SfCircularChart(
-                legend: const Legend(isVisible: true, position: LegendPosition.bottom),
+                legend: const Legend(
+                  isVisible: true,
+                  position: LegendPosition.bottom,
+                ),
                 tooltipBehavior: TooltipBehavior(enable: true),
                 series: [
                   PieSeries<PieDataPoint, String>(
@@ -69,7 +72,7 @@ class HabitTypeDistributionChart extends StatelessWidget {
                       isVisible: true,
                       labelPosition: ChartDataLabelPosition.outside,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -87,15 +90,22 @@ class CategoryDistributionChart extends StatelessWidget {
 
   List<PieDataPoint> _generateCategoryData() {
     final Map<String, int> categoryCount = {};
-    
+
     for (var habit in habits) {
       final category = habit.category ?? 'Uncategorized';
       categoryCount[category] = (categoryCount[category] ?? 0) + 1;
     }
-    
-    final colors = [Colors.blue, Colors.green, Colors.orange, Colors.purple, Colors.pink, Colors.teal];
+
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.pink,
+      Colors.teal,
+    ];
     int colorIndex = 0;
-    
+
     return categoryCount.entries.map((entry) {
       final color = colors[colorIndex % colors.length];
       colorIndex++;
@@ -106,9 +116,9 @@ class CategoryDistributionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categoryData = _generateCategoryData();
-    
+
     if (categoryData.isEmpty) return const SizedBox();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -125,7 +135,10 @@ class CategoryDistributionChart extends StatelessWidget {
             SizedBox(
               height: 300,
               child: SfCircularChart(
-                legend: const Legend(isVisible: true, position: LegendPosition.bottom),
+                legend: const Legend(
+                  isVisible: true,
+                  position: LegendPosition.bottom,
+                ),
                 tooltipBehavior: TooltipBehavior(enable: true),
                 series: [
                   DoughnutSeries<PieDataPoint, String>(
@@ -137,7 +150,7 @@ class CategoryDistributionChart extends StatelessWidget {
                       isVisible: true,
                       labelPosition: ChartDataLabelPosition.outside,
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -155,17 +168,17 @@ class FrequencyDistributionChart extends StatelessWidget {
 
   List<FrequencyDataPoint> _generateFrequencyData() {
     final Map<HabitFrequency, int> frequencyCount = {};
-    
+
     for (var habit in habits) {
-      frequencyCount[habit.frequency] = (frequencyCount[habit.frequency] ?? 0) + 1;
+      frequencyCount[habit.frequency] =
+          (frequencyCount[habit.frequency] ?? 0) + 1;
     }
-    
+
     return frequencyCount.entries.map((entry) {
       String label = entry.key.toString().split('.').last;
-      label = label.replaceAllMapped(
-        RegExp(r'([A-Z])'),
-        (match) => ' ${match.group(1)}',
-      ).trim();
+      label = label
+          .replaceAllMapped(RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}')
+          .trim();
       label = label[0].toUpperCase() + label.substring(1);
       return FrequencyDataPoint(label, entry.value);
     }).toList();
@@ -174,7 +187,7 @@ class FrequencyDistributionChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final frequencyData = _generateFrequencyData();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -207,9 +220,11 @@ class FrequencyDistributionChart extends StatelessWidget {
                     xValueMapper: (point, _) => point.frequency,
                     yValueMapper: (point, _) => point.count,
                     color: Theme.of(context).colorScheme.primary,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(6),
+                    ),
                     dataLabelSettings: const DataLabelSettings(isVisible: true),
-                  )
+                  ),
                 ],
               ),
             ),

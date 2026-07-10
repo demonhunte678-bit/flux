@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class SettingsPage extends ConsumerWidget {
   final bool wrapWithScaffold;
   const SettingsPage({super.key, this.wrapWithScaffold = false});
@@ -74,7 +75,9 @@ class SettingsPage extends ConsumerWidget {
                   subtitle: 'Show percentage rates in the app',
                   value: settingsState.showSuccessRate,
                   onChanged: (value) {
-                    ref.read(settingsProvider.notifier).toggleShowSuccessRate(value);
+                    ref
+                        .read(settingsProvider.notifier)
+                        .toggleShowSuccessRate(value);
                   },
                   icon: Icons.percent_rounded,
                 ),
@@ -84,7 +87,9 @@ class SettingsPage extends ConsumerWidget {
                   subtitle: 'Show daily streaks in the app',
                   value: settingsState.showCurrentStreak,
                   onChanged: (value) {
-                    ref.read(settingsProvider.notifier).toggleShowCurrentStreak(value);
+                    ref
+                        .read(settingsProvider.notifier)
+                        .toggleShowCurrentStreak(value);
                   },
                   icon: Icons.local_fire_department_outlined,
                 ),
@@ -100,7 +105,11 @@ class SettingsPage extends ConsumerWidget {
                   title: 'Language',
                   subtitle: settingsState.language,
                   icon: Icons.language_outlined,
-                  onTap: () => _showLanguageSelector(context, ref, settingsState.language),
+                  onTap: () => _showLanguageSelector(
+                    context,
+                    ref,
+                    settingsState.language,
+                  ),
                 ),
                 _buildNavigationTile(
                   context,
@@ -176,7 +185,9 @@ class SettingsPage extends ConsumerWidget {
                     Divider(
                       height: 1,
                       indent: 52,
-                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                      color: Theme.of(
+                        context,
+                      ).dividerColor.withValues(alpha: 0.1),
                     ),
                 ],
               );
@@ -209,7 +220,7 @@ class SettingsPage extends ConsumerWidget {
         value: value,
         onChanged: onChanged,
         secondary: Icon(icon, color: Theme.of(context).colorScheme.primary),
-        activeColor: Theme.of(context).colorScheme.primary,
+        activeThumbColor: Theme.of(context).colorScheme.primary,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       ),
     );
@@ -245,12 +256,13 @@ class SettingsPage extends ConsumerWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: colors.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final item = colors[index];
           final color = item.color;
           final name = item.colorName;
-          final isSelected = themeState.themeName.toLowerCase() == name.toLowerCase();
+          final isSelected =
+              themeState.themeName.toLowerCase() == name.toLowerCase();
 
           return GestureDetector(
             onTap: () {
@@ -270,7 +282,7 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.3),
+                    color: color.withValues(alpha: 0.3),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),
@@ -279,7 +291,9 @@ class SettingsPage extends ConsumerWidget {
               child: isSelected
                   ? Icon(
                       Icons.check,
-                      color: _isDarkColor(color) ? Colors.white : Colors.black87,
+                      color: _isDarkColor(color)
+                          ? Colors.white
+                          : Colors.black87,
                       size: 16,
                     )
                   : null,
@@ -294,7 +308,11 @@ class SettingsPage extends ConsumerWidget {
     return color.computeLuminance() < 0.5;
   }
 
-  void _showLanguageSelector(BuildContext context, WidgetRef ref, String currentLanguage) {
+  void _showLanguageSelector(
+    BuildContext context,
+    WidgetRef ref,
+    String currentLanguage,
+  ) {
     final languages = ['English', 'Arabic'];
 
     showDialog(

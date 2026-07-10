@@ -1,31 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:intl/intl.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
 class HabitDetailPage extends ConsumerStatefulWidget {
   final Habit habit;
   const HabitDetailPage({super.key, required this.habit});
-  
+
   @override
   ConsumerState<HabitDetailPage> createState() => _HabitDetailPageState();
 }
 
-class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTickerProviderStateMixin {
+class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   void _showAddEntryDialog(Habit habit) {
     showModalBottomSheet(
       context: context,
@@ -40,7 +57,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
       ),
     );
   }
-  
+
   void _showToggleDisplayModeDialog(Habit habit) {
     showDialog(
       context: context,
@@ -84,54 +101,62 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
           children: [
             Text('What would you like to do with "${habit.formattedName}"?'),
             const SizedBox(height: 16),
-            if (!habit.isPaused) ListTile(
-              leading: const Icon(Icons.pause_circle, color: Colors.orange),
-              title: const Text('Pause Habit'),
-              subtitle: const Text('Temporarily stop tracking without affecting streaks'),
-              onTap: () async {
-                habit.isPaused = true;
-                habit.pauseStartDate = DateTime.now();
-                await ref.read(habitsProvider.notifier).updateHabit(habit);
-                if (context.mounted) Navigator.pop(context);
-              },
-            ),
-            if (habit.isPaused) ListTile(
-              leading: const Icon(Icons.play_circle, color: Colors.green),
-              title: const Text('Resume Habit'),
-              subtitle: const Text('Continue tracking this habit'),
-              onTap: () async {
-                habit.isPaused = false;
-                habit.pauseEndDate = DateTime.now();
-                await ref.read(habitsProvider.notifier).updateHabit(habit);
-                if (context.mounted) Navigator.pop(context);
-              },
-            ),
-            if (!habit.isArchived) ListTile(
-              leading: const Icon(Icons.archive, color: Colors.amber),
-              title: const Text('Archive Habit'),
-              subtitle: const Text('Hide it from the main list but keep the data'),
-              onTap: () async {
-                habit.isArchived = true;
-                await ref.read(habitsProvider.notifier).updateHabit(habit);
-                if (context.mounted) {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back to home
-                }
-              },
-            ),
-            if (habit.isArchived) ListTile(
-              leading: const Icon(Icons.unarchive, color: Colors.green),
-              title: const Text('Restore Habit'),
-              subtitle: const Text('Bring it back to the active list'),
-              onTap: () async {
-                habit.isArchived = false;
-                await ref.read(habitsProvider.notifier).updateHabit(habit);
-                if (context.mounted) {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back to home
-                }
-              },
-            ),
+            if (!habit.isPaused)
+              ListTile(
+                leading: const Icon(Icons.pause_circle, color: Colors.orange),
+                title: const Text('Pause Habit'),
+                subtitle: const Text(
+                  'Temporarily stop tracking without affecting streaks',
+                ),
+                onTap: () async {
+                  habit.isPaused = true;
+                  habit.pauseStartDate = DateTime.now();
+                  await ref.read(habitsProvider.notifier).updateHabit(habit);
+                  if (context.mounted) Navigator.pop(context);
+                },
+              ),
+            if (habit.isPaused)
+              ListTile(
+                leading: const Icon(Icons.play_circle, color: Colors.green),
+                title: const Text('Resume Habit'),
+                subtitle: const Text('Continue tracking this habit'),
+                onTap: () async {
+                  habit.isPaused = false;
+                  habit.pauseEndDate = DateTime.now();
+                  await ref.read(habitsProvider.notifier).updateHabit(habit);
+                  if (context.mounted) Navigator.pop(context);
+                },
+              ),
+            if (!habit.isArchived)
+              ListTile(
+                leading: const Icon(Icons.archive, color: Colors.amber),
+                title: const Text('Archive Habit'),
+                subtitle: const Text(
+                  'Hide it from the main list but keep the data',
+                ),
+                onTap: () async {
+                  habit.isArchived = true;
+                  await ref.read(habitsProvider.notifier).updateHabit(habit);
+                  if (context.mounted) {
+                    Navigator.pop(context); // Close dialog
+                    Navigator.pop(context); // Go back to home
+                  }
+                },
+              ),
+            if (habit.isArchived)
+              ListTile(
+                leading: const Icon(Icons.unarchive, color: Colors.green),
+                title: const Text('Restore Habit'),
+                subtitle: const Text('Bring it back to the active list'),
+                onTap: () async {
+                  habit.isArchived = false;
+                  await ref.read(habitsProvider.notifier).updateHabit(habit);
+                  if (context.mounted) {
+                    Navigator.pop(context); // Close dialog
+                    Navigator.pop(context); // Go back to home
+                  }
+                },
+              ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.delete_forever, color: Colors.red),
@@ -152,13 +177,15 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
       ),
     );
   }
-  
+
   void _confirmDelete(Habit habit) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Deletion'),
-        content: Text('Are you sure you want to permanently delete "${habit.formattedName}"? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to permanently delete "${habit.formattedName}"? This action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -185,9 +212,10 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
   Widget build(BuildContext context) {
     final habitsAsync = ref.watch(habitsProvider);
     final settingsState = ref.watch(settingsProvider);
-    
+
     return habitsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, stack) => Scaffold(body: Center(child: Text('Error: $err'))),
       data: (allHabits) {
         final habit = allHabits.firstWhere(
@@ -231,11 +259,15 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
             ],
           ),
         );
-      }
+      },
     );
   }
 
-  Widget _buildDashboardTab(Habit habit, bool showSuccessRate, bool showCurrentStreak) {
+  Widget _buildDashboardTab(
+    Habit habit,
+    bool showSuccessRate,
+    bool showCurrentStreak,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -256,7 +288,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
 
   Widget _buildAnalyticsTab(Habit habit) {
     final filteredHabits = [habit];
-    
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -277,7 +309,11 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
     );
   }
 
-  Widget _buildQuickStats(Habit habit, bool showSuccessRate, bool showCurrentStreak) {
+  Widget _buildQuickStats(
+    Habit habit,
+    bool showSuccessRate,
+    bool showCurrentStreak,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -295,9 +331,15 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 if (showSuccessRate)
-                  _buildStatItem('Success Rate', '${habit.successRate.toStringAsFixed(0)}%'),
+                  _buildStatItem(
+                    'Success Rate',
+                    '${habit.successRate.toStringAsFixed(0)}%',
+                  ),
                 if (showCurrentStreak)
-                  _buildStatItem('Current Streak', '${habit.currentStreak} Days'),
+                  _buildStatItem(
+                    'Current Streak',
+                    '${habit.currentStreak} Days',
+                  ),
               ],
             ),
           ],
@@ -318,17 +360,11 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
-  
+
   String _getHabitTypeText(HabitType type) {
     switch (type) {
       case HabitType.FailBased:
@@ -340,7 +376,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
         return 'Check (Done-based)';
     }
   }
-  
+
   String _getFrequencyText(Habit habit) {
     switch (habit.frequency) {
       case HabitFrequency.Daily:
@@ -350,8 +386,18 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
       case HabitFrequency.Weekends:
         return 'Weekends (Sat-Sun)';
       case HabitFrequency.CustomDays:
-        final dayNames = const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        final selectedDays = habit.customDays.map((i) => dayNames[i]).join(', ');
+        final dayNames = const [
+          'Sun',
+          'Mon',
+          'Tue',
+          'Wed',
+          'Thu',
+          'Fri',
+          'Sat',
+        ];
+        final selectedDays = habit.customDays
+            .map((i) => dayNames[i])
+            .join(', ');
         return 'Custom Days ($selectedDays)';
       case HabitFrequency.XTimesPerWeek:
         return '${habit.targetFrequency ?? 'X'} times per week';
@@ -362,31 +408,37 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
 
   List<Widget> _buildEntriesList(Habit habit) {
     final entries = habit.entries;
-    final sortedEntries = [...entries]..sort((a, b) => b.date.compareTo(a.date));
-    
+    final sortedEntries = [...entries]
+      ..sort((a, b) => b.date.compareTo(a.date));
+
     return sortedEntries.map((entry) {
       final isPositive = habit.isPositiveDay(entry);
-      
+
       return Card(
         margin: const EdgeInsets.only(bottom: 8),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 16,
+          ),
           leading: CircleAvatar(
-            backgroundColor: entry.isSkipped 
+            backgroundColor: entry.isSkipped
                 ? Colors.orange.withValues(alpha: 0.2)
-                : isPositive 
-                    ? Colors.green.withValues(alpha: 0.2) 
-                    : Colors.red.withValues(alpha: 0.2),
-            foregroundColor: entry.isSkipped 
+                : isPositive
+                ? Colors.green.withValues(alpha: 0.2)
+                : Colors.red.withValues(alpha: 0.2),
+            foregroundColor: entry.isSkipped
                 ? Colors.orange
-                : isPositive 
-                    ? Colors.green 
-                    : Colors.red,
-            child: Icon(entry.isSkipped 
-                ? Icons.skip_next
-                : isPositive 
-                    ? Icons.check 
-                    : Icons.close),
+                : isPositive
+                ? Colors.green
+                : Colors.red,
+            child: Icon(
+              entry.isSkipped
+                  ? Icons.skip_next
+                  : isPositive
+                  ? Icons.check
+                  : Icons.close,
+            ),
           ),
           title: Text(
             DateFormat('MMMM d, yyyy').format(entry.date),
@@ -410,7 +462,9 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Delete Entry'),
-                  content: const Text('Are you sure you want to delete this entry?'),
+                  content: const Text(
+                    'Are you sure you want to delete this entry?',
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context, false),
@@ -424,9 +478,11 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
                   ],
                 ),
               );
-              
+
               if (confirm == true) {
-                await ref.read(habitsProvider.notifier).deleteEntry(habit, entry);
+                await ref
+                    .read(habitsProvider.notifier)
+                    .deleteEntry(habit, entry);
               }
             },
           ),
@@ -439,17 +495,17 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
     if (entry.isSkipped) {
       return 'Skipped day';
     }
-    
+
     String description;
     switch (habit.type) {
       case HabitType.FailBased:
         if (entry.value != null) {
-          description = entry.count == 0 
-              ? 'Success (0 ${habit.getUnitDisplayName()})' 
+          description = entry.count == 0
+              ? 'Success (0 ${habit.getUnitDisplayName()})'
               : '${entry.value} ${entry.unit ?? habit.getUnitDisplayName()}';
         } else {
-          description = entry.count == 0 
-              ? 'Success (0 failures)' 
+          description = entry.count == 0
+              ? 'Success (0 failures)'
               : '${entry.count} failure(s)';
         }
         break;
@@ -457,30 +513,30 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage> with SingleTi
       case HabitType.ParagraphBased:
       case HabitType.SuccessBased:
         if (entry.value != null) {
-          description = entry.count > 0 
-              ? '${entry.value} ${entry.unit ?? habit.getUnitDisplayName()}' 
+          description = entry.count > 0
+              ? '${entry.value} ${entry.unit ?? habit.getUnitDisplayName()}'
               : 'Failed (0 ${habit.getUnitDisplayName()})';
         } else {
-          description = entry.count > 0 
-              ? '${entry.count} success(es)' 
+          description = entry.count > 0
+              ? '${entry.count} success(es)'
               : 'Failed (0 successes)';
         }
         break;
       case HabitType.DoneBased:
         if (entry.value != null) {
-          description = entry.count > 0 
-              ? 'Completed (${entry.value} ${entry.unit ?? habit.getUnitDisplayName()})' 
+          description = entry.count > 0
+              ? 'Completed (${entry.value} ${entry.unit ?? habit.getUnitDisplayName()})'
               : 'Not completed';
         } else {
           description = entry.count > 0 ? 'Completed' : 'Not completed';
         }
         break;
     }
-    
+
     if (entry.notes != null && entry.notes!.isNotEmpty) {
       description += '\nNote: ${entry.notes}';
     }
-    
+
     return description;
   }
 }

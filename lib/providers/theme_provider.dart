@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
+
 class ThemeState {
   final ThemeData themeData;
   final String themeName;
@@ -27,11 +28,16 @@ class ThemeState {
 
 class ThemeNotifier extends StateNotifier<ThemeState> {
   ThemeNotifier()
-      : super(ThemeState(
-          themeData: ThemeService.createTheme(themeName: 'Green', isDarkMode: false),
+    : super(
+        ThemeState(
+          themeData: ThemeService.createTheme(
+            themeName: 'Green',
+            isDarkMode: false,
+          ),
           themeName: 'Green',
           isDarkMode: false,
-        )) {
+        ),
+      ) {
     _loadTheme();
   }
 
@@ -48,7 +54,10 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   Future<void> toggleDarkMode(bool isDark) async {
     await ThemeService.setDarkMode(isDark);
     state = state.copyWith(
-      themeData: ThemeService.createTheme(themeName: state.themeName, isDarkMode: isDark),
+      themeData: ThemeService.createTheme(
+        themeName: state.themeName,
+        isDarkMode: isDark,
+      ),
       isDarkMode: isDark,
     );
   }
@@ -56,7 +65,10 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   Future<void> selectTheme(String themeName) async {
     await ThemeService.setCurrentTheme(themeName);
     state = state.copyWith(
-      themeData: ThemeService.createTheme(themeName: themeName, isDarkMode: state.isDarkMode),
+      themeData: ThemeService.createTheme(
+        themeName: themeName,
+        isDarkMode: state.isDarkMode,
+      ),
       themeName: themeName,
     );
   }

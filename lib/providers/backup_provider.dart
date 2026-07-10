@@ -1,15 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class BackupState {
   final bool isLoading;
   final String? errorMessage;
   final String? successMessage;
 
-  BackupState({
-    this.isLoading = false,
-    this.errorMessage,
-    this.successMessage,
-  });
+  BackupState({this.isLoading = false, this.errorMessage, this.successMessage});
 }
 
 class BackupNotifier extends StateNotifier<BackupState> {
@@ -24,7 +22,9 @@ class BackupNotifier extends StateNotifier<BackupState> {
         state = BackupState(successMessage: 'Backup exported successfully!');
         return true;
       } else {
-        state = BackupState(errorMessage: 'Export failed: Location not chosen.');
+        state = BackupState(
+          errorMessage: 'Export failed: Location not chosen.',
+        );
         return false;
       }
     } catch (e) {
@@ -53,6 +53,8 @@ class BackupNotifier extends StateNotifier<BackupState> {
   }
 }
 
-final backupProvider = StateNotifierProvider<BackupNotifier, BackupState>((ref) {
+final backupProvider = StateNotifierProvider<BackupNotifier, BackupState>((
+  ref,
+) {
   return BackupNotifier(ref);
 });

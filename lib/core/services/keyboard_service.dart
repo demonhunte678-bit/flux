@@ -266,7 +266,8 @@ class KeyboardService {
 
   void _scrollPageUp() {
     if (_currentScrollController?.hasClients == true) {
-      final viewportHeight = _currentScrollController!.position.viewportDimension;
+      final viewportHeight =
+          _currentScrollController!.position.viewportDimension;
       _currentScrollController!.animateTo(
         _currentScrollController!.offset - viewportHeight,
         duration: Duration(milliseconds: 300),
@@ -277,7 +278,8 @@ class KeyboardService {
 
   void _scrollPageDown() {
     if (_currentScrollController?.hasClients == true) {
-      final viewportHeight = _currentScrollController!.position.viewportDimension;
+      final viewportHeight =
+          _currentScrollController!.position.viewportDimension;
       _currentScrollController!.animateTo(
         _currentScrollController!.offset + viewportHeight,
         duration: Duration(milliseconds: 300),
@@ -309,14 +311,20 @@ class KeyboardService {
   // Zoom methods
   void _zoomIn() {
     if (_currentZoomLevel < _maxZoom) {
-      _currentZoomLevel = (_currentZoomLevel + _zoomStep).clamp(_minZoom, _maxZoom);
+      _currentZoomLevel = (_currentZoomLevel + _zoomStep).clamp(
+        _minZoom,
+        _maxZoom,
+      );
       _applyZoom();
     }
   }
 
   void _zoomOut() {
     if (_currentZoomLevel > _minZoom) {
-      _currentZoomLevel = (_currentZoomLevel - _zoomStep).clamp(_minZoom, _maxZoom);
+      _currentZoomLevel = (_currentZoomLevel - _zoomStep).clamp(
+        _minZoom,
+        _maxZoom,
+      );
       _applyZoom();
     }
   }
@@ -335,7 +343,7 @@ class KeyboardService {
   // Focus navigation
   void _focusNext() {
     if (_focusableNodes.isEmpty) return;
-    
+
     if (_currentFocusNode == null) {
       _currentFocusNode = _focusableNodes.first;
       _currentFocusNode!.requestFocus();
@@ -349,13 +357,14 @@ class KeyboardService {
 
   void _focusPrevious() {
     if (_focusableNodes.isEmpty) return;
-    
+
     if (_currentFocusNode == null) {
       _currentFocusNode = _focusableNodes.last;
       _currentFocusNode!.requestFocus();
     } else {
       final currentIndex = _focusableNodes.indexOf(_currentFocusNode!);
-      final previousIndex = (currentIndex - 1 + _focusableNodes.length) % _focusableNodes.length;
+      final previousIndex =
+          (currentIndex - 1 + _focusableNodes.length) % _focusableNodes.length;
       _currentFocusNode = _focusableNodes[previousIndex];
       _currentFocusNode!.requestFocus();
     }

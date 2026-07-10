@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flux/index.dart';
+
 class AccentColor {
   final String colorName;
   final Color color;
-  
+
   const AccentColor(this.colorName, this.color);
 }
 
@@ -29,15 +30,15 @@ class ThemeService {
     const AccentColor('Brown', Color(0xFF795548)),
     const AccentColor('Grey', Color(0xFF607D8B)),
   ];
-  
+
   static Future<bool> isDarkMode() async {
     return await SettingsService.isDarkMode();
   }
-  
+
   static Future<void> setDarkMode(bool isDark) async {
     await SettingsService.setDarkMode(isDark);
   }
-  
+
   static Future<Color> getAccentColor() async {
     final themeName = await getCurrentTheme();
     final accent = accentColors.firstWhere(
@@ -46,23 +47,23 @@ class ThemeService {
     );
     return accent.color;
   }
-  
+
   static Future<void> setAccentColor(Color color) async {
     final accent = accentColors.firstWhere(
-      (c) => c.color.value == color.value,
+      (c) => c.color.toARGB32() == color.toARGB32(),
       orElse: () => accentColors[0],
     );
     await setCurrentTheme(accent.colorName);
   }
-  
+
   static Future<String> getCurrentTheme() async {
     return await SettingsService.getSelectedTheme();
   }
-  
+
   static Future<void> setCurrentTheme(String themeName) async {
     await SettingsService.setSelectedTheme(themeName);
   }
-  
+
   static ThemeData createTheme({
     required String themeName,
     required bool isDarkMode,
@@ -73,7 +74,7 @@ class ThemeService {
     );
     final primaryColor = accent.color;
     final useDark = isDarkMode;
-    
+
     return ThemeData(
       useMaterial3: true,
       brightness: useDark ? Brightness.dark : Brightness.light,
@@ -89,24 +90,21 @@ class ThemeService {
       ),
     );
   }
-  
+
   static List<Color> getGradientColors(Color primary) {
-    return [
-      primary,
-      primary.withOpacity(0.8),
-    ];
+    return [primary, primary.withValues(alpha: 0.8)];
   }
-  
+
   static Color getComplementaryColor(Color color) {
     final hsl = HSLColor.fromColor(color);
     return hsl.withHue((hsl.hue + 180) % 360).toColor();
   }
-  
+
   static Color getAnalogousColor(Color color, {double offset = 30}) {
     final hsl = HSLColor.fromColor(color);
     return hsl.withHue((hsl.hue + offset) % 360).toColor();
   }
-  
+
   static List<Color> generatePalette(Color baseColor) {
     final hsl = HSLColor.fromColor(baseColor);
     return [
@@ -117,7 +115,7 @@ class ThemeService {
       hsl.withLightness(0.1).toColor(),
     ];
   }
-  
+
   static Color getAchievementColor(String rarity) {
     switch (rarity.toLowerCase()) {
       case 'common':

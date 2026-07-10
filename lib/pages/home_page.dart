@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:intl/intl.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -60,12 +78,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _showAddHabit(List<Habit> activeHabits) {
-    final existingCategories = activeHabits
-        .where((h) => h.category != null)
-        .map((h) => h.category!)
-        .toSet()
-        .toList()
-      ..sort();
+    final existingCategories =
+        activeHabits
+            .where((h) => h.category != null)
+            .map((h) => h.category!)
+            .toSet()
+            .toList()
+          ..sort();
 
     showModalBottomSheet(
       context: context,
@@ -89,21 +108,26 @@ class _HomePageState extends ConsumerState<HomePage> {
     final themeState = ref.watch(themeProvider);
 
     return habitsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, stack) => Scaffold(body: Center(child: Text('Error loading habits: $err'))),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, stack) =>
+          Scaffold(body: Center(child: Text('Error loading habits: $err'))),
       data: (allHabits) {
         final activeHabits = allHabits.where((h) => !h.isArchived).toList();
 
-        final categories = activeHabits
-            .where((h) => h.category != null)
-            .map((h) => h.category!)
-            .toSet()
-            .toList()
-          ..sort();
+        final categories =
+            activeHabits
+                .where((h) => h.category != null)
+                .map((h) => h.category!)
+                .toSet()
+                .toList()
+              ..sort();
 
         final filteredHabits = _selectedCategory == null
             ? activeHabits
-            : activeHabits.where((h) => h.category == _selectedCategory).toList();
+            : activeHabits
+                  .where((h) => h.category == _selectedCategory)
+                  .toList();
 
         int totalPositive = 0;
         int totalNegative = 0;
@@ -128,7 +152,9 @@ class _HomePageState extends ConsumerState<HomePage> {
             : 0.0;
 
         return KeyboardAwareWidget(
-          scrollController: _currentIndex == 0 ? _habitsScrollController : _dashboardScrollController,
+          scrollController: _currentIndex == 0
+              ? _habitsScrollController
+              : _dashboardScrollController,
           focusableNodes: _focusableNodes,
           onAddHabit: () => _showAddHabit(activeHabits),
           onOpenSettings: () => _onTabChanged(3),
@@ -146,9 +172,23 @@ class _HomePageState extends ConsumerState<HomePage> {
             body: IndexedStack(
               index: _currentIndex,
               children: [
-                _buildHabitsTab(filteredHabits, categories, overallSuccessRate, settingsState),
-                _buildDashboardTab(filteredHabits, overallSuccessRate, bestStreak, bestStreakHabit, settingsState),
-                AnalyticsDashboardPage(habits: filteredHabits, showBackButton: false),
+                _buildHabitsTab(
+                  filteredHabits,
+                  categories,
+                  overallSuccessRate,
+                  settingsState,
+                ),
+                _buildDashboardTab(
+                  filteredHabits,
+                  overallSuccessRate,
+                  bestStreak,
+                  bestStreakHabit,
+                  settingsState,
+                ),
+                AnalyticsDashboardPage(
+                  habits: filteredHabits,
+                  showBackButton: false,
+                ),
                 const SettingsPage(),
               ],
             ),
@@ -167,7 +207,10 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Column(
       children: [
         _buildHabitsHeader(overallSuccessRate, filteredHabits.isNotEmpty),
-        _buildSuccessRateCard(overallSuccessRate, settingsState.showSuccessRate),
+        _buildSuccessRateCard(
+          overallSuccessRate,
+          settingsState.showSuccessRate,
+        ),
         _buildDaySelector(),
         _buildCategoryFilterRow(categories),
         Expanded(
@@ -186,7 +229,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     String bestStreakHabit,
     SettingsState settingsState,
   ) {
-    return _buildDashboard(filteredHabits, overallSuccessRate, bestStreak, bestStreakHabit, settingsState);
+    return _buildDashboard(
+      filteredHabits,
+      overallSuccessRate,
+      bestStreak,
+      bestStreakHabit,
+      settingsState,
+    );
   }
 
   Widget _buildHabitsHeader(double overallSuccessRate, bool hasHabits) {
@@ -217,7 +266,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                   encouragement.subtitle,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -235,13 +286,21 @@ class _HomePageState extends ConsumerState<HomePage> {
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+        color: Theme.of(
+          context,
+        ).colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
-          Icon(Icons.insights, color: Theme.of(context).colorScheme.primary, size: 28),
+          Icon(
+            Icons.insights,
+            color: Theme.of(context).colorScheme.primary,
+            size: 28,
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -254,8 +313,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(
                   value: overallSuccessRate / 100,
-                  backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.1),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -286,16 +349,18 @@ class _HomePageState extends ConsumerState<HomePage> {
             },
           ),
           const SizedBox(width: 8),
-          ...categories.map((cat) => Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(cat),
-              selected: _selectedCategory == cat,
-              onSelected: (selected) {
-                setState(() => _selectedCategory = selected ? cat : null);
-              },
+          ...categories.map(
+            (cat) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(cat),
+                selected: _selectedCategory == cat,
+                onSelected: (selected) {
+                  setState(() => _selectedCategory = selected ? cat : null);
+                },
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -325,15 +390,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : isToday
-                        ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.4)
-                        : Theme.of(context).colorScheme.surface,
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.4)
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected
                       ? Theme.of(context).colorScheme.primary
                       : isToday
-                          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
-                          : Colors.grey.withValues(alpha: 0.2),
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.3)
+                      : Colors.grey.withValues(alpha: 0.2),
                 ),
               ),
               child: Column(
@@ -388,7 +457,11 @@ class _HomePageState extends ConsumerState<HomePage> {
           const SizedBox(height: 16),
           Text(
             'No habits for today',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600], fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -466,7 +539,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                       habit: habit,
                       selectedDate: _selectedDate,
                       onSave: (updatedEntry) async {
-                        await ref.read(habitsProvider.notifier).updateEntry(habit, entry, updatedEntry);
+                        await ref
+                            .read(habitsProvider.notifier)
+                            .updateEntry(habit, entry, updatedEntry);
                         if (context.mounted) Navigator.of(context).pop();
                       },
                     ),
@@ -477,7 +552,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: const Text('Delete Entry'),
                 onTap: () async {
-                  await ref.read(habitsProvider.notifier).deleteEntry(habit, entry);
+                  await ref
+                      .read(habitsProvider.notifier)
+                      .deleteEntry(habit, entry);
                   if (context.mounted) Navigator.pop(context);
                 },
               ),
@@ -521,7 +598,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                 '$bestStreak Days',
                 Icons.flash_on,
                 Colors.orange,
-                subtitle: bestStreakHabit.isNotEmpty ? 'on $bestStreakHabit' : null,
+                subtitle: bestStreakHabit.isNotEmpty
+                    ? 'on $bestStreakHabit'
+                    : null,
               ),
             ),
           ],
@@ -529,7 +608,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         const SizedBox(height: 24),
         Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -555,7 +636,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                           barWidth: 4,
                           belowBarData: BarAreaData(
                             show: true,
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.15),
                           ),
                         ),
                       ],
@@ -580,7 +663,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       for (var habit in habits) {
         if (habit.isDueOnDate(date)) {
           totalDue++;
-          final entry = habit.entries.firstWhereOrNull((e) => DateUtils.isSameDay(e.date, date));
+          final entry = habit.entries.firstWhereOrNull(
+            (e) => DateUtils.isSameDay(e.date, date),
+          );
           if (entry != null && habit.isPositiveDay(entry)) {
             doneCount++;
           }
@@ -592,7 +677,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     return spots;
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color, {String? subtitle}) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color, {
+    String? subtitle,
+  }) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -604,12 +695,22 @@ class _HomePageState extends ConsumerState<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title, style: TextStyle(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 Icon(icon, color: color, size: 24),
               ],
             ),
             const SizedBox(height: 12),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             if (subtitle != null) ...[
               const SizedBox(height: 4),
               Text(
@@ -630,10 +731,26 @@ class _HomePageState extends ConsumerState<HomePage> {
       selectedIndex: _currentIndex,
       onDestinationSelected: _onTabChanged,
       destinations: const [
-        NavigationDestination(icon: Icon(Icons.check_circle_outline), selectedIcon: Icon(Icons.check_circle), label: 'Today'),
-        NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Dashboard'),
-        NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Analytics'),
-        NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Settings'),
+        NavigationDestination(
+          icon: Icon(Icons.check_circle_outline),
+          selectedIcon: Icon(Icons.check_circle),
+          label: 'Today',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.dashboard_outlined),
+          selectedIcon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.analytics_outlined),
+          selectedIcon: Icon(Icons.analytics),
+          label: 'Analytics',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.settings_outlined),
+          selectedIcon: Icon(Icons.settings),
+          label: 'Settings',
+        ),
       ],
     );
   }

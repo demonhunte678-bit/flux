@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'chart_data_models.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'chart_data_models.dart';
 
 class AnalyticsReport extends StatelessWidget {
   final List<Habit> habits;
@@ -23,7 +25,7 @@ class AnalyticsReport extends StatelessWidget {
 
   Widget _buildCorrelationAnalysis(BuildContext context) {
     final correlations = _calculateCorrelations();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -61,41 +63,64 @@ class AnalyticsReport extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Habit 1', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Habit 2', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text('Strength', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary), textAlign: TextAlign.right),
-                      ),
-                    ],
-                  ),
-                  ...correlations.map((corr) => TableRow(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(corr.habit1),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(corr.habit2),
+                        child: Text(
+                          'Habit 1',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          corr.coefficient.toStringAsFixed(2),
+                          'Habit 2',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: corr.coefficient > 0 ? Colors.green : Colors.red,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'Strength',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           textAlign: TextAlign.right,
                         ),
                       ),
                     ],
-                  )),
+                  ),
+                  ...correlations.map(
+                    (corr) => TableRow(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(corr.habit1),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(corr.habit2),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            corr.coefficient.toStringAsFixed(2),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: corr.coefficient > 0
+                                  ? Colors.green
+                                  : Colors.red,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
           ],
@@ -106,7 +131,7 @@ class AnalyticsReport extends StatelessWidget {
 
   Widget _buildPerformanceInsights() {
     final insights = _generatePerformanceInsights();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -121,7 +146,9 @@ class AnalyticsReport extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             if (insights.isEmpty)
-              const Center(child: Text('Add more entries to generate insights!'))
+              const Center(
+                child: Text('Add more entries to generate insights!'),
+              )
             else
               ...insights.map((insight) => _buildInsightItem(insight)),
           ],
@@ -135,9 +162,9 @@ class AnalyticsReport extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: insight.color.withOpacity(0.1),
+        color: insight.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: insight.color.withOpacity(0.3)),
+        border: Border.all(color: insight.color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -166,7 +193,7 @@ class AnalyticsReport extends StatelessWidget {
 
   Widget _buildRecommendations() {
     final recommendations = _generateRecommendations();
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -181,7 +208,9 @@ class AnalyticsReport extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             if (recommendations.isEmpty)
-              const Center(child: Text('Keep tracking to receive recommendations!'))
+              const Center(
+                child: Text('Keep tracking to receive recommendations!'),
+              )
             else
               ...recommendations.map((rec) => _buildRecommendationItem(rec)),
           ],
@@ -195,9 +224,9 @@ class AnalyticsReport extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.1),
+        color: Colors.blue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.withOpacity(0.3)),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -216,50 +245,58 @@ class AnalyticsReport extends StatelessWidget {
 
   List<CorrelationData> _calculateCorrelations() {
     List<CorrelationData> correlations = [];
-    
+
     if (habits.length < 2) return correlations;
-    
+
     for (int i = 0; i < habits.length; i++) {
       for (int j = i + 1; j < habits.length; j++) {
         final habit1 = habits[i];
         final habit2 = habits[j];
-        
+
         final correlation = _calculateSimpleCorrelation(habit1, habit2);
-        
+
         if (correlation.abs() > 0.3) {
-          correlations.add(CorrelationData(
-            habit1: habit1.formattedName,
-            habit2: habit2.formattedName,
-            coefficient: correlation,
-          ));
+          correlations.add(
+            CorrelationData(
+              habit1: habit1.formattedName,
+              habit2: habit2.formattedName,
+              coefficient: correlation,
+            ),
+          );
         }
       }
     }
-    
+
     return correlations;
   }
 
   double _calculateSimpleCorrelation(Habit habit1, Habit habit2) {
-    final dates1 = habit1.entries.map((e) => DateTime(e.date.year, e.date.month, e.date.day)).toSet();
-    final dates2 = habit2.entries.map((e) => DateTime(e.date.year, e.date.month, e.date.day)).toSet();
+    final dates1 = habit1.entries
+        .map((e) => DateTime(e.date.year, e.date.month, e.date.day))
+        .toSet();
+    final dates2 = habit2.entries
+        .map((e) => DateTime(e.date.year, e.date.month, e.date.day))
+        .toSet();
     final commonDates = dates1.intersection(dates2).toList();
-    
+
     if (commonDates.length < 5) return 0.0;
-    
+
     int bothSuccess = 0;
     int bothFail = 0;
     int oneSuccessOneFail = 0;
-    
+
     for (var date in commonDates) {
-      final entry1 = habit1.entries.firstWhereOrNull((e) => 
-          DateTime(e.date.year, e.date.month, e.date.day) == date);
-      final entry2 = habit2.entries.firstWhereOrNull((e) => 
-          DateTime(e.date.year, e.date.month, e.date.day) == date);
-      
+      final entry1 = habit1.entries.firstWhereOrNull(
+        (e) => DateTime(e.date.year, e.date.month, e.date.day) == date,
+      );
+      final entry2 = habit2.entries.firstWhereOrNull(
+        (e) => DateTime(e.date.year, e.date.month, e.date.day) == date,
+      );
+
       if (entry1 != null && entry2 != null) {
         final success1 = habit1.isPositiveDay(entry1);
         final success2 = habit2.isPositiveDay(entry2);
-        
+
         if (success1 && success2) {
           bothSuccess++;
         } else if (!success1 && !success2) {
@@ -269,98 +306,132 @@ class AnalyticsReport extends StatelessWidget {
         }
       }
     }
-    
+
     final agreements = bothSuccess + bothFail;
     final total = commonDates.length;
-    
+
     return (agreements - oneSuccessOneFail) / total;
   }
 
   List<InsightData> _generatePerformanceInsights() {
     List<InsightData> insights = [];
-    
+
     if (habits.isEmpty) return insights;
-    
-    final bestHabit = habits.reduce((a, b) => 
-        a.successRate > b.successRate ? a : b);
-    insights.add(InsightData(
-      title: 'Best Performer',
-      description: '${bestHabit.formattedName} has ${bestHabit.successRate.toStringAsFixed(1)}% success rate',
-      icon: Icons.star,
-      color: Colors.green,
-    ));
-    
-    final mostConsistent = habits.reduce((a, b) => 
-        a.currentStreak > b.currentStreak ? a : b);
+
+    final bestHabit = habits.reduce(
+      (a, b) => a.successRate > b.successRate ? a : b,
+    );
+    insights.add(
+      InsightData(
+        title: 'Best Performer',
+        description:
+            '${bestHabit.formattedName} has ${bestHabit.successRate.toStringAsFixed(1)}% success rate',
+        icon: Icons.star,
+        color: Colors.green,
+      ),
+    );
+
+    final mostConsistent = habits.reduce(
+      (a, b) => a.currentStreak > b.currentStreak ? a : b,
+    );
     if (mostConsistent.currentStreak > 0) {
-      insights.add(InsightData(
-        title: 'Most Consistent',
-        description: '${mostConsistent.formattedName} has a ${mostConsistent.currentStreak}-day streak',
-        icon: Icons.local_fire_department,
-        color: Colors.orange,
-      ));
+      insights.add(
+        InsightData(
+          title: 'Most Consistent',
+          description:
+              '${mostConsistent.formattedName} has a ${mostConsistent.currentStreak}-day streak',
+          icon: Icons.local_fire_department,
+          color: Colors.orange,
+        ),
+      );
     }
-    
+
     final entryDates = habits
         .expand((h) => h.entries)
         .map((e) => e.date.weekday)
         .toList();
-    
+
     if (entryDates.isNotEmpty) {
       final dayCount = <int, int>{};
       for (var day in entryDates) {
         dayCount[day] = (dayCount[day] ?? 0) + 1;
       }
-      
-      final mostActiveDay = dayCount.entries.reduce((a, b) => 
-          a.value > b.value ? a : b);
-      final dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-      
-      insights.add(InsightData(
-        title: 'Most Active Day',
-        description: '${dayNames[mostActiveDay.key - 1]} with ${mostActiveDay.value} entries',
-        icon: Icons.calendar_today,
-        color: Colors.blue,
-      ));
+
+      final mostActiveDay = dayCount.entries.reduce(
+        (a, b) => a.value > b.value ? a : b,
+      );
+      final dayNames = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+
+      insights.add(
+        InsightData(
+          title: 'Most Active Day',
+          description:
+              '${dayNames[mostActiveDay.key - 1]} with ${mostActiveDay.value} entries',
+          icon: Icons.calendar_today,
+          color: Colors.blue,
+        ),
+      );
     }
-    
+
     return insights;
   }
 
   List<RecommendationData> _generateRecommendations() {
     List<RecommendationData> recommendations = [];
-    
-    final strugglingHabits = habits.where((h) => h.successRate < 50 && h.entries.length > 5).toList();
-    
+
+    final strugglingHabits = habits
+        .where((h) => h.successRate < 50 && h.entries.length > 5)
+        .toList();
+
     if (strugglingHabits.isNotEmpty) {
-      recommendations.add(RecommendationData(
-        'Consider reviewing ${strugglingHabits.first.formattedName} - try adjusting the target or frequency',
-      ));
+      recommendations.add(
+        RecommendationData(
+          'Consider reviewing ${strugglingHabits.first.formattedName} - try adjusting the target or frequency',
+        ),
+      );
     }
-    
+
     final now = DateTime.now();
     final staleHabits = habits.where((h) {
       if (h.entries.isEmpty) return true;
-      final lastEntry = h.entries.map((e) => e.date).reduce((a, b) => a.isAfter(b) ? a : b);
+      final lastEntry = h.entries
+          .map((e) => e.date)
+          .reduce((a, b) => a.isAfter(b) ? a : b);
       return now.difference(lastEntry).inDays > 7;
     }).toList();
-    
+
     if (staleHabits.isNotEmpty) {
-      recommendations.add(RecommendationData(
-        'You haven\'t logged ${staleHabits.first.formattedName} recently - consider adding an entry',
-      ));
+      recommendations.add(
+        RecommendationData(
+          'You haven\'t logged ${staleHabits.first.formattedName} recently - consider adding an entry',
+        ),
+      );
     }
-    
-    final correlations = habits.length >= 2 ? _calculateCorrelations() : <CorrelationData>[];
-    final strongPositiveCorrelations = correlations.where((c) => c.coefficient > 0.5).toList();
-    
+
+    final correlations = habits.length >= 2
+        ? _calculateCorrelations()
+        : <CorrelationData>[];
+    final strongPositiveCorrelations = correlations
+        .where((c) => c.coefficient > 0.5)
+        .toList();
+
     if (strongPositiveCorrelations.isNotEmpty) {
       final correlation = strongPositiveCorrelations.first;
-      recommendations.add(RecommendationData(
-        '${correlation.habit1} and ${correlation.habit2} work well together - consider doing them consecutively',
-      ));
+      recommendations.add(
+        RecommendationData(
+          '${correlation.habit1} and ${correlation.habit2} work well together - consider doing them consecutively',
+        ),
+      );
     }
-    
+
     return recommendations;
   }
 }

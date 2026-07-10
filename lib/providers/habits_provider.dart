@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class HabitsNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
   HabitsNotifier() : super(const AsyncValue.loading()) {
     loadHabits();
@@ -52,7 +55,11 @@ class HabitsNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
     }
   }
 
-  Future<void> updateEntry(Habit habit, HabitEntry oldEntry, HabitEntry newEntry) async {
+  Future<void> updateEntry(
+    Habit habit,
+    HabitEntry oldEntry,
+    HabitEntry newEntry,
+  ) async {
     try {
       await HabitsRepository.instance.updateEntry(habit, oldEntry, newEntry);
       await loadHabits();
@@ -71,6 +78,7 @@ class HabitsNotifier extends StateNotifier<AsyncValue<List<Habit>>> {
   }
 }
 
-final habitsProvider = StateNotifierProvider<HabitsNotifier, AsyncValue<List<Habit>>>((ref) {
-  return HabitsNotifier();
-});
+final habitsProvider =
+    StateNotifierProvider<HabitsNotifier, AsyncValue<List<Habit>>>((ref) {
+      return HabitsNotifier();
+    });

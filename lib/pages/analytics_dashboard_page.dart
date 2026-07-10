@@ -1,29 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';import 'package:flux/index.dart';
+import 'package:flux/index.dart';
+
 class AnalyticsDashboardPage extends StatefulWidget {
   final List<Habit> habits;
   final bool showBackButton;
-  
-  const AnalyticsDashboardPage({super.key, required this.habits, this.showBackButton = true});
-  
+
+  const AnalyticsDashboardPage({
+    super.key,
+    required this.habits,
+    this.showBackButton = true,
+  });
+
   @override
   _AnalyticsDashboardPageState createState() => _AnalyticsDashboardPageState();
 }
 
-class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage> with TickerProviderStateMixin {
+class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   String _selectedTimeRange = 'Last 30 Days';
   DateTime? _startDate;
   DateTime? _endDate;
-  
+
   final List<String> _timeRanges = [
     'Last 7 Days',
     'Last 30 Days',
     'Last 90 Days',
     'This Year',
     'All Time',
-    'Custom Range'
+    'Custom Range',
   ];
 
   @override
@@ -70,13 +76,15 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage> with Ti
 
   List<Habit> get _filteredHabits {
     if (_startDate == null || _endDate == null) return widget.habits;
-    
+
     return widget.habits.map((habit) {
       final filteredEntries = habit.entries.where((entry) {
-        return entry.date.isAfter(_startDate!.subtract(const Duration(days: 1))) &&
-               entry.date.isBefore(_endDate!.add(const Duration(days: 1)));
+        return entry.date.isAfter(
+              _startDate!.subtract(const Duration(days: 1)),
+            ) &&
+            entry.date.isBefore(_endDate!.add(const Duration(days: 1)));
       }).toList();
-      
+
       // Create a copy of the habit with filtered entries
       final filteredHabit = Habit(
         id: habit.id,
@@ -96,7 +104,7 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage> with Ti
         customUnit: habit.customUnit,
         entries: filteredEntries,
       );
-      
+
       return filteredHabit;
     }).toList();
   }
@@ -129,12 +137,9 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage> with Ti
                 }
               });
             },
-            itemBuilder: (context) => _timeRanges.map((range) =>
-              PopupMenuItem(
-                value: range,
-                child: Text(range),
-              ),
-            ).toList(),
+            itemBuilder: (context) => _timeRanges
+                .map((range) => PopupMenuItem(value: range, child: Text(range)))
+                .toList(),
           ),
         ],
       ),
@@ -214,15 +219,19 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage> with Ti
     String rangeText = _selectedTimeRange;
     if (_startDate != null && _endDate != null) {
       final formatter = DateFormat('MMM d, yyyy');
-      rangeText += '\n${formatter.format(_startDate!)} - ${formatter.format(_endDate!)}';
+      rangeText +=
+          '\n${formatter.format(_startDate!)} - ${formatter.format(_endDate!)}';
     }
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(Icons.date_range, color: Theme.of(context).colorScheme.primary),
+            Icon(
+              Icons.date_range,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -241,11 +250,11 @@ class _AnalyticsDashboardPageState extends State<AnalyticsDashboardPage> with Ti
       context: context,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      initialDateRange: _startDate != null && _endDate != null 
+      initialDateRange: _startDate != null && _endDate != null
           ? DateTimeRange(start: _startDate!, end: _endDate!)
           : null,
     );
-    
+
     if (picked != null) {
       setState(() {
         _startDate = picked.start;

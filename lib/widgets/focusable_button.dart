@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flux/index.dart';
+
 class FocusableButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
@@ -64,7 +65,7 @@ class _FocusableButtonState extends State<FocusableButton> {
         return KeyEventResult.ignored;
       },
       child: Builder(
-        builder: (context) {          
+        builder: (context) {
           return Tooltip(
             message: widget.tooltip ?? '',
             child: ElevatedButton(
@@ -78,7 +79,9 @@ class _FocusableButtonState extends State<FocusableButton> {
                 }),
                 backgroundColor: WidgetStateProperty.resolveWith((states) {
                   if (states.contains(WidgetState.focused)) {
-                    return Theme.of(context).colorScheme.primary.withValues(alpha: 0.1);
+                    return Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1);
                   }
                   return widget.style?.backgroundColor?.resolve(states);
                 }),
@@ -164,17 +167,19 @@ class _FocusableIconButtonState extends State<FocusableIconButton> {
       child: Builder(
         builder: (context) {
           final isFocused = Focus.of(context).hasFocus;
-          
+
           return Tooltip(
             message: widget.tooltip ?? '',
             child: IconButton(
               onPressed: widget.enabled ? _handlePressed : null,
               icon: widget.icon,
               style: IconButton.styleFrom(
-                backgroundColor: isFocused 
-                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                backgroundColor: isFocused
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1)
                     : null,
-                side: isFocused 
+                side: isFocused
                     ? BorderSide(
                         color: Theme.of(context).colorScheme.primary,
                         width: 2.0,

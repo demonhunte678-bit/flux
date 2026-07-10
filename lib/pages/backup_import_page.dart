@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
+
 class BackupImportPage extends ConsumerWidget {
   const BackupImportPage({super.key});
 
@@ -52,7 +53,10 @@ class BackupImportPage extends ConsumerWidget {
                     const SizedBox(height: 24),
                     const Text(
                       'Database Backup & Restore',
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
@@ -69,13 +73,18 @@ class BackupImportPage extends ConsumerWidget {
                       icon: const Icon(Icons.download_rounded, size: 24),
                       label: const Text(
                         'Export Database',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 2,
                       ),
                     ),
@@ -85,13 +94,20 @@ class BackupImportPage extends ConsumerWidget {
                       icon: const Icon(Icons.upload_rounded, size: 24),
                       label: const Text(
                         'Import Database',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.secondary,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 2,
                       ),
                     ),
@@ -108,7 +124,7 @@ class BackupImportPage extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Import Database?'),
         content: const Text(
-          'This will overwrite all your current habits and entries with the selected backup file. This action cannot be undone.'
+          'This will overwrite all your current habits and entries with the selected backup file. This action cannot be undone.',
         ),
         actions: [
           TextButton(
