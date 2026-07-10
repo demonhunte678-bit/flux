@@ -41,7 +41,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Habit> _habits = [];
   List<Habit> _activeHabits = [];
-  List<Habit> _archivedHabits = [];
   List<Habit> _filteredHabits = [];
   int _currentIndex = 0;
   bool _isLoading = true;
@@ -51,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _totalEntries = 0;
   int _bestCurrentStreak = 0;
   String _bestStreakHabit = '';
-  bool _showArchived = false;
   String? _selectedCategory;
   List<String> _categories = [];
   bool _showSuccessRate = true;
@@ -128,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Filter active and archived habits
     final active = all.where((h) => !h.isArchived).toList();
-    final archived = all.where((h) => h.isArchived).toList();
 
     // Extract categories
     final categories =
@@ -165,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _habits = all;
       _activeHabits = active;
-      _archivedHabits = archived;
       _categories = categories;
       _filteredHabits = filtered;
       _totalPositiveDays = totalPositive;
@@ -213,199 +209,17 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  void _openSettings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => SettingsScreen()),
-    ).then((_) => _loadHabits());
-  }
-
-  void _toggleArchiveView() {
-    setState(() {
-      _showArchived = !_showArchived;
-    });
-  }
-
-  void _showCategoryFilter() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Filter by Category'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text('All Categories'),
-              leading: Radio<String?>(
-                value: null,
-                groupValue: _selectedCategory,
-                onChanged: (value) {
-                  setState(() => _selectedCategory = value);
-                  _loadHabits();
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-            ..._categories.map(
-              (category) => ListTile(
-                title: Text(category),
-                leading: Radio<String?>(
-                  value: category,
-                  groupValue: _selectedCategory,
-                  onChanged: (value) {
-                    setState(() => _selectedCategory = value);
-                    _loadHabits();
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _openAnalytics() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AnalyticsDashboard(habits: _filteredHabits),
-      ),
-    );
-  }
-
-  void _openBackupScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BackupImportScreen()),
-    );
-  }
-
-  void _showYearInReview() {
-    final currentYear = DateTime.now().year;
-    final yearReview = ReportsService.generateYearInReview(
-      _filteredHabits,
-      currentYear,
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('$currentYear Year in Review'),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (yearReview.totalHabits == 0) ...[
-                Text('No data available for $currentYear'),
-                SizedBox(height: 16),
-                Text('Start tracking habits to see your year in review!'),
-              ] else ...[
-                Text('🎯 Total Habits: ${yearReview.totalHabits}'),
-                Text('📅 Total Entries: ${yearReview.totalEntries}'),
-                Text(
-                  '📊 Success Rate: ${yearReview.overallSuccessRate.toStringAsFixed(1)}%',
-                ),
-                Text('🔥 Longest Streak: ${yearReview.longestStreak} days'),
-                SizedBox(height: 16),
-                if (yearReview.milestones.isNotEmpty) ...[
-                  Text(
-                    '🏆 Key Milestones:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  ...yearReview.milestones
-                      .take(3)
-                      .map(
-                        (milestone) => Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Text('• ${milestone.title}'),
-                        ),
-                      ),
-                ],
-                if (yearReview.insights.isNotEmpty) ...[
-                  SizedBox(height: 16),
-                  Text(
-                    '💡 Insights:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  ...yearReview.insights
-                      .take(3)
-                      .map(
-                        (insight) => Padding(
-                          padding: EdgeInsets.only(left: 8, top: 4),
-                          child: Text(
-                            '• ${insight.title}: ${insight.description}',
-                          ),
-                        ),
-                      ),
-                ],
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showKeyboardShortcuts() {
-    showKeyboardShortcutsDialog(context);
-  }
-
-  void _handleClose() {
-    // Close any open dialogs or navigate back
-    if (Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
-  }
-
-  void _handleToggleFullscreen() {
-    // This would need to be implemented based on the platform
-    // For now, we'll just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Fullscreen toggle not implemented on this platform'),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _showArchived
-          ? AppBar(
-              title: const Text('Archived Habits'),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _toggleArchiveView,
-              ),
-            )
-          : null,
-      floatingActionButton: !_showArchived
-          ? FloatingActionButton(
-              shape: const CircleBorder(),
-              onPressed: _showAddHabit,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
-              child: const Icon(Icons.add),
-            )
-          : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: !_showArchived
-          ? _buildCustomBottomNavigationBar()
-          : null,
+      floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
+        onPressed: _showAddHabit,
+        child: const Icon(Icons.add),
+      ),
+      bottomNavigationBar: _buildCustomBottomNavigationBar(),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _showArchived
-          ? _buildArchivedList()
           : IndexedStack(
               index: _currentIndex,
               children: [
@@ -438,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStatisticsTab() {
-    return AnalyticsDashboard(habits: _filteredHabits);
+    return AnalyticsDashboard(habits: _filteredHabits, showBackButton: false);
   }
 
   Widget _buildSettingsTab() {
@@ -492,11 +306,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final isSelected = _currentIndex == index;
     final color = isSelected ? colorScheme.primary : Colors.grey.shade400;
 
-    return InkWell(
-      onTap: () => _onTabChanged(index),
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+    return SizedBox(
+      width: 70,
+      height: 70,
+      child: InkWell(
+        onTap: () => _onTabChanged(index),
+        borderRadius: BorderRadius.circular(12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -519,16 +334,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCustomBottomNavigationBar() {
     return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
+          spacing: 8,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildBottomNavItem(0, Icons.home_rounded, "Home"),
             _buildBottomNavItem(1, Icons.dashboard_rounded, "Dashboard"),
-            const SizedBox(width: 40), // Spacer for center FAB
             _buildBottomNavItem(2, Icons.analytics_rounded, "Statistics"),
             _buildBottomNavItem(3, Icons.settings_rounded, "Settings"),
           ],
@@ -537,57 +350,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildArchivedList() {
-    if (_archivedHabits.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.inventory_2, size: 72, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'No archived habits',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Archived habits will appear here',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-            SizedBox(height: 24),
-            TextButton.icon(
-              onPressed: _toggleArchiveView,
-              icon: Icon(Icons.arrow_back),
-              label: Text('Back to Active Habits'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.separated(
-      controller: _habitsScrollController,
-      padding: EdgeInsets.all(16),
-      itemCount: _archivedHabits.length,
-      separatorBuilder: (_, __) => SizedBox(height: 8),
-      itemBuilder: (_, i) {
-        final habit = _archivedHabits[i];
-        return HabitListItem(
-          habit: habit,
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => HabitDetailScreen(habit: habit),
-              ),
-            );
-            _loadHabits();
-          },
-        );
-      },
-    );
-  }
 
   Widget _buildEmpty() => Center(
     child: Column(

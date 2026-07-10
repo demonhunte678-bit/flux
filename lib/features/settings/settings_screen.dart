@@ -3,7 +3,8 @@ import 'package:flux/core/services/settings_service.dart';
 import 'package:flux/core/services/theme_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final bool wrapWithScaffold;
+  const SettingsScreen({super.key, this.wrapWithScaffold = false});
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -35,13 +36,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : _buildContent(),
-      ),
+    final content = SafeArea(
+      child: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildContent(),
     );
+
+    if (widget.wrapWithScaffold) {
+      return Scaffold(body: content);
+    }
+    return content;
   }
 
   Widget _buildContent() {
