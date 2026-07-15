@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/index.dart';
+import 'package:flux/providers/index.dart';
+import 'package:flux/core/index.dart';
 
 class SettingsPage extends ConsumerWidget {
   final bool wrapWithScaffold;

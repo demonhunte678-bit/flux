@@ -50,7 +50,7 @@ class HabitTrackerApp extends ConsumerWidget {
                 _completeOnboarding(context);
               },
             )
-          : const HomePage(),
+          : const AppShell(),
     );
   }
 
@@ -61,7 +61,7 @@ class HabitTrackerApp extends ConsumerWidget {
     if (context.mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (context) => const AppShell()),
       );
     }
   }
