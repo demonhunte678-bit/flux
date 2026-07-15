@@ -153,26 +153,35 @@ class Habit {
     }
   }
 
-  bool isDueToday() {
-    if (isPaused) return false;
+  bool isDueOnDate(DateTime date) {
+    if (isPaused) {
+      if (pauseStartDate != null && date.isAfter(pauseStartDate!.subtract(const Duration(days: 1)))) {
+        if (pauseEndDate == null || date.isBefore(pauseEndDate!.add(const Duration(days: 1)))) {
+          return false;
+        }
+      }
+    }
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final targetDate = DateTime(date.year, date.month, date.day);
 
     switch (frequency) {
       case HabitFrequency.Daily:
         return true;
       case HabitFrequency.Weekdays:
-        return now.weekday <= 5;
+        return date.weekday <= 5;
       case HabitFrequency.Weekends:
-        return now.weekday > 5;
+        return date.weekday > 5;
       case HabitFrequency.CustomDays:
-        final todayIndex = now.weekday % 7;
+        final todayIndex = date.weekday % 7;
         return customDays.contains(todayIndex);
       case HabitFrequency.XTimesPerWeek:
       case HabitFrequency.XTimesPerMonth:
-        return _checkFrequencyTarget(today);
+        return _checkFrequencyTarget(targetDate);
     }
+  }
+
+  bool isDueToday() {
+    return isDueOnDate(DateTime.now());
   }
 
   bool _checkFrequencyTarget(DateTime today) {

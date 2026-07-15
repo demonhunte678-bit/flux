@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
-import 'package:flux/core/index.dart';
+import 'package:flux/widgets/index.dart';
+import 'backup_import_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   final bool wrapWithScaffold;
@@ -31,8 +32,7 @@ class SettingsPage extends ConsumerWidget {
               context,
               title: 'Appearance',
               children: [
-                _buildSwitchTile(
-                  context,
+                SettingsSwitchTile(
                   title: 'Dark Mode',
                   subtitle: 'Toggle dark or light theme',
                   value: themeState.isDarkMode,
@@ -59,7 +59,12 @@ class SettingsPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      _buildColorGrid(ref, themeState),
+                      SettingsColorGrid(
+                        themeState: themeState,
+                        onThemeSelected: (name) {
+                          ref.read(themeProvider.notifier).selectTheme(name);
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -70,8 +75,7 @@ class SettingsPage extends ConsumerWidget {
               context,
               title: 'Display Preferences',
               children: [
-                _buildSwitchTile(
-                  context,
+                SettingsSwitchTile(
                   title: 'Show Success Rate',
                   subtitle: 'Show percentage rates in the app',
                   value: settingsState.showSuccessRate,
@@ -82,8 +86,7 @@ class SettingsPage extends ConsumerWidget {
                   },
                   icon: Icons.percent_rounded,
                 ),
-                _buildSwitchTile(
-                  context,
+                SettingsSwitchTile(
                   title: 'Show Streak Days',
                   subtitle: 'Show daily streaks in the app',
                   value: settingsState.showCurrentStreak,
@@ -101,8 +104,7 @@ class SettingsPage extends ConsumerWidget {
               context,
               title: 'General',
               children: [
-                _buildNavigationTile(
-                  context,
+                SettingsNavigationTile(
                   title: 'Language',
                   subtitle: settingsState.language,
                   icon: Icons.language_outlined,
@@ -112,8 +114,7 @@ class SettingsPage extends ConsumerWidget {
                     settingsState.language,
                   ),
                 ),
-                _buildNavigationTile(
-                  context,
+                SettingsNavigationTile(
                   title: 'Backup & Restore',
                   subtitle: 'Export or import your habit database',
                   icon: Icons.backup_outlined,
@@ -186,9 +187,7 @@ class SettingsPage extends ConsumerWidget {
                     Divider(
                       height: 1,
                       indent: 52,
-                      color: Theme.of(
-                        context,
-                      ).dividerColor.withValues(alpha: 0.1),
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                     ),
                 ],
               );
@@ -197,116 +196,6 @@ class SettingsPage extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  Widget _buildSwitchTile(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-    required IconData icon,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: SwitchListTile(
-        title: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-        ),
-        value: value,
-        onChanged: onChanged,
-        secondary: Icon(icon, color: Theme.of(context).colorScheme.primary),
-        activeThumbColor: Theme.of(context).colorScheme.primary,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      ),
-    );
-  }
-
-  Widget _buildNavigationTile(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-      ),
-      trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-    );
-  }
-
-  Widget _buildColorGrid(WidgetRef ref, ThemeState themeState) {
-    final colors = ThemeService.accentColors;
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: colors.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final item = colors[index];
-          final color = item.color;
-          final name = item.colorName;
-          final isSelected =
-              themeState.themeName.toLowerCase() == name.toLowerCase();
-
-          return GestureDetector(
-            onTap: () {
-              ref.read(themeProvider.notifier).selectTheme(name);
-            },
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? (themeState.isDarkMode ? Colors.white : Colors.black87)
-                      : Colors.transparent,
-                  width: 3,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: isSelected
-                  ? Icon(
-                      Icons.check,
-                      color: _isDarkColor(color)
-                          ? Colors.white
-                          : Colors.black87,
-                      size: 16,
-                    )
-                  : null,
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  bool _isDarkColor(Color color) {
-    return color.computeLuminance() < 0.5;
   }
 
   void _showLanguageSelector(
