@@ -119,7 +119,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   void toggleGoal(FocusArea area, String goal) {
     final map = Map<FocusArea, List<String>>.from(state.selectedGoals);
-    final list = [...(map[area] ?? [])];
+    final List<String> list = [...(map[area] ?? <String>[])];
     if (list.contains(goal)) {
       list.remove(goal);
     } else {

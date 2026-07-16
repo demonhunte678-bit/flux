@@ -12,7 +12,7 @@ class AddHabitSheet extends StatefulWidget {
   });
 
   @override
-  _AddHabitSheetState createState() => _AddHabitSheetState();
+  State<AddHabitSheet> createState() => _AddHabitSheetState();
 }
 
 class _AddHabitSheetState extends State<AddHabitSheet>
@@ -31,7 +31,6 @@ class _AddHabitSheetState extends State<AddHabitSheet>
   HabitUnit _unit = HabitUnit.Count;
   final List<int> _customDays = [];
   String? _selectedCategory;
-  bool _hasMeasurableGoal = false;
 
   late TabController _tabController;
 
@@ -127,16 +126,13 @@ class _AddHabitSheetState extends State<AddHabitSheet>
       ),
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 5),
-        ],
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
         children: [
           Center(
             child: Container(
-              width: 40,
+              width: 32,
               height: 4,
               decoration: BoxDecoration(
                 color: Colors.grey.withValues(alpha: 0.3),
@@ -146,28 +142,32 @@ class _AddHabitSheetState extends State<AddHabitSheet>
           ),
           const SizedBox(height: 16),
           Text(
-            'Create New Habit',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            'New Habit',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           TabBar(
             controller: _tabController,
+            dividerColor: Colors.transparent,
+            indicatorSize: TabBarIndicatorSize.tab,
             tabs: const [
               Tab(text: 'Basic'),
               Tab(text: 'Schedule'),
-              Tab(text: 'Goals'),
+              Tab(text: 'Details'),
               Tab(text: 'Style'),
             ],
           ),
+          const SizedBox(height: 12),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
                 _buildBasicTab(),
                 _buildScheduleTab(),
-                _buildGoalsTab(),
+                _buildDetailsTab(),
                 _buildStyleTab(),
               ],
             ),
@@ -175,11 +175,12 @@ class _AddHabitSheetState extends State<AddHabitSheet>
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            height: 56,
-            child: ElevatedButton(
+            height: 54,
+            child: FilledButton.tonal(
               onPressed: _createHabit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _color,
+              style: FilledButton.styleFrom(
+                backgroundColor: _color.withValues(alpha: 0.12),
+                foregroundColor: _color,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -189,7 +190,6 @@ class _AddHabitSheetState extends State<AddHabitSheet>
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
             ),
@@ -201,7 +201,7 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   Widget _buildBasicTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -212,13 +212,46 @@ class _AddHabitSheetState extends State<AddHabitSheet>
           _buildCategoryField(),
           const SizedBox(height: 24),
           Text(
-            'Habit Type',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            'Type',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
-          const SizedBox(height: 8),
-          _buildHabitTypeSelector(),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<HabitType>(
+              segments: const [
+                ButtonSegment<HabitType>(
+                  value: HabitType.DoneBased,
+                  label: Text('Check'),
+                  icon: Icon(Icons.check_circle_outline),
+                ),
+                ButtonSegment<HabitType>(
+                  value: HabitType.SuccessBased,
+                  label: Text('Achieve'),
+                  icon: Icon(Icons.emoji_events_outlined),
+                ),
+                ButtonSegment<HabitType>(
+                  value: HabitType.FailBased,
+                  label: Text('Avoid'),
+                  icon: Icon(Icons.block_outlined),
+                ),
+              ],
+              selected: {_type},
+              onSelectionChanged: (Set<HabitType> selected) {
+                setState(() {
+                  _type = selected.first;
+                });
+              },
+              showSelectedIcon: false,
+              style: SegmentedButton.styleFrom(
+                selectedBackgroundColor: _color.withValues(alpha: 0.15),
+                selectedForegroundColor: _color,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -226,25 +259,26 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   Widget _buildScheduleTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'How often should this habit occur?',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            'Frequency',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           _buildFrequencySelector(),
           if (_frequency == HabitFrequency.CustomDays) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildCustomDaysSelector(),
           ],
           if (_frequency == HabitFrequency.XTimesPerWeek ||
               _frequency == HabitFrequency.XTimesPerMonth) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildTargetFrequencyField(),
           ],
         ],
@@ -252,57 +286,47 @@ class _AddHabitSheetState extends State<AddHabitSheet>
     );
   }
 
-  Widget _buildGoalsTab() {
+  Widget _buildDetailsTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SwitchListTile(
-            title: const Text('Set Measurable Goal'),
-            subtitle: const Text(
-              'Track specific values instead of just counts',
-            ),
-            value: _hasMeasurableGoal,
-            onChanged: (value) {
-              setState(() {
-                _hasMeasurableGoal = value;
-                if (!value) {
-                  _unit = HabitUnit.Count;
-                  _targetValueCtrl.clear();
-                }
-              });
-            },
+          Text(
+            'Unit of Measurement',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
-          if (_hasMeasurableGoal) ...[
-            const SizedBox(height: 16),
-            Text(
-              'Unit of Measurement',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            _buildUnitSelector(),
-            if (_unit == HabitUnit.Custom) ...[
-              const SizedBox(height: 16),
-              CustomFormField(
-                controller: _customUnitCtrl,
-                labelText: 'Custom Unit Name',
-                hintText: 'e.g., cups, sets, chapters',
-              ),
-            ],
+          const SizedBox(height: 12),
+          _buildUnitSelector(),
+          if (_unit == HabitUnit.Custom) ...[
             const SizedBox(height: 16),
             CustomFormField(
-              controller: _targetValueCtrl,
-              labelText: _getTargetLabel(),
-              hintText: _getTargetHint(),
-              suffixText: _getUnitName(),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
+              controller: _customUnitCtrl,
+              labelText: 'Custom Unit Name',
+              hintText: 'e.g., cups, sets, chapters',
             ),
           ],
+          const SizedBox(height: 24),
+          Text(
+            'Target Value (Optional)',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+          ),
+          const SizedBox(height: 12),
+          CustomFormField(
+            controller: _targetValueCtrl,
+            labelText: _getTargetLabel(),
+            hintText: _getTargetHint(),
+            suffixText: _getUnitName(),
+            keyboardType: const TextInputType.numberWithOptions(
+              decimal: true,
+            ),
+          ),
         ],
       ),
     );
@@ -310,26 +334,28 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   Widget _buildStyleTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Icon',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           _buildIconSelector(),
           const SizedBox(height: 24),
           Text(
-            'Color',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            'Color Theme',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           _buildColorSelector(),
         ],
       ),
@@ -340,7 +366,7 @@ class _AddHabitSheetState extends State<AddHabitSheet>
     return CustomFormField(
       controller: _nameCtrl,
       labelText: 'Name',
-      hintText: 'Habit name',
+      hintText: 'e.g., Read Books, Workout',
       prefixIcon: Icons.edit,
       textInputAction: TextInputAction.next,
       textCapitalization: TextCapitalization.sentences,
@@ -352,7 +378,7 @@ class _AddHabitSheetState extends State<AddHabitSheet>
       controller: _notesCtrl,
       labelText: 'Notes',
       hintText: 'Optional description or notes',
-      prefixIcon: Icons.note,
+      prefixIcon: Icons.note_alt_outlined,
       textInputAction: TextInputAction.done,
       textCapitalization: TextCapitalization.sentences,
       maxLines: 2,
@@ -364,18 +390,20 @@ class _AddHabitSheetState extends State<AddHabitSheet>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Category (Optional)',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          'Category',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         if (widget.existingCategories.isNotEmpty) ...[
           Wrap(
             spacing: 8,
+            runSpacing: 4,
             children: widget.existingCategories
                 .map(
-                  (category) => FilterChip(
+                  (category) => ChoiceChip(
                     label: Text(category),
                     selected: _selectedCategory == category,
                     onSelected: (selected) {
@@ -384,19 +412,25 @@ class _AddHabitSheetState extends State<AddHabitSheet>
                         _categoryCtrl.text = selected ? category : '';
                       });
                     },
+                    selectedColor: _color.withValues(alpha: 0.15),
+                    checkmarkColor: _color,
+                    labelStyle: TextStyle(
+                      color: _selectedCategory == category ? _color : Colors.black87,
+                      fontWeight: _selectedCategory == category
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
                   ),
                 )
                 .toList(),
           ),
           const SizedBox(height: 8),
-          Text('Or create new:', style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 4),
         ],
         CustomFormField(
           controller: _categoryCtrl,
-          labelText: 'Category',
+          labelText: 'New Category (Optional)',
           hintText: 'e.g., Fitness, Learning, Health',
-          prefixIcon: Icons.category,
+          prefixIcon: Icons.category_outlined,
           onChanged: (value) {
             if (value.isNotEmpty) {
               setState(() => _selectedCategory = null);
@@ -407,82 +441,30 @@ class _AddHabitSheetState extends State<AddHabitSheet>
     );
   }
 
-  Widget _buildHabitTypeSelector() {
-    return Container(
-      height: 54,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-        ),
-      ),
-      child: Row(
-        children: HabitType.values.map((type) {
-          final isSelected = _type == type;
-          String typeLabel;
-
-          switch (type) {
-            case HabitType.FailBased:
-              typeLabel = 'Avoid';
-              break;
-            case HabitType.SuccessBased:
-              typeLabel = 'Achieve';
-              break;
-            case HabitType.DoneBased:
-              typeLabel = 'Check';
-              break;
-          }
-
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _type = type),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                margin: const EdgeInsets.all(4),
-                alignment: Alignment.center,
-                child: Text(
-                  typeLabel,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   Widget _buildFrequencySelector() {
-    return Column(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: HabitFrequency.values.map((frequency) {
         final isSelected = _frequency == frequency;
-        String label = _getFrequencyLabel(frequency);
-
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          child: RadioListTile<HabitFrequency>(
-            title: Text(label),
-            value: frequency,
-            groupValue: _frequency,
-            onChanged: (value) {
+        return ChoiceChip(
+          label: Text(_getFrequencyLabel(frequency)),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
               setState(() {
-                _frequency = value!;
+                _frequency = frequency;
                 if (frequency != HabitFrequency.CustomDays) {
                   _customDays.clear();
                 }
               });
-            },
+            }
+          },
+          selectedColor: _color.withValues(alpha: 0.15),
+          checkmarkColor: _color,
+          labelStyle: TextStyle(
+            color: isSelected ? _color : Colors.black87,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         );
       }).toList(),
@@ -495,13 +477,15 @@ class _AddHabitSheetState extends State<AddHabitSheet>
       children: [
         Text(
           'Select Days',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Wrap(
           spacing: 8,
+          runSpacing: 4,
           children: List.generate(7, (index) {
             final isSelected = _customDays.contains(index);
             return FilterChip(
@@ -516,6 +500,12 @@ class _AddHabitSheetState extends State<AddHabitSheet>
                   }
                 });
               },
+              selectedColor: _color.withValues(alpha: 0.15),
+              checkmarkColor: _color,
+              labelStyle: TextStyle(
+                color: isSelected ? _color : Colors.black87,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
             );
           }),
         ),
@@ -536,10 +526,15 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   Widget _buildUnitSelector() {
     return DropdownButtonFormField<HabitUnit>(
-      initialValue: _unit,
+      value: _unit,
       decoration: InputDecoration(
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
       items: HabitUnit.values.map((unit) {
         return DropdownMenuItem(
@@ -557,57 +552,30 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   Widget _buildIconSelector() {
     return Container(
-      height: 220,
+      height: 180,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
-        ),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: GridView.builder(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
+          crossAxisCount: 6,
           childAspectRatio: 1.0,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
         ),
         itemCount: _icons.length,
         itemBuilder: (context, index) {
           final icon = _icons[index];
           final isSelected = _icon == icon;
 
-          return Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => setState(() => _icon = icon),
-              borderRadius: BorderRadius.circular(8),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.2)
-                      : Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).dividerColor,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  size: 24,
-                ),
-              ),
+          return IconButton.filledTonal(
+            onPressed: () => setState(() => _icon = icon),
+            isSelected: isSelected,
+            icon: Icon(icon, size: 22),
+            style: IconButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.surface,
             ),
           );
         },
@@ -617,7 +585,7 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   Widget _buildColorSelector() {
     return SizedBox(
-      height: 60,
+      height: 52,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _colorOptions.length,
@@ -628,26 +596,34 @@ class _AddHabitSheetState extends State<AddHabitSheet>
           return GestureDetector(
             onTap: () => setState(() => _color = color),
             child: Container(
-              width: 48,
-              height: 48,
-              margin: const EdgeInsets.symmetric(horizontal: 8),
+              width: 38,
+              height: 38,
+              margin: const EdgeInsets.symmetric(horizontal: 6),
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? Colors.white : Colors.transparent,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Colors.transparent,
                   width: 3,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withValues(alpha: 0.4),
-                    blurRadius: isSelected ? 8 : 0,
-                    spreadRadius: isSelected ? 2 : 0,
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: isSelected ? 6 : 0,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: isSelected
-                  ? const Icon(Icons.check, color: Colors.white)
+                  ? Icon(
+                      Icons.check,
+                      color: color.computeLuminance() < 0.5
+                          ? Colors.white
+                          : Colors.black87,
+                      size: 16,
+                    )
                   : null,
             ),
           );
@@ -661,15 +637,15 @@ class _AddHabitSheetState extends State<AddHabitSheet>
       case HabitFrequency.Daily:
         return 'Daily';
       case HabitFrequency.Weekdays:
-        return 'Weekdays (Mon-Fri)';
+        return 'Weekdays';
       case HabitFrequency.Weekends:
-        return 'Weekends (Sat-Sun)';
+        return 'Weekends';
       case HabitFrequency.CustomDays:
         return 'Custom Days';
       case HabitFrequency.XTimesPerWeek:
-        return 'X times per week';
+        return 'X / Week';
       case HabitFrequency.XTimesPerMonth:
-        return 'X times per month';
+        return 'X / Month';
     }
   }
 
@@ -694,25 +670,25 @@ class _AddHabitSheetState extends State<AddHabitSheet>
       case HabitUnit.Dollars:
         return 'Dollars';
       case HabitUnit.Custom:
-        return 'Custom Unit';
+        return 'Custom';
     }
   }
 
   String _getTargetLabel() {
     switch (_type) {
       case HabitType.FailBased:
-        return 'Maximum allowed per day';
+        return 'Maximum Limit';
       case HabitType.SuccessBased:
-        return 'Target amount per day';
+        return 'Daily Target';
       case HabitType.DoneBased:
-        return 'Target amount';
+        return 'Target Amount';
     }
   }
 
   String _getTargetHint() {
     switch (_type) {
       case HabitType.FailBased:
-        return 'e.g., 2 (max 2 cigarettes)';
+        return 'e.g., 2 (max 2 failures)';
       case HabitType.SuccessBased:
         return 'e.g., 30 (read 30 pages)';
       case HabitType.DoneBased:
@@ -731,20 +707,18 @@ class _AddHabitSheetState extends State<AddHabitSheet>
     final name = _nameCtrl.text.trim();
     if (name.isEmpty) return;
 
-    final category =
-        _selectedCategory ??
+    final category = _selectedCategory ??
         (_categoryCtrl.text.trim().isNotEmpty
             ? _categoryCtrl.text.trim()
             : null);
 
-    final targetValue = _hasMeasurableGoal && _targetValueCtrl.text.isNotEmpty
+    final targetValue = _targetValueCtrl.text.isNotEmpty
         ? double.tryParse(_targetValueCtrl.text)
         : null;
 
-    final targetFrequency =
-        (_frequency == HabitFrequency.XTimesPerWeek ||
-                _frequency == HabitFrequency.XTimesPerMonth) &&
-            _targetFrequencyCtrl.text.isNotEmpty
+    final targetFrequency = (_frequency == HabitFrequency.XTimesPerWeek ||
+            _frequency == HabitFrequency.XTimesPerMonth) &&
+        _targetFrequencyCtrl.text.isNotEmpty
         ? int.tryParse(_targetFrequencyCtrl.text)
         : null;
 
@@ -766,7 +740,7 @@ class _AddHabitSheetState extends State<AddHabitSheet>
         customDays: _frequency == HabitFrequency.CustomDays ? _customDays : [],
         targetFrequency: targetFrequency,
         targetValue: targetValue,
-        unit: _hasMeasurableGoal ? _unit : HabitUnit.Count,
+        unit: _unit,
         customUnit: customUnit,
       ),
     );
