@@ -16,6 +16,10 @@ class QuickStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final frequencyText = habit.getFrequencyDisplayText(
+      weekendSetting: habit.weekendDays,
+    );
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -25,7 +29,7 @@ class QuickStatsCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatItem(context, 'Type', _getHabitTypeText(habit.type)),
-                _buildStatItem(context, 'Frequency', _getFrequencyText(habit)),
+                _buildStatItem(context, 'Frequency', frequencyText),
               ],
             ),
             if (showSuccessRate || showCurrentStreak) ...[
@@ -79,37 +83,6 @@ class QuickStatsCard extends StatelessWidget {
         return 'Achieve (Success-based)';
       case HabitType.DoneBased:
         return 'Check (Done-based)';
-      default:
-        return '';
-    }
-  }
-
-  String _getFrequencyText(Habit habit) {
-    switch (habit.frequency) {
-      case HabitFrequency.Daily:
-        return 'Daily';
-      case HabitFrequency.Weekdays:
-        return 'Weekdays (Mon-Fri)';
-      case HabitFrequency.Weekends:
-        return 'Weekends (Sat-Sun)';
-      case HabitFrequency.CustomDays:
-        final dayNames = const [
-          'Sun',
-          'Mon',
-          'Tue',
-          'Wed',
-          'Thu',
-          'Fri',
-          'Sat',
-        ];
-        final selectedDays = habit.customDays
-            .map((i) => dayNames[i])
-            .join(', ');
-        return 'Custom Days ($selectedDays)';
-      case HabitFrequency.XTimesPerWeek:
-        return '${habit.targetFrequency ?? 'X'} times per week';
-      case HabitFrequency.XTimesPerMonth:
-        return '${habit.targetFrequency ?? 'X'} times per month';
       default:
         return '';
     }

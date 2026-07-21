@@ -130,7 +130,7 @@ class DashboardPage extends ConsumerWidget {
       int totalDue = 0;
       int doneCount = 0;
       for (var habit in habits) {
-        if (habit.isDueOnDate(date)) {
+        if (habit.isDueOnDate(date, weekendDaysSetting: habit.weekendDays)) {
           totalDue++;
           final entry = habit.entries.firstWhereOrNull(
             (e) => DateUtils.isSameDay(e.date, date),

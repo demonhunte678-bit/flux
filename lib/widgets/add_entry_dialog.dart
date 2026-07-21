@@ -6,6 +6,7 @@ class AddEntryDialog extends StatefulWidget {
   final Habit habit;
   final DateTime? selectedDate;
   final bool showDateSelector;
+  final String? weekendDaysSetting;
   final Function(HabitEntry) onSave;
 
   const AddEntryDialog({
@@ -13,6 +14,7 @@ class AddEntryDialog extends StatefulWidget {
     required this.habit,
     this.selectedDate,
     this.showDateSelector = false,
+    this.weekendDaysSetting,
     required this.onSave,
   });
 
@@ -44,8 +46,14 @@ class _AddEntryDialogState extends State<AddEntryDialog>
   }
 
   DateTime _getDefaultDate() {
+    final weekendDaysSetting = widget.weekendDaysSetting ?? widget.habit.weekendDays;
+
     if (widget.habit.entries.isEmpty) {
-      return DateTime.now();
+      var date = DateTime.now();
+      while (!widget.habit.isDueOnDate(date, weekendDaysSetting: weekendDaysSetting)) {
+        date = date.subtract(const Duration(days: 1));
+      }
+      return date;
     }
 
     DateTime? latestDate;
@@ -56,13 +64,16 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     }
 
     if (latestDate != null) {
-      final nextDay = latestDate.add(const Duration(days: 1));
+      var nextDay = latestDate.add(const Duration(days: 1));
+      while (!widget.habit.isDueOnDate(nextDay, weekendDaysSetting: weekendDaysSetting)) {
+        nextDay = nextDay.add(const Duration(days: 1));
+      }
       return nextDay;
     }
 
     var date = DateTime.now();
-    while (_hasEntryForDate(date)) {
-      date = date.add(const Duration(days: 1));
+    while (_hasEntryForDate(date) || !widget.habit.isDueOnDate(date, weekendDaysSetting: weekendDaysSetting)) {
+      date = date.subtract(const Duration(days: 1));
     }
     return date;
   }
@@ -309,6 +320,11 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                 initialDate: _selectedDate,
                 firstDate: DateTime.now().subtract(const Duration(days: 365)),
                 lastDate: DateTime.now().add(const Duration(days: 365)),
+                selectableDayPredicate: (date) {
+                  return widget.habit.isDueOnDate(date,
+                      weekendDaysSetting:
+                          widget.weekendDaysSetting ?? widget.habit.weekendDays);
+                },
               );
               if (picked != null) {
                 setState(() {

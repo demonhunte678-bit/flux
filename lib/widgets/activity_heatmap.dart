@@ -13,8 +13,28 @@ class ActivityHeatmap extends StatelessWidget {
     final now = DateTime.now();
     final todayMidnight = DateTime(now.year, now.month, now.day);
 
-    // Calculate starting date: 26 weeks ago, aligned to Monday
-    final startDay = todayMidnight.subtract(const Duration(days: 182));
+    // Find the earliest entry date
+    DateTime startDay = todayMidnight.subtract(const Duration(days: 90));
+    DateTime? earliestEntry;
+    for (var habit in habits) {
+      for (var entry in habit.entries) {
+        if (earliestEntry == null || entry.date.isBefore(earliestEntry)) {
+          earliestEntry = entry.date;
+        }
+      }
+    }
+
+    if (earliestEntry != null) {
+      final earliestMidnight = DateTime(earliestEntry.year, earliestEntry.month, earliestEntry.day);
+      final threeMonthsAgo = todayMidnight.subtract(const Duration(days: 90));
+      if (earliestMidnight.isBefore(threeMonthsAgo)) {
+        startDay = threeMonthsAgo;
+      } else {
+        startDay = earliestMidnight;
+      }
+    }
+
+    // Align starting date to Monday of that week
     final daysToMonday = startDay.weekday - 1;
     final alignedStartDate = startDay.subtract(Duration(days: daysToMonday));
 
@@ -48,9 +68,9 @@ class ActivityHeatmap extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Aggregate Activity Heatmap (Last 6 Months)',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              habits.length == 1 ? 'Activity Heatmap' : 'Aggregate Activity Heatmap',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SingleChildScrollView(
@@ -91,17 +111,12 @@ class ActivityHeatmap extends StatelessWidget {
                         children: week.map((date) {
                           final isFuture = date.isAfter(todayMidnight);
 
-                          int positiveCount = 0;
-                          for (var habit in habits) {
-                            final entry = habit.entries.firstWhereOrNull(
-                              (e) =>
-                                  e.date.year == date.year &&
-                                  e.date.month == date.month &&
-                                  e.date.day == date.day,
+                          if (isFuture) {
+                            return const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: Padding(padding: EdgeInsets.all(2)),
                             );
-                            if (entry != null && habit.isPositiveDay(entry)) {
-                              positiveCount++;
-                            }
                           }
 
                           Color squareColor = Theme.of(context)
@@ -109,33 +124,116 @@ class ActivityHeatmap extends StatelessWidget {
                               .surfaceContainerHighest
                               .withValues(alpha: 0.3);
                           String tooltipMsg =
-                              '${DateFormat('MMM d, yyyy').format(date)}: No habits completed';
+                              '${DateFormat('MMM d, yyyy').format(date)}: No entries';
 
-                          if (isFuture) {
-                            squareColor = Colors.transparent;
-                            tooltipMsg = '';
-                          } else if (positiveCount > 0) {
-                            double opacity = 0.25;
-                            if (positiveCount == 2) {
-                              opacity = 0.5;
-                            } else if (positiveCount == 3)
-                              opacity = 0.75;
-                            else if (positiveCount >= 4)
-                              opacity = 1.0;
-
-                            squareColor = primaryColor.withValues(
-                              alpha: opacity,
+                          if (habits.length == 1) {
+                            final habit = habits[0];
+                            final entry = habit.entries.firstWhereOrNull(
+                              (e) =>
+                                  e.date.year == date.year &&
+                                  e.date.month == date.month &&
+                                  e.date.day == date.day,
                             );
-                            tooltipMsg =
-                                '${DateFormat('MMM d, yyyy').format(date)}: $positiveCount habit${positiveCount != 1 ? 's' : ''} completed';
-                          }
 
-                          if (isFuture) {
-                            return const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: Padding(padding: EdgeInsets.all(2)),
-                            );
+                            if (entry != null) {
+                              if (entry.isSkipped) {
+                                squareColor = Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withValues(alpha: 0.3);
+                                tooltipMsg =
+                                    '${DateFormat('MMM d, yyyy').format(date)}: Skipped';
+                              } else {
+                                final isFailBased = habit.type == HabitType.FailBased;
+                                final limit = habit.targetValue ?? 0.0;
+                                final actual = entry.value ?? entry.count.toDouble();
+
+                                if (isFailBased) {
+                                  if (actual <= limit) {
+                                    double opacity = 1.0;
+                                    if (limit > 0) {
+                                      opacity = (1.0 - (actual / limit) * 0.6).clamp(0.4, 1.0);
+                                    }
+                                    squareColor = primaryColor.withValues(alpha: opacity);
+                                    tooltipMsg =
+                                        '${DateFormat('MMM d, yyyy').format(date)}: Succeeded ($actual/$limit failures)';
+                                  } else {
+                                    final excess = actual - limit;
+                                    double opacity = 0.4;
+                                    if (excess > 1) opacity = 0.7;
+                                    if (excess >= 4) opacity = 1.0;
+
+                                    squareColor = Colors.red.withValues(alpha: opacity);
+                                    tooltipMsg =
+                                        '${DateFormat('MMM d, yyyy').format(date)}: Failed ($actual/$limit failures)';
+                                  }
+                                } else {
+                                  final target = habit.targetValue ?? 1.0;
+                                  final ratio = target > 0 ? (actual / target) : 1.0;
+
+                                  if (ratio >= 1.0) {
+                                    squareColor = primaryColor;
+                                  } else if (ratio >= 0.8) {
+                                    squareColor = primaryColor.withValues(alpha: 0.8);
+                                  } else if (ratio >= 0.5) {
+                                    squareColor = primaryColor.withValues(alpha: 0.5);
+                                  } else if (ratio >= 0.3) {
+                                    squareColor = primaryColor.withValues(alpha: 0.35);
+                                  } else if (ratio > 0.0) {
+                                    squareColor = primaryColor.withValues(alpha: 0.2);
+                                  } else {
+                                    squareColor = Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.3);
+                                  }
+                                  tooltipMsg =
+                                      '${DateFormat('MMM d, yyyy').format(date)}: ${actual.toStringAsFixed(0)}/${target.toStringAsFixed(0)} ${habit.getUnitDisplayName()} completed';
+                                }
+                              }
+                            }
+                          } else {
+                            int successes = 0;
+                            int failures = 0;
+                            int totalActive = 0;
+
+                            for (var habit in habits) {
+                              final entry = habit.entries.firstWhereOrNull(
+                                (e) =>
+                                    e.date.year == date.year &&
+                                    e.date.month == date.month &&
+                                    e.date.day == date.day,
+                              );
+                              if (entry != null && !entry.isSkipped) {
+                                totalActive++;
+                                if (habit.isPositiveDay(entry)) {
+                                  successes++;
+                                } else {
+                                  failures++;
+                                }
+                              }
+                            }
+
+                            if (totalActive > 0) {
+                              if (successes >= failures) {
+                                final successRate = successes / totalActive;
+                                double opacity = 0.25;
+                                if (successRate >= 0.8) opacity = 1.0;
+                                else if (successRate >= 0.5) opacity = 0.7;
+                                else if (successRate >= 0.3) opacity = 0.4;
+
+                                squareColor = primaryColor.withValues(alpha: opacity);
+                              } else {
+                                final failureRate = failures / totalActive;
+                                double opacity = 0.4;
+                                if (failureRate >= 0.8) opacity = 1.0;
+                                else if (failureRate >= 0.5) opacity = 0.7;
+
+                                squareColor = Colors.red.withValues(alpha: opacity);
+                              }
+                              tooltipMsg =
+                                  '${DateFormat('MMM d, yyyy').format(date)}: $successes/$totalActive habits completed';
+                            }
                           }
 
                           return Tooltip(

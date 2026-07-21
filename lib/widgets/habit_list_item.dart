@@ -77,7 +77,7 @@ class HabitListItem extends ConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (habit.isDueToday()) ...[
+                            if (habit.isDueToday(weekendDaysSetting: habit.weekendDays)) ...[
                               const SizedBox(width: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(

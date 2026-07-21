@@ -89,6 +89,18 @@ class SettingsService {
     await _saveSetting(MATCH_LAUNCHER_ICON_KEY, match);
   }
 
+  // Weekend Definition settings
+  static const String WEEKEND_DAYS_KEY = 'weekend_days';
+
+  static Future<String> getWeekendDays() async {
+    final settings = await _getSettings();
+    return settings[WEEKEND_DAYS_KEY] ?? 'Saturday & Sunday';
+  }
+
+  static Future<void> setWeekendDays(String days) async {
+    await _saveSetting(WEEKEND_DAYS_KEY, days);
+  }
+
   // Fallbacks for display settings referenced elsewhere in the app
   static Future<bool> getShowHabitIcons() async => true;
   static Future<bool> getCompactMode() async => false;

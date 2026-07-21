@@ -37,6 +37,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
       builder: (context) => AddEntryDialog(
         habit: habit,
         showDateSelector: true,
+        weekendDaysSetting: habit.weekendDays,
         onSave: (entry) async {
           await ref.read(habitsProvider.notifier).addEntry(habit, entry);
           if (mounted) Navigator.of(context).pop();
@@ -45,34 +46,21 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     );
   }
 
-  void _showToggleDisplayModeDialog(Habit habit) {
-    showDialog(
+  void _showEditHabitSheet(Habit habit) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Display Mode'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: ReportDisplay.values.map((mode) {
-            return RadioListTile<ReportDisplay>(
-              title: Text(mode.toString().split('.').last),
-              value: mode,
-              groupValue: habit.displayMode,
-              onChanged: (value) async {
-                if (value != null) {
-                  habit.displayMode = value;
-                  await ref.read(habitsProvider.notifier).updateHabit(habit);
-                  if (context.mounted) Navigator.pop(context);
-                }
-              },
-            );
-          }).toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddHabitSheet(
+        habitToEdit: habit,
+        onSave: (updatedHabit) async {
+          await ref.read(habitsProvider.notifier).updateHabit(updatedHabit);
+        },
+        existingCategories: (ref.read(habitsProvider).value ?? [])
+            .map((h) => h.category)
+            .whereType<String>()
+            .toSet()
+            .toList(),
       ),
     );
   }
@@ -88,6 +76,18 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           children: [
             Text('What would you like to do with "${habit.name}"?'),
             const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.edit, color: Colors.blue),
+              title: const Text('Edit Habit'),
+              subtitle: const Text(
+                'Change name, schedule, limit/goal, icon, and colors',
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _showEditHabitSheet(habit);
+              },
+            ),
+            const Divider(),
             if (!habit.isPaused)
               ListTile(
                 leading: const Icon(Icons.pause_circle, color: Colors.orange),
@@ -268,10 +268,6 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: () => _showToggleDisplayModeDialog(habit),
-            ),
-            IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () => _showDeleteHabitDialog(habit),
             ),
@@ -302,6 +298,8 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildMotivationalBanner(habit),
+          _buildGoalProgressCard(habit),
           QuickStatsCard(
             habit: habit,
             showSuccessRate: showSuccessRate,
@@ -318,6 +316,220 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
             onDeleteEntry: (entry) => _deleteEntry(habit, entry),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMotivationalBanner(Habit habit) {
+    final hasRecentFailure = habit.type == HabitType.FailBased && habit.entries.any((e) {
+      final isTodayOrYesterday = DateUtils.isSameDay(e.date, DateTime.now()) ||
+          DateUtils.isSameDay(e.date, DateTime.now().subtract(const Duration(days: 1)));
+      return isTodayOrYesterday && (e.value ?? 0) > 0;
+    });
+
+    if (!hasRecentFailure) return const SizedBox.shrink();
+
+    final goalText = habit.goalType != null
+        ? "Don't let one slip-up stop you from reaching your ${habit.goalType == 'streak' ? '${habit.goalValue?.toInt() ?? 90}-day streak' : '${habit.goalValue?.toInt() ?? 80}% success rate'} goal!"
+        : "1 slip-up doesn't erase your progress. Let's start fresh and make today a win!";
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.orange.withValues(alpha: 0.15),
+            Colors.red.withValues(alpha: 0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.bolt_rounded, color: Colors.orange, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 const Text(
+                   "You can get it!",
+                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                 ),
+                 const SizedBox(height: 4),
+                 Text(
+                   goalText,
+                   style: const TextStyle(fontSize: 13, color: Colors.black87),
+                 ),
+               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoalProgressCard(Habit habit) {
+    if (habit.goalType == null || habit.goalValue == null) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 16),
+        elevation: 0,
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+            width: 1,
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _showEditHabitSheet(habit),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.emoji_events_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "No Active Goal Set",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        "Tap here to set a target streak or success rate to stay motivated!",
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.grey),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final goalVal = habit.goalValue!;
+    double progress = 0.0;
+    String progressLabel = "";
+    String goalLabel = "";
+
+    if (habit.goalType == 'streak') {
+      progress = (habit.currentStreak / goalVal).clamp(0.0, 1.0);
+      progressLabel = "${habit.currentStreak} of ${goalVal.toInt()} days";
+      goalLabel = "Streak Goal: ${goalVal.toInt()} Days";
+    } else if (habit.goalType == 'percentage') {
+      progress = (habit.successRate / goalVal).clamp(0.0, 1.0);
+      progressLabel = "${habit.successRate.toStringAsFixed(0)}% of ${goalVal.toInt()}%";
+      goalLabel = "Success Rate Goal: ${goalVal.toInt()}%";
+    } else {
+      final totalCount = habit.entries.length;
+      progress = (totalCount / goalVal).clamp(0.0, 1.0);
+      progressLabel = "$totalCount of ${goalVal.toInt()} completions";
+      goalLabel = "Completions Goal: ${goalVal.toInt()} times";
+    }
+
+    final isCompleted = progress >= 1.0;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isCompleted ? Icons.emoji_events : Icons.emoji_events_outlined,
+                      color: isCompleted ? Colors.amber : Theme.of(context).colorScheme.primary,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                       goalLabel,
+                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ],
+                ),
+                if (isCompleted)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      "Achieved!",
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                  )
+                else
+                  Text(
+                    "${(progress * 100).toStringAsFixed(0)}% reached",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 8,
+                backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  isCompleted ? Colors.green : Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  progressLabel,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
+                ),
+                if (!isCompleted && habit.goalType == 'streak')
+                  Text(
+                    "${(goalVal - habit.currentStreak).toInt()} days left",
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

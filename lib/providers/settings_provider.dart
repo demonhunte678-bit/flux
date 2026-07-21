@@ -8,12 +8,14 @@ class SettingsState {
   final bool showCurrentStreak;
   final String language;
   final bool matchLauncherIcon;
+  final String weekendDays;
 
   SettingsState({
     required this.showSuccessRate,
     required this.showCurrentStreak,
     required this.language,
     required this.matchLauncherIcon,
+    required this.weekendDays,
   });
 
   SettingsState copyWith({
@@ -21,12 +23,14 @@ class SettingsState {
     bool? showCurrentStreak,
     String? language,
     bool? matchLauncherIcon,
+    String? weekendDays,
   }) {
     return SettingsState(
       showSuccessRate: showSuccessRate ?? this.showSuccessRate,
       showCurrentStreak: showCurrentStreak ?? this.showCurrentStreak,
       language: language ?? this.language,
       matchLauncherIcon: matchLauncherIcon ?? this.matchLauncherIcon,
+      weekendDays: weekendDays ?? this.weekendDays,
     );
   }
 }
@@ -41,6 +45,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
           showCurrentStreak: true,
           language: 'English',
           matchLauncherIcon: (!kIsWeb && defaultTargetPlatform == TargetPlatform.android),
+          weekendDays: 'Saturday & Sunday',
         ),
       ) {
     _loadSettings();
@@ -51,11 +56,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final currentStreak = await SettingsService.getShowCurrentStreak();
     final lang = await SettingsService.getLanguage();
     final matchIcon = await SettingsService.getMatchLauncherIcon();
+    final weekend = await SettingsService.getWeekendDays();
     state = SettingsState(
       showSuccessRate: successRate,
       showCurrentStreak: currentStreak,
       language: lang,
       matchLauncherIcon: matchIcon,
+      weekendDays: weekend,
     );
   }
 
@@ -72,6 +79,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> changeLanguage(String language) async {
     await SettingsService.setLanguage(language);
     state = state.copyWith(language: language);
+  }
+
+  Future<void> changeWeekendDays(String days) async {
+    await SettingsService.setWeekendDays(days);
+    state = state.copyWith(weekendDays: days);
   }
 
   Future<void> toggleMatchLauncherIcon(bool value) async {
