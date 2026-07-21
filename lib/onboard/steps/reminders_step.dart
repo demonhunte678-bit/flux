@@ -30,10 +30,10 @@ class RemindersStep implements OnboardStep {
     ];
 
     final reminderTimes = [
-      {'value': 'morning', 'label': '🌅 Morning (8:00 AM)'},
-      {'value': 'afternoon', 'label': '☀️ Afternoon (1:00 PM)'},
-      {'value': 'evening', 'label': '🌇 Evening (7:00 PM)'},
-      {'value': 'night', 'label': '🌃 Night (9:30 PM)'},
+      {'value': 'morning', 'label': 'Morning (8:00 AM)'},
+      {'value': 'afternoon', 'label': 'Afternoon (1:00 PM)'},
+      {'value': 'evening', 'label': 'Evening (7:00 PM)'},
+      {'value': 'night', 'label': 'Night (9:30 PM)'},
     ];
 
     return SingleChildScrollView(

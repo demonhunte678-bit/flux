@@ -41,7 +41,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
           themeData: ThemeService.createTheme(
             themeName: 'Emerald',
             isDarkMode: ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark,
-            gamifiedMode: false,
           ),
           themeName: 'Emerald',
           isDarkMode: ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark,
@@ -53,7 +52,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   Future<void> _loadTheme() async {
     final isDark = await ThemeService.isDarkMode();
     var name = await ThemeService.getCurrentTheme();
-    final gamified = await SettingsService.getGamifiedMode();
 
     if (!kIsWeb && Platform.isAndroid) {
       try {
@@ -68,7 +66,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       themeData: ThemeService.createTheme(
         themeName: name,
         isDarkMode: isDark,
-        gamifiedMode: gamified,
       ),
       themeName: name,
       isDarkMode: isDark,
@@ -77,12 +74,10 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   Future<void> toggleDarkMode(bool isDark) async {
     await ThemeService.setDarkMode(isDark);
-    final gamified = await SettingsService.getGamifiedMode();
     state = state.copyWith(
       themeData: ThemeService.createTheme(
         themeName: state.themeName,
         isDarkMode: isDark,
-        gamifiedMode: gamified,
       ),
       isDarkMode: isDark,
     );
@@ -90,12 +85,10 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   Future<void> selectTheme(String themeName) async {
     await ThemeService.setCurrentTheme(themeName);
-    final gamified = await SettingsService.getGamifiedMode();
     state = state.copyWith(
       themeData: ThemeService.createTheme(
         themeName: themeName,
         isDarkMode: state.isDarkMode,
-        gamifiedMode: gamified,
       ),
       themeName: themeName,
     );

@@ -101,16 +101,6 @@ class SettingsService {
     await _saveSetting(WEEKEND_DAYS_KEY, days);
   }
 
-  // Gamified & Personalization Settings
-  static Future<bool> getGamifiedMode() async {
-    final settings = await _getSettings();
-    return settings['gamified_mode'] ?? false;
-  }
-
-  static Future<void> setGamifiedMode(bool value) async {
-    await _saveSetting('gamified_mode', value);
-  }
-
   static Future<String> getUserName() async {
     final settings = await _getSettings();
     return settings['user_name'] ?? '';

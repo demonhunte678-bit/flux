@@ -20,8 +20,7 @@ class WelcomeStep implements OnboardStep {
 
   @override
   bool canProceed(WidgetRef ref) {
-    final state = ref.read(onboardingProvider);
-    return state.userName.trim().isNotEmpty;
+    return true;
   }
 
   @override
@@ -42,12 +41,9 @@ class WelcomeStep implements OnboardStep {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(
-            child: FluxLogo(size: 80, showBackground: true),
-          ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
           Text(
-            'What is your name?',
+            'What is your name? (Optional)',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -83,7 +79,7 @@ class WelcomeStep implements OnboardStep {
           ),
           const SizedBox(height: 24),
           Text(
-            'What is your daily occupation?',
+            'What is your daily occupation? (Optional)',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -110,6 +106,8 @@ class WelcomeStep implements OnboardStep {
                 onSelected: (selected) {
                   if (selected) {
                     notifier.setOccupation(occ);
+                  } else {
+                    notifier.setOccupation('');
                   }
                 },
                 selectedColor: stepColor,

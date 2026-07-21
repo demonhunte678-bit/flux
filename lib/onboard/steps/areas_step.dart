@@ -16,19 +16,19 @@ enum FocusArea {
   String get label {
     switch (this) {
       case FocusArea.health:
-        return '💪 Fitness & Health';
+        return 'Fitness & Health';
       case FocusArea.growth:
-        return '📚 Learning & Productivity';
+        return 'Learning & Productivity';
       case FocusArea.finances:
-        return '💰 Finances';
+        return 'Finances';
       case FocusArea.mental:
-        return '🧠 Mindfulness & Mental Health';
+        return 'Mindfulness & Mental Health';
       case FocusArea.home:
-        return '🧹 Routines & Organization';
+        return 'Routines & Organization';
       case FocusArea.sleep:
-        return '😴 Sleep';
+        return 'Sleep';
       case FocusArea.relationships:
-        return '❤️ Relationships';
+        return 'Relationships';
     }
   }
 

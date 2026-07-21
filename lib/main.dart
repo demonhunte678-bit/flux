@@ -30,8 +30,6 @@ class HabitTrackerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
-    final settings = ref.watch(settingsProvider);
-    final gamified = settings.gamifiedMode;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -39,33 +37,24 @@ class HabitTrackerApp extends ConsumerWidget {
       theme: ThemeService.createTheme(
         themeName: themeState.themeName,
         isDarkMode: false,
-        gamifiedMode: gamified,
       ),
       darkTheme: ThemeService.createTheme(
         themeName: themeState.themeName,
         isDarkMode: true,
-        gamifiedMode: gamified,
       ),
       themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: isFirstLaunch
           ? OnboardingPage(
               onComplete: () {
-                _completeOnboarding(context);
+                _completeOnboarding();
               },
             )
           : const AppShell(),
     );
   }
 
-  void _completeOnboarding(BuildContext context) async {
+  void _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('first_launch', false);
-
-    if (context.mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AppShell()),
-      );
-    }
   }
 }

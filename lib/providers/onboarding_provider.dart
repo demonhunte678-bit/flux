@@ -22,7 +22,6 @@ class OnboardingState {
   final String commit30Days; // 'yes', 'try', 'not_sure'
   final String reminderPeriod; // 'morning', 'afternoon', 'evening', 'night'
   final bool wantsReminders;
-  final bool gamifiedMode;
   final bool showSuccessRate; // preference: false means streak focused, true means percentage focused
 
   OnboardingState({
@@ -39,7 +38,6 @@ class OnboardingState {
     required this.commit30Days,
     required this.reminderPeriod,
     required this.wantsReminders,
-    required this.gamifiedMode,
     required this.showSuccessRate,
   });
 
@@ -57,7 +55,6 @@ class OnboardingState {
     String? commit30Days,
     String? reminderPeriod,
     bool? wantsReminders,
-    bool? gamifiedMode,
     bool? showSuccessRate,
   }) {
     return OnboardingState(
@@ -74,7 +71,6 @@ class OnboardingState {
       commit30Days: commit30Days ?? this.commit30Days,
       reminderPeriod: reminderPeriod ?? this.reminderPeriod,
       wantsReminders: wantsReminders ?? this.wantsReminders,
-      gamifiedMode: gamifiedMode ?? this.gamifiedMode,
       showSuccessRate: showSuccessRate ?? this.showSuccessRate,
     );
   }
@@ -99,7 +95,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
             commit30Days: 'yes',
             reminderPeriod: 'evening',
             wantsReminders: true,
-            gamifiedMode: false,
             showSuccessRate: true,
           ),
         );
@@ -155,10 +150,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 
   void toggleReminders(bool wants) {
     state = state.copyWith(wantsReminders: wants);
-  }
-
-  void setGamifiedMode(bool value) {
-    state = state.copyWith(gamifiedMode: value);
   }
 
   void setShowSuccessRate(bool value) {
@@ -415,7 +406,6 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     await settingsNotifier.setUserName(state.userName);
     await settingsNotifier.setOccupation(state.occupation);
     await settingsNotifier.setBiggestObstacle(state.biggestObstacle);
-    await settingsNotifier.setGamifiedMode(state.gamifiedMode);
     await settingsNotifier.toggleShowSuccessRate(state.showSuccessRate);
 
     // Seed database with starter habits chosen

@@ -9,7 +9,6 @@ class SettingsState {
   final String language;
   final bool matchLauncherIcon;
   final String weekendDays;
-  final bool gamifiedMode;
   final String userName;
   final String occupation;
   final String biggestObstacle;
@@ -20,7 +19,6 @@ class SettingsState {
     required this.language,
     required this.matchLauncherIcon,
     required this.weekendDays,
-    required this.gamifiedMode,
     required this.userName,
     required this.occupation,
     required this.biggestObstacle,
@@ -32,7 +30,6 @@ class SettingsState {
     String? language,
     bool? matchLauncherIcon,
     String? weekendDays,
-    bool? gamifiedMode,
     String? userName,
     String? occupation,
     String? biggestObstacle,
@@ -43,7 +40,6 @@ class SettingsState {
       language: language ?? this.language,
       matchLauncherIcon: matchLauncherIcon ?? this.matchLauncherIcon,
       weekendDays: weekendDays ?? this.weekendDays,
-      gamifiedMode: gamifiedMode ?? this.gamifiedMode,
       userName: userName ?? this.userName,
       occupation: occupation ?? this.occupation,
       biggestObstacle: biggestObstacle ?? this.biggestObstacle,
@@ -62,7 +58,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
           language: 'English',
           matchLauncherIcon: (!kIsWeb && defaultTargetPlatform == TargetPlatform.android),
           weekendDays: 'Saturday & Sunday',
-          gamifiedMode: false,
           userName: '',
           occupation: '',
           biggestObstacle: '',
@@ -77,7 +72,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final lang = await SettingsService.getLanguage();
     final matchIcon = await SettingsService.getMatchLauncherIcon();
     final weekend = await SettingsService.getWeekendDays();
-    final gamified = await SettingsService.getGamifiedMode();
     final name = await SettingsService.getUserName();
     final occ = await SettingsService.getOccupation();
     final obstacle = await SettingsService.getBiggestObstacle();
@@ -87,7 +81,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       language: lang,
       matchLauncherIcon: matchIcon,
       weekendDays: weekend,
-      gamifiedMode: gamified,
       userName: name,
       occupation: occ,
       biggestObstacle: obstacle,
@@ -114,11 +107,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(weekendDays: days);
   }
 
-  Future<void> setGamifiedMode(bool value) async {
-    await SettingsService.setGamifiedMode(value);
-    state = state.copyWith(gamifiedMode: value);
-    ref.read(themeProvider.notifier).selectTheme(ref.read(themeProvider).themeName);
-  }
 
   Future<void> setUserName(String name) async {
     await SettingsService.setUserName(name);

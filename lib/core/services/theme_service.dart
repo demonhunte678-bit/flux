@@ -67,7 +67,6 @@ class ThemeService {
   static ThemeData createTheme({
     required String themeName,
     required bool isDarkMode,
-    bool gamifiedMode = false,
     ColorScheme? dynamicColorScheme,
   }) {
     if (themeName.toLowerCase() == 'system' && dynamicColorScheme != null) {
@@ -100,26 +99,11 @@ class ThemeService {
       onSurface: useDark ? const Color(0xFFECECEF) : const Color(0xFF1E1E22),
     );
 
-    final textTheme = gamifiedMode
-        ? const TextTheme(
-            displayLarge: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            displayMedium: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            displaySmall: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            headlineLarge: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            headlineMedium: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            headlineSmall: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            titleLarge: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            titleMedium: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-            titleSmall: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold),
-          )
-        : const TextTheme();
-
     return ThemeData(
       useMaterial3: true,
       brightness: useDark ? Brightness.dark : Brightness.light,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
-      textTheme: textTheme,
       appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: false,

@@ -45,17 +45,6 @@ class SettingsPage extends ConsumerWidget {
                       ? Icons.dark_mode_outlined
                       : Icons.light_mode_outlined,
                 ),
-                SettingsSwitchTile(
-                  title: 'Gamified RPG Mode',
-                  subtitle: 'Enable retro font styling and badge levels',
-                  value: settingsState.gamifiedMode,
-                  onChanged: (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .setGamifiedMode(value);
-                  },
-                  icon: Icons.sports_esports_outlined,
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,

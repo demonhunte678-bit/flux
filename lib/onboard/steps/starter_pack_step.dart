@@ -101,7 +101,7 @@ class StarterPackStep implements OnboardStep {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          habit.icon ?? Icons.star,
+                          habit.icon ?? Icons.shield,
                           color: stepColor,
                         ),
                       ),

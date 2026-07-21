@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flux/index.dart';
 import 'package:flux/providers/index.dart';
 import '../onboard_step.dart';
 
@@ -111,7 +112,7 @@ class PreferencesStep implements OnboardStep {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '🔥 Streaks Focus',
+                          'Streaks Focus',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: !state.showSuccessRate ? stepColor : Theme.of(context).colorScheme.onSurface,
@@ -159,7 +160,7 @@ class PreferencesStep implements OnboardStep {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '📈 Percentages Focus',
+                          'Percentages Focus',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: state.showSuccessRate ? stepColor : Theme.of(context).colorScheme.onSurface,

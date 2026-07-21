@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flux/index.dart';
 import 'package:flux/providers/index.dart';
 import '../onboard_step.dart';
 
@@ -27,28 +28,32 @@ class QuestStep implements OnboardStep {
     final options = [
       {
         'value': 'break',
-        'title': '🚫 Break Bad Habits',
+        'title': 'Break Bad Habits',
         'desc': 'I want to avoid triggers, limit distractions, or stop bad routines.',
+        'icon': Icons.block,
       },
       {
         'value': 'create',
-        'title': '✨ Creating Habits',
+        'title': 'Creating Habits',
         'desc': 'I want to establish new daily activities, positive routines, or targets.',
+        'icon': Icons.add_task,
       },
       {
         'value': 'both',
-        'title': '🧭 Don\'t Know / Both',
+        'title': 'Don\'t Know / Both',
         'desc': 'I want to build a mix of positive additions and avoid slips.',
+        'icon': Icons.alt_route,
       },
     ];
 
     return Column(
       children: options.map((opt) {
         final isSelected = state.intent == opt['value'];
+        final iconData = opt['icon'] as IconData;
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: InkWell(
-            onTap: () => notifier.setIntent(opt['value']!),
+            onTap: () => notifier.setIntent(opt['value'] as String),
             borderRadius: BorderRadius.circular(16),
             child: Container(
               padding: const EdgeInsets.all(20),
@@ -64,12 +69,18 @@ class QuestStep implements OnboardStep {
               ),
               child: Row(
                 children: [
+                  Icon(
+                    iconData,
+                    size: 28,
+                    color: isSelected ? stepColor : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          opt['title']!,
+                          opt['title'] as String,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -78,7 +89,7 @@ class QuestStep implements OnboardStep {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          opt['desc']!,
+                          opt['desc'] as String,
                           style: TextStyle(
                             fontSize: 13,
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
