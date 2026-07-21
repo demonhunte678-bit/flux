@@ -2,43 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
 import '../onboard_step.dart';
-import 'package:flux/index.dart';
-
-enum ReminderPeriod {
-  morning,
-  afternoon,
-  evening;
-
-  String get label {
-    switch (this) {
-      case ReminderPeriod.morning:
-        return '🌅 Morning (8-9 AM)';
-      case ReminderPeriod.afternoon:
-        return '☀️ Afternoon (1-2 PM)';
-      case ReminderPeriod.evening:
-        return '🌙 Evening (7-8 PM)';
-    }
-  }
-
-  String get value => name;
-}
 
 class RemindersStep implements OnboardStep {
   @override
-  String get stepName => 'Reminders';
+  String get stepName => 'Routine & Commitment';
 
   @override
-  String? get title => 'Stay on Track';
+  String? get title => 'Alignment & Commitment';
 
   @override
-  String? get subtitle => 'Reminders help you stay consistent, especially in the first 21 days';
+  String? get subtitle => 'Reminders and dedication form the building blocks of consistency.';
 
   @override
   bool canProceed(WidgetRef ref) {
-    final state = ref.read(onboardingProvider);
-    if (state.wantsReminders) {
-      return state.reminderTime != null;
-    }
     return true;
   }
 
@@ -47,74 +23,110 @@ class RemindersStep implements OnboardStep {
     final state = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
 
-    return Column(
-      children: [
-        SwitchListTile(
-          title: const Text(
-            'Enable Reminders',
-            style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(
-            state.wantsReminders ? '🔔 Yes, keep me motivated!' : '🔕 No, I\'ll remember myself',
-            style: TextStyle(color: Colors.grey[600]),
-          ),
-          value: state.wantsReminders,
-          onChanged: (value) => notifier.toggleReminders(value),
-          activeColor: stepColor,
-        ),
-        if (state.wantsReminders) ...[
-          const SizedBox(height: 24),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'When would you like to be reminded?',
-              style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.bold),
+    final commitmentOptions = [
+      {'value': 'yes', 'label': 'Yes, absolutely!'},
+      {'value': 'try', 'label': 'I will try my best'},
+      {'value': 'not_sure', 'label': 'I\'m not sure yet'},
+    ];
+
+    final reminderTimes = [
+      {'value': 'morning', 'label': '🌅 Morning (8:00 AM)'},
+      {'value': 'afternoon', 'label': '☀️ Afternoon (1:00 PM)'},
+      {'value': 'evening', 'label': '🌇 Evening (7:00 PM)'},
+      {'value': 'night', 'label': '🌃 Night (9:30 PM)'},
+    ];
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'When are you MOST likely to complete your habits?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 12),
-          Column(
-            children: ReminderPeriod.values.map((time) {
-              final isSelected = state.reminderTime == time;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: InkWell(
-                  onTap: () => notifier.setReminderTime(time),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? stepColor.withValues(alpha: 0.1) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected ? stepColor : Colors.grey.withValues(alpha: 0.2),
-                        width: 2,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            time.label,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? stepColor : Colors.black87,
-                            ),
-                          ),
-                        ),
-                        if (isSelected)
-                          Icon(Icons.check_circle, color: stepColor)
-                        else
-                          const Icon(Icons.circle_outlined, color: Colors.grey),
-                      ],
-                    ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: reminderTimes.map((time) {
+              final isSelected = state.reminderPeriod == time['value'];
+              return ChoiceChip(
+                label: Text(
+                  time['label']!,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    notifier.setReminderPeriod(time['value']!);
+                  }
+                },
+                selectedColor: stepColor,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'Can you honestly commit to this for the next 30 days?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: commitmentOptions.map((opt) {
+              final isSelected = state.commit30Days == opt['value'];
+              return ChoiceChip(
+                label: Text(
+                  opt['label']!,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    notifier.setCommit30Days(opt['value']!);
+                  }
+                },
+                selectedColor: stepColor,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.5),
                   ),
                 ),
               );
             }).toList(),
           ),
         ],
-      ],
+      ),
     );
   }
 }

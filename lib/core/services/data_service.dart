@@ -6,7 +6,7 @@ import 'package:flux/index.dart';
 class DataService {
   // Get the path of the database file to export
   static Future<String> exportToSql() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
+    final dbFolder = await getApplicationSupportDirectory();
     final file = File(join(dbFolder.path, 'flux_habits_drift.db'));
 
     if (await file.exists()) {
@@ -22,7 +22,7 @@ class DataService {
       // Close the current database connection
       await AppDatabase.instance.close();
 
-      final dbFolder = await getApplicationDocumentsDirectory();
+      final dbFolder = await getApplicationSupportDirectory();
       final targetFile = File(join(dbFolder.path, 'flux_habits_drift.db'));
       final sourceFile = File(databasePath);
 

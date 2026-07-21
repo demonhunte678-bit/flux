@@ -1,4 +1,4 @@
-package com.wisamidris.flux
+package dev.wisamidris77.flux
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
@@ -7,7 +7,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.wisamidris.flux/launcher_icon"
+    private val CHANNEL = "dev.wisamidris77.flux/launcher_icon"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)

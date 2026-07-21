@@ -3,79 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
 import '../onboard_step.dart';
 
-enum EnergyLevel {
-  low,
-  steady,
-  bright;
-
-  String get label {
-    switch (this) {
-      case EnergyLevel.low:
-        return '🔋 Low Spark';
-      case EnergyLevel.steady:
-        return '⚡ Steady Glow';
-      case EnergyLevel.bright:
-        return '🔥 Bright Flame';
-    }
-  }
-
-  String get value => name;
-}
-
-enum TimePreference {
-  morning,
-  night;
-
-  String get label {
-    switch (this) {
-      case TimePreference.morning:
-        return '☀️ Morning Person';
-      case TimePreference.night:
-        return '🦉 Night Owl';
-    }
-  }
-
-  String get value => name;
-}
-
-enum TimeAvailability {
-  under15,
-  between15And30,
-  between30And60,
-  flexible;
-
-  String get label {
-    switch (this) {
-      case TimeAvailability.under15:
-        return '⏳ Just a few minutes (<15)';
-      case TimeAvailability.between15And30:
-        return '⏱️ A good moment (15-30)';
-      case TimeAvailability.between30And60:
-        return '🕰️ A dedicated slot (30-60)';
-      case TimeAvailability.flexible:
-        return '🗓️ It\'s flexible!';
-    }
-  }
-
-  String get value => name;
-}
-
 class LifestyleStep implements OnboardStep {
   @override
-  String get stepName => 'Lifestyle';
+  String get stepName => 'Lifestyle & Obstacles';
 
   @override
-  String? get title => 'About Your Lifestyle';
+  String? get title => 'Your Constraints & Obstacles';
 
   @override
-  String? get subtitle => 'Help us understand your daily rhythm';
+  String? get subtitle => 'Understanding your limits helps us suggest realistic habits.';
 
   @override
   bool canProceed(WidgetRef ref) {
-    final state = ref.read(onboardingProvider);
-    return state.energyLevel != null &&
-        state.timePreference != null &&
-        state.timeAvailability != null;
+    // Both variables have defaults in state, so user can always proceed.
+    return true;
   }
 
   @override
@@ -83,78 +24,112 @@ class LifestyleStep implements OnboardStep {
     final state = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
 
-    return Column(
-      children: [
-        _buildLifestyleQuestion(
-          'My typical daily energy is like:',
-          EnergyLevel.values,
-          state.energyLevel,
-          (value) => notifier.setEnergyLevel(value),
-          stepColor,
-        ),
-        const SizedBox(height: 24),
-        _buildLifestyleQuestion(
-          "I'm more of a:",
-          TimePreference.values,
-          state.timePreference,
-          (value) => notifier.setTimePreference(value),
-          stepColor,
-        ),
-        const SizedBox(height: 24),
-        _buildLifestyleQuestion(
-          'Daily time for new habits:',
-          TimeAvailability.values,
-          state.timeAvailability,
-          (value) => notifier.setTimeAvailability(value),
-          stepColor,
-        ),
-      ],
-    );
-  }
+    final obstacles = [
+      {'value': 'forget', 'label': 'I forget to log/do them'},
+      {'value': 'motivation', 'label': 'I lose motivation quickly'},
+      {'value': 'time', 'label': 'I don\'t have enough time'},
+      {'value': 'too_many', 'label': 'I start too many habits at once'},
+      {'value': 'quit', 'label': 'I quit after a few days of failure'},
+    ];
 
-  Widget _buildLifestyleQuestion<T>(
-    String question,
-    List<T> options,
-    T? selectedValue,
-    ValueChanged<T> onChanged,
-    Color stepColor,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          question,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+    final timeSlots = [
+      '5 min',
+      '10 min',
+      '20 min',
+      '30+ min',
+    ];
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'What usually gets in your way of building habits?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: options.map((opt) {
-            final isSelected = opt == selectedValue;
-            String text = '';
-            if (opt is EnergyLevel) text = opt.label;
-            if (opt is TimePreference) text = opt.label;
-            if (opt is TimeAvailability) text = opt.label;
-
-            return ChoiceChip(
-              label: Text(text),
-              selected: isSelected,
-              onSelected: (_) => onChanged(opt),
-              selectedColor: stepColor.withValues(alpha: 0.2),
-              checkmarkColor: stepColor,
-              labelStyle: TextStyle(
-                color: isSelected ? stepColor : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            );
-          }).toList(),
-        ),
-      ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: obstacles.map((opt) {
+              final isSelected = state.biggestObstacle == opt['value'];
+              return ChoiceChip(
+                label: Text(
+                  opt['label']!,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    notifier.setBiggestObstacle(opt['value']!);
+                  }
+                },
+                selectedColor: stepColor,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'How much time can you realistically spend every day?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: timeSlots.map((time) {
+              final isSelected = state.timeAvailability == time;
+              return ChoiceChip(
+                label: Text(
+                  time,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    notifier.setTimeAvailability(time);
+                  }
+                },
+                selectedColor: stepColor,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 }

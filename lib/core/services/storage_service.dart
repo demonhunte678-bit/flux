@@ -5,9 +5,25 @@ import 'package:path_provider/path_provider.dart';
 
 class StorageService {
   static Future<Directory> _dataDir() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final data = Directory('${dir.path}/habits');
-    if (!await data.exists()) await data.create();
+    final supportDir = await PathService.getAppSupportDirectory();
+    final data = Directory('${supportDir.path}/habits');
+
+    // Migrate habits folder if exists in documents
+    if (!await data.exists()) {
+      try {
+        final docDir = await getApplicationDocumentsDirectory();
+        final oldDataDir = Directory('${docDir.path}/habits');
+        if (await oldDataDir.exists()) {
+          if (!await supportDir.exists()) await supportDir.create(recursive: true);
+          // Simply rename/move the directory
+          await oldDataDir.rename(data.path);
+        }
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    if (!await data.exists()) await data.create(recursive: true);
     return data;
   }
 
@@ -72,8 +88,26 @@ class StorageService {
   }
 
   static Future<File> _settingsFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/settings.json');
+    final supportDir = await PathService.getAppSupportDirectory();
+    final targetFile = File('${supportDir.path}/settings.json');
+
+    // Migration of settings.json from Documents to ApplicationSupport
+    if (!await targetFile.exists()) {
+      try {
+        final docDir = await getApplicationDocumentsDirectory();
+        final oldFile = File('${docDir.path}/settings.json');
+        if (await oldFile.exists()) {
+          if (!await supportDir.exists()) {
+            await supportDir.create(recursive: true);
+          }
+          await oldFile.copy(targetFile.path);
+          await oldFile.delete();
+        }
+      } catch (e) {
+        // Ignore
+      }
+    }
+    return targetFile;
   }
 
   static Future<Map<String, dynamic>> loadSettings() async {

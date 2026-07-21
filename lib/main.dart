@@ -30,6 +30,8 @@ class HabitTrackerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
+    final settings = ref.watch(settingsProvider);
+    final gamified = settings.gamifiedMode;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -37,29 +39,17 @@ class HabitTrackerApp extends ConsumerWidget {
       theme: ThemeService.createTheme(
         themeName: themeState.themeName,
         isDarkMode: false,
+        gamifiedMode: gamified,
       ),
       darkTheme: ThemeService.createTheme(
         themeName: themeState.themeName,
         isDarkMode: true,
+        gamifiedMode: gamified,
       ),
       themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: isFirstLaunch
           ? OnboardingPage(
-              onComplete: (themePreference) {
-                if (themePreference != null) {
-                  final themeNotifier = ref.read(themeProvider.notifier);
-                  if (themePreference == 'dark') {
-                    themeNotifier.toggleDarkMode(true);
-                    themeNotifier.selectTheme('Emerald');
-                  } else if (themePreference == 'light') {
-                    themeNotifier.toggleDarkMode(false);
-                    themeNotifier.selectTheme('Emerald');
-                  } else if (themePreference == 'system') {
-                    final isPlatformDark = ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark;
-                    themeNotifier.toggleDarkMode(isPlatformDark);
-                    themeNotifier.selectTheme('Emerald');
-                  }
-                }
+              onComplete: () {
                 _completeOnboarding(context);
               },
             )

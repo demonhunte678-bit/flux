@@ -61,7 +61,7 @@ class HabitsRepository {
       await query.write(
         HabitEntriesCompanion(
           date: Value(newEntry.date),
-          count: Value(newEntry.count),
+          count: Value(newEntry.value.toInt()),
           value: Value(newEntry.value),
           unit: Value(newEntry.unit),
           notes: Value(newEntry.notes),

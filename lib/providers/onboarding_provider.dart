@@ -4,78 +4,78 @@ import 'package:flux/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:flux/data/index.dart';
-import 'package:flux/onboard/steps/quest_step.dart';
 import 'package:flux/onboard/steps/areas_step.dart';
-import 'package:flux/onboard/steps/lifestyle_step.dart';
-import 'package:flux/onboard/steps/preferences_step.dart';
-import 'package:flux/onboard/steps/reminders_step.dart';
-import 'package:flux/onboard/steps/theme_step.dart';
 import 'habits_provider.dart';
+import 'settings_provider.dart';
 
 class OnboardingState {
   final int currentStep;
-  final OnboardingQuest? selectedQuest;
+  final String userName;
+  final String occupation;
+  final String intent; // 'break', 'create', 'both'
   final List<FocusArea> selectedAreas;
-  final Map<FocusArea, List<String>> selectedGoals;
-  final EnergyLevel? energyLevel;
-  final TimePreference? timePreference;
-  final TimeAvailability? timeAvailability;
-  final TrackingPreference? trackingPreference;
-  final StartingApproach? startingApproach;
+  final String timeAvailability; // '5 min', '10 min', '20 min', '30+ min'
+  final String experienceLevel; // 'never', 'little', 'regular'
+  final String biggestObstacle; // 'forget', 'motivation', 'time', 'too_many', 'quit'
   final List<Habit> suggestedHabits;
   final List<Habit> selectedHabits;
+  final String commit30Days; // 'yes', 'try', 'not_sure'
+  final String reminderPeriod; // 'morning', 'afternoon', 'evening', 'night'
   final bool wantsReminders;
-  final ReminderPeriod? reminderTime;
-  final ThemePreference? selectedTheme;
+  final bool gamifiedMode;
+  final bool showSuccessRate; // preference: false means streak focused, true means percentage focused
 
   OnboardingState({
     required this.currentStep,
-    this.selectedQuest,
+    required this.userName,
+    required this.occupation,
+    required this.intent,
     required this.selectedAreas,
-    required this.selectedGoals,
-    this.energyLevel,
-    this.timePreference,
-    this.timeAvailability,
-    this.trackingPreference,
-    this.startingApproach,
+    required this.timeAvailability,
+    required this.experienceLevel,
+    required this.biggestObstacle,
     required this.suggestedHabits,
     required this.selectedHabits,
+    required this.commit30Days,
+    required this.reminderPeriod,
     required this.wantsReminders,
-    this.reminderTime,
-    this.selectedTheme,
+    required this.gamifiedMode,
+    required this.showSuccessRate,
   });
 
   OnboardingState copyWith({
     int? currentStep,
-    OnboardingQuest? Function()? selectedQuest,
+    String? userName,
+    String? occupation,
+    String? intent,
     List<FocusArea>? selectedAreas,
-    Map<FocusArea, List<String>>? selectedGoals,
-    EnergyLevel? Function()? energyLevel,
-    TimePreference? Function()? timePreference,
-    TimeAvailability? Function()? timeAvailability,
-    TrackingPreference? Function()? trackingPreference,
-    StartingApproach? Function()? startingApproach,
+    String? timeAvailability,
+    String? experienceLevel,
+    String? biggestObstacle,
     List<Habit>? suggestedHabits,
     List<Habit>? selectedHabits,
+    String? commit30Days,
+    String? reminderPeriod,
     bool? wantsReminders,
-    ReminderPeriod? Function()? reminderTime,
-    ThemePreference? Function()? selectedTheme,
+    bool? gamifiedMode,
+    bool? showSuccessRate,
   }) {
     return OnboardingState(
       currentStep: currentStep ?? this.currentStep,
-      selectedQuest: selectedQuest != null ? selectedQuest() : this.selectedQuest,
+      userName: userName ?? this.userName,
+      occupation: occupation ?? this.occupation,
+      intent: intent ?? this.intent,
       selectedAreas: selectedAreas ?? this.selectedAreas,
-      selectedGoals: selectedGoals ?? this.selectedGoals,
-      energyLevel: energyLevel != null ? energyLevel() : this.energyLevel,
-      timePreference: timePreference != null ? timePreference() : this.timePreference,
-      timeAvailability: timeAvailability != null ? timeAvailability() : this.timeAvailability,
-      trackingPreference: trackingPreference != null ? trackingPreference() : this.trackingPreference,
-      startingApproach: startingApproach != null ? startingApproach() : this.startingApproach,
+      timeAvailability: timeAvailability ?? this.timeAvailability,
+      experienceLevel: experienceLevel ?? this.experienceLevel,
+      biggestObstacle: biggestObstacle ?? this.biggestObstacle,
       suggestedHabits: suggestedHabits ?? this.suggestedHabits,
       selectedHabits: selectedHabits ?? this.selectedHabits,
+      commit30Days: commit30Days ?? this.commit30Days,
+      reminderPeriod: reminderPeriod ?? this.reminderPeriod,
       wantsReminders: wantsReminders ?? this.wantsReminders,
-      reminderTime: reminderTime != null ? reminderTime() : this.reminderTime,
-      selectedTheme: selectedTheme != null ? selectedTheme() : this.selectedTheme,
+      gamifiedMode: gamifiedMode ?? this.gamifiedMode,
+      showSuccessRate: showSuccessRate ?? this.showSuccessRate,
     );
   }
 }
@@ -87,12 +87,20 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       : super(
           OnboardingState(
             currentStep: 0,
+            userName: '',
+            occupation: 'Working',
+            intent: 'both',
             selectedAreas: const [],
-            selectedGoals: const {},
+            timeAvailability: '10 min',
+            experienceLevel: 'never',
+            biggestObstacle: 'forget',
             suggestedHabits: const [],
             selectedHabits: const [],
-            wantsReminders: false,
-            selectedTheme: ThemePreference.system,
+            commit30Days: 'yes',
+            reminderPeriod: 'evening',
+            wantsReminders: true,
+            gamifiedMode: false,
+            showSuccessRate: true,
           ),
         );
 
@@ -100,53 +108,61 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(currentStep: step);
   }
 
-  void selectQuest(OnboardingQuest? quest) {
-    state = state.copyWith(selectedQuest: () => quest);
+  void setUserName(String name) {
+    state = state.copyWith(userName: name);
+  }
+
+  void setOccupation(String value) {
+    state = state.copyWith(occupation: value);
+  }
+
+  void setIntent(String value) {
+    state = state.copyWith(intent: value);
+    _generateSuggestedHabits();
   }
 
   void toggleArea(FocusArea area) {
     final list = [...state.selectedAreas];
-    final map = Map<FocusArea, List<String>>.from(state.selectedGoals);
     if (list.contains(area)) {
       list.remove(area);
-      map.remove(area);
-    } else if (list.length < 3) {
+    } else {
       list.add(area);
     }
-    state = state.copyWith(selectedAreas: list, selectedGoals: map);
+    state = state.copyWith(selectedAreas: list);
     _generateSuggestedHabits();
   }
 
-  void toggleGoal(FocusArea area, String goal) {
-    final map = Map<FocusArea, List<String>>.from(state.selectedGoals);
-    final List<String> list = [...(map[area] ?? <String>[])];
-    if (list.contains(goal)) {
-      list.remove(goal);
-    } else {
-      list.add(goal);
-    }
-    map[area] = list;
-    state = state.copyWith(selectedGoals: map);
+  void setTimeAvailability(String value) {
+    state = state.copyWith(timeAvailability: value);
+    _generateSuggestedHabits();
   }
 
-  void setEnergyLevel(EnergyLevel? energy) {
-    state = state.copyWith(energyLevel: () => energy);
+  void setExperienceLevel(String value) {
+    state = state.copyWith(experienceLevel: value);
   }
 
-  void setTimePreference(TimePreference? time) {
-    state = state.copyWith(timePreference: () => time);
+  void setBiggestObstacle(String value) {
+    state = state.copyWith(biggestObstacle: value);
   }
 
-  void setTimeAvailability(TimeAvailability? availability) {
-    state = state.copyWith(timeAvailability: () => availability);
+  void setCommit30Days(String value) {
+    state = state.copyWith(commit30Days: value);
   }
 
-  void setHabitPreference(TrackingPreference? pref) {
-    state = state.copyWith(trackingPreference: () => pref);
+  void setReminderPeriod(String value) {
+    state = state.copyWith(reminderPeriod: value);
   }
 
-  void setStartingApproach(StartingApproach? approach) {
-    state = state.copyWith(startingApproach: () => approach);
+  void toggleReminders(bool wants) {
+    state = state.copyWith(wantsReminders: wants);
+  }
+
+  void setGamifiedMode(bool value) {
+    state = state.copyWith(gamifiedMode: value);
+  }
+
+  void setShowSuccessRate(bool value) {
+    state = state.copyWith(showSuccessRate: value);
   }
 
   void toggleSuggestedHabit(Habit habit) {
@@ -160,71 +176,34 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     state = state.copyWith(selectedHabits: list);
   }
 
-  void toggleReminders(bool wants) {
-    state = state.copyWith(wantsReminders: wants);
-  }
-
-  void setReminderTime(ReminderPeriod? time) {
-    state = state.copyWith(reminderTime: () => time);
-  }
-
-  void selectTheme(ThemePreference? theme) {
-    state = state.copyWith(selectedTheme: () => theme);
-  }
-
   void _generateSuggestedHabits() {
+    double scale(double min5, double min10, double min20, double min30) {
+      if (state.timeAvailability == '5 min') return min5;
+      if (state.timeAvailability == '10 min') return min10;
+      if (state.timeAvailability == '20 min') return min20;
+      return min30;
+    }
+
     final allSuggestions = [
-      // Fitness & Workout
+      // Fitness & Health
       Habit(
         name: 'Workout',
         type: HabitType.SuccessBased,
         frequency: HabitFrequency.Daily,
         icon: Icons.fitness_center,
-        targetValue: 30,
+        targetValue: scale(5, 10, 15, 30),
         unit: HabitUnit.Minutes,
-      ),
-      Habit(
-        name: 'Go for a Run',
-        type: HabitType.SuccessBased,
-        frequency: HabitFrequency.Daily,
-        icon: Icons.directions_run,
-        targetValue: 3,
-        unit: HabitUnit.Kilometers,
+        category: 'health',
       ),
       Habit(
         name: 'Morning Walk',
         type: HabitType.SuccessBased,
         frequency: HabitFrequency.Daily,
         icon: Icons.directions_walk,
-        targetValue: 20,
+        targetValue: scale(5, 10, 15, 20),
         unit: HabitUnit.Minutes,
+        category: 'health',
       ),
-      // Breaking Bad Habits
-      Habit(
-        name: 'No Smoking',
-        type: HabitType.FailBased,
-        frequency: HabitFrequency.Daily,
-        icon: Icons.smoke_free,
-        targetValue: 1,
-        unit: HabitUnit.Count,
-      ),
-      Habit(
-        name: 'No Junk Food',
-        type: HabitType.FailBased,
-        frequency: HabitFrequency.Daily,
-        icon: Icons.no_food,
-        targetValue: 1,
-        unit: HabitUnit.Count,
-      ),
-      Habit(
-        name: 'Limit Social Media',
-        type: HabitType.FailBased,
-        frequency: HabitFrequency.Daily,
-        icon: Icons.timer_off,
-        targetValue: 30,
-        unit: HabitUnit.Minutes,
-      ),
-      // Health & Wellness
       Habit(
         name: 'Drink Water',
         type: HabitType.DoneBased,
@@ -232,31 +211,36 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         icon: Icons.local_drink,
         targetValue: 8,
         unit: HabitUnit.Count,
+        category: 'health',
       ),
       Habit(
-        name: 'Eat a Healthy Meal',
-        type: HabitType.DoneBased,
+        name: 'No Smoking',
+        type: HabitType.FailBased,
         frequency: HabitFrequency.Daily,
-        icon: Icons.restaurant,
-        targetValue: 3,
+        icon: Icons.smoke_free,
+        targetValue: 0,
         unit: HabitUnit.Count,
+        category: 'health',
       ),
       Habit(
-        name: 'Get 8 Hours of Sleep',
-        type: HabitType.SuccessBased,
+        name: 'Limit Junk Food',
+        type: HabitType.FailBased,
         frequency: HabitFrequency.Daily,
-        icon: Icons.bedtime,
-        targetValue: 8,
-        unit: HabitUnit.Hours,
+        icon: Icons.no_food,
+        targetValue: 1,
+        unit: HabitUnit.Count,
+        category: 'health',
       ),
+
       // Mindfulness & Mental Health
       Habit(
         name: 'Meditate',
         type: HabitType.SuccessBased,
         frequency: HabitFrequency.Daily,
         icon: Icons.spa,
-        targetValue: 10,
+        targetValue: scale(5, 5, 10, 15),
         unit: HabitUnit.Minutes,
+        category: 'mental',
       ),
       Habit(
         name: 'Practice Gratitude',
@@ -265,6 +249,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         icon: Icons.sentiment_satisfied_alt,
         targetValue: 1,
         unit: HabitUnit.Count,
+        category: 'mental',
       ),
       Habit(
         name: 'Journal',
@@ -273,24 +258,47 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         icon: Icons.edit_note,
         targetValue: 1,
         unit: HabitUnit.Count,
+        category: 'mental',
       ),
-      // Personal Growth
+      Habit(
+        name: 'Limit Social Media',
+        type: HabitType.FailBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.timer_off,
+        targetValue: scale(15, 30, 45, 60),
+        unit: HabitUnit.Minutes,
+        category: 'mental',
+      ),
+
+      // Learning & Productivity
       Habit(
         name: 'Read Books',
         type: HabitType.SuccessBased,
         frequency: HabitFrequency.Daily,
         icon: Icons.book,
-        targetValue: 20,
+        targetValue: scale(5, 10, 15, 20),
         unit: HabitUnit.Minutes,
+        category: 'growth',
       ),
       Habit(
         name: 'Learn Coding',
         type: HabitType.SuccessBased,
         frequency: HabitFrequency.Daily,
         icon: Icons.code,
-        targetValue: 30,
+        targetValue: scale(5, 10, 20, 30),
         unit: HabitUnit.Minutes,
+        category: 'growth',
       ),
+      Habit(
+        name: 'No Procrastination',
+        type: HabitType.FailBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.dangerous,
+        targetValue: 0,
+        unit: HabitUnit.Count,
+        category: 'growth',
+      ),
+
       // Finances
       Habit(
         name: 'Track Expenses',
@@ -299,6 +307,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         icon: Icons.attach_money,
         targetValue: 1,
         unit: HabitUnit.Count,
+        category: 'finances',
       ),
       Habit(
         name: 'Save Money',
@@ -307,65 +316,115 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
         icon: Icons.savings,
         targetValue: 1,
         unit: HabitUnit.Count,
+        category: 'finances',
       ),
-      // Home & Organization
       Habit(
-        name: 'Tidy Up',
+        name: 'No Impulse Buying',
+        type: HabitType.FailBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.money_off,
+        targetValue: 0,
+        unit: HabitUnit.Count,
+        category: 'finances',
+      ),
+
+      // Routines & Organization
+      Habit(
+        name: 'Tidy Up Room',
         type: HabitType.DoneBased,
         frequency: HabitFrequency.Daily,
         icon: Icons.cleaning_services,
-        targetValue: 15,
+        targetValue: scale(5, 10, 15, 15),
         unit: HabitUnit.Minutes,
+        category: 'home',
+      ),
+      Habit(
+        name: 'Do Dishes',
+        type: HabitType.DoneBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.flatware,
+        targetValue: 1,
+        unit: HabitUnit.Count,
+        category: 'home',
+      ),
+
+      // Sleep
+      Habit(
+        name: 'Sleep 8 Hours',
+        type: HabitType.SuccessBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.bedtime,
+        targetValue: 8,
+        unit: HabitUnit.Hours,
+        category: 'sleep',
+      ),
+      Habit(
+        name: 'No Screen in Bed',
+        type: HabitType.FailBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.phonelink_off,
+        targetValue: 0,
+        unit: HabitUnit.Count,
+        category: 'sleep',
+      ),
+
+      // Relationships
+      Habit(
+        name: 'Call a Loved One',
+        type: HabitType.DoneBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.phone_in_talk,
+        targetValue: 1,
+        unit: HabitUnit.Count,
+        category: 'relationships',
+      ),
+      Habit(
+        name: 'Express Appreciation',
+        type: HabitType.DoneBased,
+        frequency: HabitFrequency.Daily,
+        icon: Icons.favorite,
+        targetValue: 1,
+        unit: HabitUnit.Count,
+        category: 'relationships',
       ),
     ];
 
     // Filter suggestions based on selected areas
-    final Map<FocusArea, List<String>> areaKeywords = {
-      FocusArea.health: ['workout', 'run', 'walk', 'water', 'meal', 'sleep'],
-      FocusArea.growth: ['read', 'coding', 'meditate', 'gratitude', 'journal'],
-      FocusArea.finances: ['expenses', 'save'],
-      FocusArea.mental: ['meditate', 'gratitude', 'journal'],
-      FocusArea.home: ['tidy'],
-    };
-
-    final filtered = allSuggestions.where((habit) {
-      for (var area in state.selectedAreas) {
-        final keywords = areaKeywords[area] ?? [];
-        for (var keyword in keywords) {
-          if (habit.name.toLowerCase().contains(keyword)) {
-            return true;
-          }
-        }
-      }
-      return false;
+    var filtered = allSuggestions.where((habit) {
+      return state.selectedAreas.any((area) => area.name == habit.category);
     }).toList();
 
-    state = state.copyWith(suggestedHabits: filtered.isEmpty ? allSuggestions.take(5).toList() : filtered);
+    // Filter based on Quest type: 'break' (FailBased), 'create' (Success/DoneBased), 'both' (both)
+    if (state.intent == 'break') {
+      filtered = filtered.where((h) => h.type == HabitType.FailBased).toList();
+    } else if (state.intent == 'create') {
+      filtered = filtered.where((h) => h.type != HabitType.FailBased).toList();
+    }
+
+    state = state.copyWith(
+      suggestedHabits: filtered.isEmpty
+          ? allSuggestions.where((h) => state.intent == 'both' || (state.intent == 'break' ? h.type == HabitType.FailBased : h.type != HabitType.FailBased)).take(5).toList()
+          : filtered,
+    );
   }
 
   Future<void> saveAndComplete() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('onboarding_quest', state.selectedQuest?.value ?? '');
-    await prefs.setStringList('onboarding_areas', state.selectedAreas.map((e) => e.value).toList());
-    
-    // Save selected goals
-    state.selectedGoals.forEach((area, goals) async {
-      await prefs.setStringList('onboarding_goals_${area.value}', goals);
-    });
+    final settingsNotifier = _ref.read(settingsProvider.notifier);
 
-    await prefs.setString('onboarding_energy_level', state.energyLevel?.value ?? '');
-    await prefs.setString('onboarding_time_preference', state.timePreference?.value ?? '');
-    await prefs.setString('onboarding_time_availability', state.timeAvailability?.value ?? '');
-    await prefs.setString('onboarding_habit_preference', state.trackingPreference?.value ?? '');
-    await prefs.setString('onboarding_starting_approach', state.startingApproach?.value ?? '');
-    await prefs.setBool('onboarding_wants_reminders', state.wantsReminders);
-    await prefs.setString('onboarding_reminder_time', state.reminderTime?.value ?? '');
-    await prefs.setString('onboarding_selected_theme', state.selectedTheme?.value ?? 'system');
+    // Save personalized variables globally to settings & SharedPreferences
+    await settingsNotifier.setUserName(state.userName);
+    await settingsNotifier.setOccupation(state.occupation);
+    await settingsNotifier.setBiggestObstacle(state.biggestObstacle);
+    await settingsNotifier.setGamifiedMode(state.gamifiedMode);
+    await settingsNotifier.toggleShowSuccessRate(state.showSuccessRate);
 
-    // Add selected starter habits to database
+    // Seed database with starter habits chosen
     for (var habit in state.selectedHabits) {
       await _ref.read(habitsProvider.notifier).addHabit(habit);
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
   }
 }
 

@@ -3,55 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
 import '../onboard_step.dart';
 
-enum TrackingPreference {
-  simple,
-  goal,
-  avoid;
-
-  String get label {
-    switch (this) {
-      case TrackingPreference.simple:
-        return '✅ Simple yes/no tracking';
-      case TrackingPreference.goal:
-        return '📈 Goal-based with targets';
-      case TrackingPreference.avoid:
-        return '📉 Avoiding bad behaviors';
-    }
-  }
-
-  String get value => name;
-}
-
-enum StartingApproach {
-  single,
-  multiple;
-
-  String get label {
-    switch (this) {
-      case StartingApproach.single:
-        return '🎯 Focus on one habit';
-      case StartingApproach.multiple:
-        return '🤹 Start multiple habits';
-    }
-  }
-
-  String get value => name;
-}
-
 class PreferencesStep implements OnboardStep {
   @override
   String get stepName => 'Preferences';
 
   @override
-  String? get title => 'Your Preferences';
+  String? get title => 'Experience & Tracking Style';
 
   @override
-  String? get subtitle => 'How do you like to track your progress?';
+  String? get subtitle => 'Customize how you track your habits.';
 
   @override
   bool canProceed(WidgetRef ref) {
-    final state = ref.read(onboardingProvider);
-    return state.trackingPreference != null && state.startingApproach != null;
+    return true;
   }
 
   @override
@@ -59,69 +23,165 @@ class PreferencesStep implements OnboardStep {
     final state = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
 
-    return Column(
-      children: [
-        _buildPreferenceQuestion(
-          'I prefer habits that are:',
-          TrackingPreference.values,
-          state.trackingPreference,
-          (value) => notifier.setHabitPreference(value),
-          stepColor,
-        ),
-        const SizedBox(height: 24),
-        _buildPreferenceQuestion(
-          'When starting, I prefer to:',
-          StartingApproach.values,
-          state.startingApproach,
-          (value) => notifier.setStartingApproach(value),
-          stepColor,
-        ),
-      ],
-    );
-  }
+    final levels = [
+      {'value': 'never', 'label': 'Never'},
+      {'value': 'little', 'label': 'A little'},
+      {'value': 'regular', 'label': 'Regularly'},
+    ];
 
-  Widget _buildPreferenceQuestion<T>(
-    String question,
-    List<T> options,
-    T? selectedValue,
-    ValueChanged<T> onChanged,
-    Color stepColor,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          question,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Have you tracked habits before?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: options.map((opt) {
-            final isSelected = opt == selectedValue;
-            String text = '';
-            if (opt is TrackingPreference) text = opt.label;
-            if (opt is StartingApproach) text = opt.label;
-
-            return ChoiceChip(
-              label: Text(text),
-              selected: isSelected,
-              onSelected: (_) => onChanged(opt),
-              selectedColor: stepColor.withValues(alpha: 0.2),
-              checkmarkColor: stepColor,
-              labelStyle: TextStyle(
-                color: isSelected ? stepColor : Colors.black87,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: levels.map((opt) {
+              final isSelected = state.experienceLevel == opt['value'];
+              return ChoiceChip(
+                label: Text(
+                  opt['label']!,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    notifier.setExperienceLevel(opt['value']!);
+                  }
+                },
+                selectedColor: stepColor,
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                checkmarkColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected
+                        ? Colors.transparent
+                        : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            'How do you prefer to measure progress?',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () => notifier.setShowSuccessRate(false), // Streak focused
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: !state.showSuccessRate
+                    ? stepColor.withValues(alpha: 0.1)
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: !state.showSuccessRate
+                      ? stepColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
-            );
-          }).toList(),
-        ),
-      ],
+              child: Row(
+                children: [
+                  Icon(Icons.local_fire_department, color: !state.showSuccessRate ? stepColor : Colors.grey),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '🔥 Streaks Focus',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: !state.showSuccessRate ? stepColor : Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Counts consecutive days you keep the habit alive.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () => notifier.setShowSuccessRate(true), // Success rate focused
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: state.showSuccessRate
+                    ? stepColor.withValues(alpha: 0.1)
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: state.showSuccessRate
+                      ? stepColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.trending_up, color: state.showSuccessRate ? stepColor : Colors.grey),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '📈 Percentages Focus',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: state.showSuccessRate ? stepColor : Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Shows your overall consistency percentage over time.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

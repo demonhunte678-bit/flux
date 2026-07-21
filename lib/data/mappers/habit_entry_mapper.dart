@@ -5,8 +5,7 @@ class HabitEntryMapper {
   static HabitEntry toDomain(HabitEntryData row) {
     return HabitEntry(
       date: row.date,
-      count: row.count,
-      value: row.value,
+      value: row.value ?? row.count.toDouble(),
       unit: row.unit,
       notes: row.notes,
       isSkipped: row.isSkipped,
@@ -17,7 +16,7 @@ class HabitEntryMapper {
     return HabitEntriesCompanion.insert(
       habitId: habitId,
       date: entry.date,
-      count: entry.count,
+      count: entry.value.toInt(),
       value: Value(entry.value),
       unit: Value(entry.unit),
       notes: Value(entry.notes),

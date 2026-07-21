@@ -92,38 +92,32 @@ class EntriesHistoryList extends StatelessWidget {
       return 'Skipped day';
     }
 
+    String formatValue(double val) {
+      if (val == val.toInt()) {
+        return val.toInt().toString();
+      }
+      return val.toString();
+    }
+
     String description;
+    final unit = entry.unit ?? habit.getUnitDisplayName();
+    final valueStr = formatValue(entry.value);
+
     switch (habit.type) {
       case HabitType.FailBased:
-        if (entry.value != null) {
-          description = entry.count == 0
-              ? 'Success (0 ${habit.getUnitDisplayName()})'
-              : '${entry.value} ${entry.unit ?? habit.getUnitDisplayName()}';
-        } else {
-          description = entry.count == 0
-              ? 'Success (0 failures)'
-              : '${entry.count} failure(s)';
-        }
+        description = entry.value == 0
+            ? 'Success (0 failures)'
+            : '$valueStr failure(s)';
         break;
       case HabitType.SuccessBased:
-        if (entry.value != null) {
-          description = entry.count > 0
-              ? '${entry.value} ${entry.unit ?? habit.getUnitDisplayName()}'
-              : 'Failed (0 ${habit.getUnitDisplayName()})';
-        } else {
-          description = entry.count > 0
-              ? '${entry.count} success(es)'
-              : 'Failed (0 successes)';
-        }
+        description = entry.value > 0
+            ? '$valueStr success(es) / $unit'
+            : 'Failed (0 successes)';
         break;
       case HabitType.DoneBased:
-        if (entry.value != null) {
-          description = entry.count > 0
-              ? 'Completed (${entry.value} ${entry.unit ?? habit.getUnitDisplayName()})'
-              : 'Not completed';
-        } else {
-          description = entry.count > 0 ? 'Completed' : 'Not completed';
-        }
+        description = entry.value > 0
+            ? (habit.unit == HabitUnit.Count ? 'Completed' : 'Completed ($valueStr $unit)')
+            : 'Not completed';
         break;
       default:
         description = '';

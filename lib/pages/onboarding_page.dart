@@ -6,16 +6,14 @@ import 'package:flux/onboard/onboard_step.dart';
 import 'package:flux/onboard/steps/welcome_step.dart';
 import 'package:flux/onboard/steps/quest_step.dart';
 import 'package:flux/onboard/steps/areas_step.dart';
-import 'package:flux/onboard/steps/goals_step.dart';
 import 'package:flux/onboard/steps/lifestyle_step.dart';
 import 'package:flux/onboard/steps/preferences_step.dart';
 import 'package:flux/onboard/steps/starter_pack_step.dart';
 import 'package:flux/onboard/steps/reminders_step.dart';
-import 'package:flux/onboard/steps/theme_step.dart';
 import 'package:flux/onboard/steps/complete_step.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
-  final Function(String?)? onComplete;
+  final VoidCallback? onComplete;
 
   const OnboardingPage({super.key, this.onComplete});
 
@@ -37,12 +35,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       WelcomeStep(onSkip: _skipToEnd, onNext: _nextStep),
       QuestStep(),
       AreasStep(),
-      GoalsStep(),
       LifestyleStep(),
       PreferencesStep(),
       StarterPackStep(),
       RemindersStep(),
-      ThemeStep(),
       CompleteStep(),
     ];
 
@@ -99,7 +95,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
     final state = ref.read(onboardingProvider);
     if (widget.onComplete != null) {
-      widget.onComplete!(state.selectedTheme?.value);
+      widget.onComplete!();
     } else {
       if (mounted) {
         Navigator.pushReplacement(

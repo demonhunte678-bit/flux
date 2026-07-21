@@ -9,6 +9,10 @@ class SettingsState {
   final String language;
   final bool matchLauncherIcon;
   final String weekendDays;
+  final bool gamifiedMode;
+  final String userName;
+  final String occupation;
+  final String biggestObstacle;
 
   SettingsState({
     required this.showSuccessRate,
@@ -16,6 +20,10 @@ class SettingsState {
     required this.language,
     required this.matchLauncherIcon,
     required this.weekendDays,
+    required this.gamifiedMode,
+    required this.userName,
+    required this.occupation,
+    required this.biggestObstacle,
   });
 
   SettingsState copyWith({
@@ -24,6 +32,10 @@ class SettingsState {
     String? language,
     bool? matchLauncherIcon,
     String? weekendDays,
+    bool? gamifiedMode,
+    String? userName,
+    String? occupation,
+    String? biggestObstacle,
   }) {
     return SettingsState(
       showSuccessRate: showSuccessRate ?? this.showSuccessRate,
@@ -31,6 +43,10 @@ class SettingsState {
       language: language ?? this.language,
       matchLauncherIcon: matchLauncherIcon ?? this.matchLauncherIcon,
       weekendDays: weekendDays ?? this.weekendDays,
+      gamifiedMode: gamifiedMode ?? this.gamifiedMode,
+      userName: userName ?? this.userName,
+      occupation: occupation ?? this.occupation,
+      biggestObstacle: biggestObstacle ?? this.biggestObstacle,
     );
   }
 }
@@ -46,6 +62,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
           language: 'English',
           matchLauncherIcon: (!kIsWeb && defaultTargetPlatform == TargetPlatform.android),
           weekendDays: 'Saturday & Sunday',
+          gamifiedMode: false,
+          userName: '',
+          occupation: '',
+          biggestObstacle: '',
         ),
       ) {
     _loadSettings();
@@ -57,12 +77,20 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final lang = await SettingsService.getLanguage();
     final matchIcon = await SettingsService.getMatchLauncherIcon();
     final weekend = await SettingsService.getWeekendDays();
+    final gamified = await SettingsService.getGamifiedMode();
+    final name = await SettingsService.getUserName();
+    final occ = await SettingsService.getOccupation();
+    final obstacle = await SettingsService.getBiggestObstacle();
     state = SettingsState(
       showSuccessRate: successRate,
       showCurrentStreak: currentStreak,
       language: lang,
       matchLauncherIcon: matchIcon,
       weekendDays: weekend,
+      gamifiedMode: gamified,
+      userName: name,
+      occupation: occ,
+      biggestObstacle: obstacle,
     );
   }
 
@@ -86,6 +114,27 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(weekendDays: days);
   }
 
+  Future<void> setGamifiedMode(bool value) async {
+    await SettingsService.setGamifiedMode(value);
+    state = state.copyWith(gamifiedMode: value);
+    ref.read(themeProvider.notifier).selectTheme(ref.read(themeProvider).themeName);
+  }
+
+  Future<void> setUserName(String name) async {
+    await SettingsService.setUserName(name);
+    state = state.copyWith(userName: name);
+  }
+
+  Future<void> setOccupation(String value) async {
+    await SettingsService.setOccupation(value);
+    state = state.copyWith(occupation: value);
+  }
+
+  Future<void> setBiggestObstacle(String value) async {
+    await SettingsService.setBiggestObstacle(value);
+    state = state.copyWith(biggestObstacle: value);
+  }
+
   Future<void> toggleMatchLauncherIcon(bool value) async {
     await SettingsService.setMatchLauncherIcon(value);
     state = state.copyWith(matchLauncherIcon: value);
@@ -94,7 +143,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       if (defaultTargetPlatform == TargetPlatform.android) {
         try {
           final String targetIcon = themeName.toLowerCase() == 'system' ? 'Emerald' : themeName;
-          await const MethodChannel('com.wisamidris.flux/launcher_icon')
+          await const MethodChannel('dev.wisamidris77.flux/launcher_icon')
               .invokeMethod('changeIcon', {'iconName': targetIcon});
         } catch (e) {
           // Ignore error in non-android platforms or if fails

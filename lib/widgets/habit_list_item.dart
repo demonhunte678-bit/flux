@@ -289,22 +289,33 @@ class HabitListItem extends ConsumerWidget {
   }
 
   String _getHabitStatusText(Habit habit) {
+    String formatValue(double val) {
+      if (val == val.toInt()) {
+        return val.toInt().toString();
+      }
+      return val.toStringAsFixed(1);
+    }
+
     switch (habit.type) {
       case HabitType.FailBased:
         final total = habit.entries.fold(
           0.0,
-          (sum, e) => sum + (e.value ?? e.count.toDouble()),
+          (sum, e) => sum + e.value,
         );
-        return 'Failures: ${total.toStringAsFixed(1)} ${habit.getUnitDisplayName()}';
+        return 'Failures: ${formatValue(total)} ${habit.getUnitDisplayName()}';
       case HabitType.SuccessBased:
         final total = habit.entries.fold(
           0.0,
-          (sum, e) => sum + (e.value ?? e.count.toDouble()),
+          (sum, e) => sum + e.value,
         );
-        return 'Successes: ${total.toStringAsFixed(1)} ${habit.getUnitDisplayName()}';
+        return 'Successes: ${formatValue(total)} ${habit.getUnitDisplayName()}';
       case HabitType.DoneBased:
-        final total = habit.entries.fold(0, (sum, e) => sum + e.count);
-        return 'Completed $total time${total != 1 ? 's' : ''}';
+        final total = habit.entries.fold(
+          0.0,
+          (sum, e) => sum + e.value,
+        );
+        final totalInt = total.toInt();
+        return 'Completed $totalInt time${totalInt != 1 ? 's' : ''}';
     }
   }
 }

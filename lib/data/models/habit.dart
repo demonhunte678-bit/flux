@@ -153,14 +153,12 @@ class Habit {
     switch (type) {
       case HabitType.FailBased:
         final limit = targetValue ?? 0.0;
-        final actual = entry.value ?? entry.count.toDouble();
-        return actual <= limit;
+        return entry.value <= limit;
       case HabitType.SuccessBased:
         final target = targetValue ?? 0.0;
-        final actual = entry.value ?? entry.count.toDouble();
-        return target > 0 ? actual >= target : entry.count > 0;
+        return target > 0 ? entry.value >= target : entry.value > 0;
       case HabitType.DoneBased:
-        return entry.count > 0;
+        return entry.value > 0;
     }
   }
 
@@ -174,7 +172,7 @@ class Habit {
     }
 
     final targetDate = DateTime(date.year, date.month, date.day);
-    final weekendSetting = weekendDaysSetting ?? 'Saturday & Sunday';
+    final weekendSetting = weekendDaysSetting ?? this.weekendDays ?? 'Saturday & Sunday';
 
     final List<int> weekendDays;
     if (weekendSetting == 'Friday & Saturday') {
@@ -304,7 +302,7 @@ class Habit {
 
       if (type == HabitType.FailBased) {
         final limit = targetValue ?? 0.0;
-        final actual = entry.value ?? entry.count.toDouble();
+        final actual = entry.value;
         if (actual <= limit) {
           totalPoints += 1.0;
         } else {
@@ -379,7 +377,7 @@ class Habit {
   bool get hasEntries => entries.isNotEmpty;
 
   double getTotalValue() {
-    return entries.fold(0.0, (sum, e) => sum + (e.value ?? e.count.toDouble()));
+    return entries.fold(0.0, (sum, e) => sum + e.value);
   }
 
   double getAverageValue() {

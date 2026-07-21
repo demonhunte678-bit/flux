@@ -727,15 +727,17 @@ class _AddEntryDialogState extends State<AddEntryDialog>
             ),
             const SizedBox(height: 16),
           ] else ...[
-            const Text(
-              'Enter Amount',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            Text(
+              'Enter ${unitName.isNotEmpty ? "${unitName[0].toUpperCase()}${unitName.substring(1)}" : "Amount"}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _valueController,
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: unitName.isNotEmpty
+                    ? '${unitName[0].toUpperCase()}${unitName.substring(1)}'
+                    : 'Amount',
                 hintText: '0.0',
                 suffixText: unitName,
                 filled: true,
@@ -1100,7 +1102,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     if (_isSkipped) {
       final entry = HabitEntry(
         date: _selectedDate,
-        count: 0,
+        value: 0.0,
         isSkipped: true,
         notes: _skipReasonController.text.trim().isNotEmpty
             ? 'Skip reason: ${_skipReasonController.text.trim()}'
@@ -1110,24 +1112,19 @@ class _AddEntryDialogState extends State<AddEntryDialog>
       return;
     }
 
-    int count = 0;
-    double? value;
+    double value = 0.0;
 
     if (widget.habit.type == HabitType.DoneBased &&
         widget.habit.unit == HabitUnit.Count) {
-      count = _isDone ? 1 : 0;
+      value = _isDone ? 1.0 : 0.0;
     } else if (widget.habit.unit == HabitUnit.Count) {
-      count = int.tryParse(_countController.text) ?? _sliderValue;
+      value = (double.tryParse(_countController.text) ?? _sliderValue.toDouble());
     } else {
-      value = double.tryParse(_valueController.text);
-      if (value != null) {
-        count = value > 0 ? 1 : 0;
-      }
+      value = double.tryParse(_valueController.text) ?? 0.0;
     }
 
     final entry = HabitEntry(
       date: _selectedDate,
-      count: count,
       value: value,
       unit: widget.habit.unit != HabitUnit.Count
           ? widget.habit.getUnitDisplayName()

@@ -6,26 +6,29 @@ import 'package:flux/index.dart';
 
 enum FocusArea {
   health,
-  career,
   growth,
   finances,
   mental,
-  home;
+  home,
+  sleep,
+  relationships;
 
   String get label {
     switch (this) {
       case FocusArea.health:
-        return '🏃 Health & Fitness';
-      case FocusArea.career:
-        return '💼 Career & Work';
+        return '💪 Fitness & Health';
       case FocusArea.growth:
-        return '📚 Personal Growth';
+        return '📚 Learning & Productivity';
       case FocusArea.finances:
         return '💰 Finances';
       case FocusArea.mental:
-        return '😊 Mental Well-being';
+        return '🧠 Mindfulness & Mental Health';
       case FocusArea.home:
-        return '🏡 Home & Organization';
+        return '🧹 Routines & Organization';
+      case FocusArea.sleep:
+        return '😴 Sleep';
+      case FocusArea.relationships:
+        return '❤️ Relationships';
     }
   }
 
@@ -33,8 +36,6 @@ enum FocusArea {
     switch (this) {
       case FocusArea.health:
         return Icons.fitness_center;
-      case FocusArea.career:
-        return Icons.work_outline;
       case FocusArea.growth:
         return Icons.menu_book;
       case FocusArea.finances:
@@ -42,7 +43,11 @@ enum FocusArea {
       case FocusArea.mental:
         return Icons.spa_outlined;
       case FocusArea.home:
-        return Icons.home_work_outlined;
+        return Icons.cleaning_services;
+      case FocusArea.sleep:
+        return Icons.bedtime_outlined;
+      case FocusArea.relationships:
+        return Icons.favorite_border;
     }
   }
 
@@ -51,13 +56,13 @@ enum FocusArea {
 
 class AreasStep implements OnboardStep {
   @override
-  String get stepName => 'Areas of Focus';
+  String get stepName => 'Focus Areas';
 
   @override
-  String? get title => 'Areas of Focus';
+  String? get title => 'What are you trying to change in your life?';
 
   @override
-  String? get subtitle => 'Select up to 3 areas you want to prioritize';
+  String? get subtitle => 'Choose the focus areas that matter to you right now.';
 
   @override
   bool canProceed(WidgetRef ref) {
@@ -81,10 +86,14 @@ class AreasStep implements OnboardStep {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: BoxDecoration(
-                color: isSelected ? stepColor.withValues(alpha: 0.1) : Colors.white,
+                color: isSelected
+                    ? stepColor.withValues(alpha: 0.1)
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? stepColor : Colors.grey.withValues(alpha: 0.2),
+                  color: isSelected
+                      ? stepColor
+                      : Theme.of(context).dividerColor.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
@@ -93,7 +102,7 @@ class AreasStep implements OnboardStep {
                   Icon(
                     area.icon,
                     size: 28,
-                    color: isSelected ? stepColor : Colors.grey[600],
+                    color: isSelected ? stepColor : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -102,14 +111,14 @@ class AreasStep implements OnboardStep {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? stepColor : Colors.black87,
+                        color: isSelected ? stepColor : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
                   if (isSelected)
                     Icon(Icons.check_circle, color: stepColor)
                   else
-                    const Icon(Icons.circle_outlined, color: Colors.grey),
+                    Icon(Icons.circle_outlined, color: Theme.of(context).dividerColor),
                 ],
               ),
             ),

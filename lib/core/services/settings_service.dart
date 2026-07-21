@@ -101,6 +101,43 @@ class SettingsService {
     await _saveSetting(WEEKEND_DAYS_KEY, days);
   }
 
+  // Gamified & Personalization Settings
+  static Future<bool> getGamifiedMode() async {
+    final settings = await _getSettings();
+    return settings['gamified_mode'] ?? false;
+  }
+
+  static Future<void> setGamifiedMode(bool value) async {
+    await _saveSetting('gamified_mode', value);
+  }
+
+  static Future<String> getUserName() async {
+    final settings = await _getSettings();
+    return settings['user_name'] ?? '';
+  }
+
+  static Future<void> setUserName(String name) async {
+    await _saveSetting('user_name', name);
+  }
+
+  static Future<String> getOccupation() async {
+    final settings = await _getSettings();
+    return settings['occupation'] ?? '';
+  }
+
+  static Future<void> setOccupation(String value) async {
+    await _saveSetting('occupation', value);
+  }
+
+  static Future<String> getBiggestObstacle() async {
+    final settings = await _getSettings();
+    return settings['biggest_obstacle'] ?? '';
+  }
+
+  static Future<void> setBiggestObstacle(String value) async {
+    await _saveSetting('biggest_obstacle', value);
+  }
+
   // Fallbacks for display settings referenced elsewhere in the app
   static Future<bool> getShowHabitIcons() async => true;
   static Future<bool> getCompactMode() async => false;

@@ -146,7 +146,7 @@ class ActivityHeatmap extends StatelessWidget {
                               } else {
                                 final isFailBased = habit.type == HabitType.FailBased;
                                 final limit = habit.targetValue ?? 0.0;
-                                final actual = entry.value ?? entry.count.toDouble();
+                                final actual = entry.value;
 
                                 if (isFailBased) {
                                   if (actual <= limit) {

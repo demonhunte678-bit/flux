@@ -2,50 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
 import '../onboard_step.dart';
-import 'package:flux/index.dart';
-
-enum OnboardingQuest {
-  health,
-  mind,
-  calm,
-  productivity,
-  routines,
-  other;
-
-  String get label {
-    switch (this) {
-      case OnboardingQuest.health:
-        return '💪 Boost My Health & Energy';
-      case OnboardingQuest.mind:
-        return '🧠 Sharpen My Mind & Skills';
-      case OnboardingQuest.calm:
-        return '🧘 Find Calm & Reduce Stress';
-      case OnboardingQuest.productivity:
-        return '🚀 Increase My Productivity';
-      case OnboardingQuest.routines:
-        return '☀️ Build Positive Daily Routines';
-      case OnboardingQuest.other:
-        return '✨ Something Else';
-    }
-  }
-
-  String get value => name;
-}
 
 class QuestStep implements OnboardStep {
   @override
-  String get stepName => 'Quest Selection';
+  String get stepName => 'Change Goal';
 
   @override
-  String? get title => "What's Your Main Goal?";
+  String? get title => 'What are you trying to change?';
 
   @override
-  String? get subtitle => 'Choose what motivates you most right now';
+  String? get subtitle => 'This determines your recommendation style.';
 
   @override
   bool canProceed(WidgetRef ref) {
-    final state = ref.read(onboardingProvider);
-    return state.selectedQuest != null;
+    // Intent has a default of 'both', so user can always proceed.
+    return true;
   }
 
   @override
@@ -53,40 +24,74 @@ class QuestStep implements OnboardStep {
     final state = ref.watch(onboardingProvider);
     final notifier = ref.read(onboardingProvider.notifier);
 
+    final options = [
+      {
+        'value': 'break',
+        'title': '🚫 Break Bad Habits',
+        'desc': 'I want to avoid triggers, limit distractions, or stop bad routines.',
+      },
+      {
+        'value': 'create',
+        'title': '✨ Creating Habits',
+        'desc': 'I want to establish new daily activities, positive routines, or targets.',
+      },
+      {
+        'value': 'both',
+        'title': '🧭 Don\'t Know / Both',
+        'desc': 'I want to build a mix of positive additions and avoid slips.',
+      },
+    ];
+
     return Column(
-      children: OnboardingQuest.values.map((quest) {
-        final isSelected = state.selectedQuest == quest;
+      children: options.map((opt) {
+        final isSelected = state.intent == opt['value'];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.only(bottom: 16),
           child: InkWell(
-            onTap: () => notifier.selectQuest(quest),
+            onTap: () => notifier.setIntent(opt['value']!),
             borderRadius: BorderRadius.circular(16),
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: isSelected ? stepColor.withValues(alpha: 0.1) : Colors.white,
+                color: isSelected
+                    ? stepColor.withValues(alpha: 0.1)
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? stepColor : Colors.grey.withValues(alpha: 0.2),
+                  color: isSelected ? stepColor : Theme.of(context).dividerColor.withValues(alpha: 0.3),
                   width: 2,
                 ),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      quest.label,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? stepColor : Colors.black87,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          opt['title']!,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? stepColor : Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          opt['desc']!,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  const SizedBox(width: 12),
                   if (isSelected)
                     Icon(Icons.check_circle, color: stepColor)
                   else
-                    const Icon(Icons.circle_outlined, color: Colors.grey),
+                    Icon(Icons.circle_outlined, color: Theme.of(context).dividerColor),
                 ],
               ),
             ),
