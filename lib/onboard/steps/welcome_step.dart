@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/providers/index.dart';
+import 'package:flux/index.dart';
 import '../onboard_step.dart';
 
 class WelcomeStep implements OnboardStep {
@@ -26,24 +26,12 @@ class WelcomeStep implements OnboardStep {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: stepColor.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.explore,
-            size: 60,
-            color: stepColor,
-          ),
-        ),
+        const FluxLogo(size: 120, showBackground: true),
         const SizedBox(height: 32),
-        const Text(
+        Text(
           'Welcome to Flux!',
           style: TextStyle(
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
@@ -51,9 +39,9 @@ class WelcomeStep implements OnboardStep {
         ),
         const SizedBox(height: 16),
         Text(
-          "Let's build amazing habits together! Choose your path to get started with personalized recommendations.",
+          'Your journey to building better habits starts here.',
           style: TextStyle(
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 16,
             height: 1.5,
           ),
@@ -64,6 +52,7 @@ class WelcomeStep implements OnboardStep {
           children: [
             Expanded(
               child: _buildOptionButton(
+                context,
                 title: 'Quick Start',
                 subtitle: 'Set up manually',
                 icon: Icons.flash_on,
@@ -74,6 +63,7 @@ class WelcomeStep implements OnboardStep {
             const SizedBox(width: 16),
             Expanded(
               child: _buildOptionButton(
+                context,
                 title: 'Guided Setup',
                 subtitle: 'Recommended',
                 icon: Icons.map,
@@ -88,7 +78,8 @@ class WelcomeStep implements OnboardStep {
     );
   }
 
-  Widget _buildOptionButton({
+  Widget _buildOptionButton(
+    BuildContext context, {
     required String title,
     required String subtitle,
     required IconData icon,
@@ -96,31 +87,50 @@ class WelcomeStep implements OnboardStep {
     required Color stepColor,
     bool isPrimary = false,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return OutlinedButton(
       onPressed: onTap,
       style: OutlinedButton.styleFrom(
-        backgroundColor: isPrimary ? stepColor : Colors.white,
-        foregroundColor: isPrimary ? Colors.white : Colors.black87,
+        backgroundColor: isPrimary
+            ? stepColor
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+        foregroundColor: isPrimary
+            ? theme.colorScheme.onPrimary
+            : theme.colorScheme.onSurface,
         side: BorderSide(
-          color: isPrimary ? Colors.transparent : Colors.grey.withValues(alpha: 0.2),
+          color: isPrimary
+              ? Colors.transparent
+              : theme.colorScheme.onSurface.withValues(alpha: 0.1),
         ),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       child: Column(
         children: [
-          Icon(icon, size: 28),
+          Icon(
+            icon,
+            size: 28,
+            color: isPrimary ? null : stepColor,
+          ),
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: isPrimary ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
             style: TextStyle(
-              fontSize: 12,
-              color: isPrimary ? Colors.white.withValues(alpha: 0.7) : Colors.grey[600],
+              fontSize: 11,
+              color: isPrimary
+                  ? theme.colorScheme.onPrimary.withValues(alpha: 0.7)
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],

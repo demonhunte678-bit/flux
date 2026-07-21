@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
@@ -65,6 +67,22 @@ class SettingsPage extends ConsumerWidget {
                           ref.read(themeProvider.notifier).selectTheme(name);
                         },
                       ),
+                      if (!kIsWeb && Platform.isAndroid) ...[
+                        const SizedBox(height: 12),
+                        const Divider(height: 1),
+                        const SizedBox(height: 12),
+                        SettingsSwitchTile(
+                          title: 'Match Launcher Icon',
+                          subtitle: 'Sync home screen icon with theme color',
+                          value: settingsState.matchLauncherIcon,
+                          onChanged: (value) {
+                            ref
+                                .read(settingsProvider.notifier)
+                                .toggleMatchLauncherIcon(value);
+                          },
+                          icon: Icons.app_shortcut_outlined,
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
@@ -45,7 +47,18 @@ class HabitTrackerApp extends ConsumerWidget {
           ? OnboardingPage(
               onComplete: (themePreference) {
                 if (themePreference != null) {
-                  ref.read(themeProvider.notifier).selectTheme(themePreference);
+                  final themeNotifier = ref.read(themeProvider.notifier);
+                  if (themePreference == 'dark') {
+                    themeNotifier.toggleDarkMode(true);
+                    themeNotifier.selectTheme('Emerald');
+                  } else if (themePreference == 'light') {
+                    themeNotifier.toggleDarkMode(false);
+                    themeNotifier.selectTheme('Emerald');
+                  } else if (themePreference == 'system') {
+                    final isPlatformDark = ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark;
+                    themeNotifier.toggleDarkMode(isPlatformDark);
+                    themeNotifier.selectTheme('Emerald');
+                  }
                 }
                 _completeOnboarding(context);
               },

@@ -22,3 +22,4 @@ export 'entries_history_list.dart';
 export 'settings_switch_tile.dart';
 export 'settings_navigation_tile.dart';
 export 'settings_color_grid.dart';
+export 'flux_logo.dart';

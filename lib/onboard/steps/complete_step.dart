@@ -35,10 +35,10 @@ class CompleteStep implements OnboardStep {
           ),
         ),
         const SizedBox(height: 32),
-        const Text(
+        Text(
           "You're All Set!",
           style: TextStyle(
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
@@ -48,7 +48,7 @@ class CompleteStep implements OnboardStep {
         Text(
           "We've customized your experience and set up your recommended starter pack. You're ready to start building consistency!",
           style: TextStyle(
-            color: Colors.grey[600],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 16,
             height: 1.5,
           ),

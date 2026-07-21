@@ -1,6 +1,11 @@
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeState {
   final ThemeData themeData;
@@ -27,15 +32,18 @@ class ThemeState {
 }
 
 class ThemeNotifier extends StateNotifier<ThemeState> {
-  ThemeNotifier()
+  final Ref ref;
+  static const _iconChannel = MethodChannel('com.wisamidris.flux/launcher_icon');
+
+  ThemeNotifier(this.ref)
     : super(
         ThemeState(
           themeData: ThemeService.createTheme(
-            themeName: 'Green',
-            isDarkMode: false,
+            themeName: 'Emerald',
+            isDarkMode: ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark,
           ),
-          themeName: 'Green',
-          isDarkMode: false,
+          themeName: 'Emerald',
+          isDarkMode: ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark,
         ),
       ) {
     _loadTheme();
@@ -43,7 +51,17 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   Future<void> _loadTheme() async {
     final isDark = await ThemeService.isDarkMode();
-    final name = await ThemeService.getCurrentTheme();
+    var name = await ThemeService.getCurrentTheme();
+
+    if (!kIsWeb && Platform.isAndroid) {
+      try {
+        final bool isThemedEnabled = await _iconChannel.invokeMethod('isThemedIconEnabled') ?? false;
+        debugPrint('System themed icon enabled status: $isThemedEnabled');
+      } catch (e) {
+        debugPrint('Failed to query themed icon status: $e');
+      }
+    }
+
     state = ThemeState(
       themeData: ThemeService.createTheme(themeName: name, isDarkMode: isDark),
       themeName: name,
@@ -71,9 +89,24 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       ),
       themeName: themeName,
     );
+    await _updateLauncherIcon(themeName);
+  }
+
+  Future<void> _updateLauncherIcon(String themeName) async {
+    final matchIcon = ref.read(settingsProvider).matchLauncherIcon;
+    if (!matchIcon) return;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        final String targetIcon = themeName.toLowerCase() == 'system' ? 'Emerald' : themeName;
+        await _iconChannel.invokeMethod('changeIcon', {'iconName': targetIcon});
+      } catch (e) {
+        debugPrint('Failed to change launcher icon: $e');
+      }
+    }
   }
 }
 
 final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
-  return ThemeNotifier();
+  return ThemeNotifier(ref);
 });

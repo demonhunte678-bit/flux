@@ -1,21 +1,256 @@
-MIT License
+Flux Community License
+Version 1.0
+Last Updated: July 18, 2026
 
-Copyright (c) 2025 Wisam idris
+Copyright © 2026 Wisam Idris.
+All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+======================================================================
+1. DEFINITIONS
+======================================================================
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+"Software" means the Flux project, including all source code, binaries,
+documentation, assets, examples, build scripts, configuration files,
+designs, and all accompanying materials.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+"Original Author" means Wisam Idris.
+
+"Derivative Work" means any modified, extended, adapted, translated,
+refactored, enhanced, or otherwise altered version of the Software.
+
+"Fork" means any repository created from the original Flux repository.
+
+======================================================================
+2. OWNERSHIP
+======================================================================
+
+The Software is copyrighted by the Original Author.
+
+Nothing in this License transfers ownership of the Software or any part
+of it.
+
+The Original Author remains the sole original creator of Flux.
+
+======================================================================
+3. PERMISSIONS
+======================================================================
+
+You are permitted to:
+
+• Use the Software for any purpose.
+• Study the Software.
+• Fork the Software.
+• Modify the Software.
+• Improve the Software.
+• Publish your Fork.
+• Share your Fork.
+
+provided that every requirement of this License is fully satisfied.
+
+======================================================================
+4. REQUIRED ATTRIBUTION
+======================================================================
+
+Every copy, Fork, Derivative Work, binary, release, package,
+documentation, website, and repository MUST retain:
+
+Copyright © 2026 Wisam Idris
+
+Every public release must clearly state:
+
+    Original Project: Flux
+    Original Author: Wisam Idris
+
+Every Derivative Work must clearly indicate that modifications were made.
+
+Example:
+
+    "Based on Flux by Wisam Idris."
+
+Removing or hiding this attribution is prohibited.
+
+======================================================================
+5. FORKS
+======================================================================
+
+Forks are encouraged.
+
+Forks may:
+
+• modify the Software
+• publish releases only in compliance with every provision of this License.
+• distribute binaries
+• fix bugs
+• add features
+
+However every Fork MUST:
+
+• remain under this exact License
+• preserve all copyright notices
+• preserve attribution
+• identify itself as an unofficial Fork
+
+Examples:
+
+Flux – Ahmed's Fork
+
+Flux Community Fork
+
+Flux (Modified)
+
+A Fork may never claim to be the official Flux project.
+
+======================================================================
+6. PROJECT NAME
+======================================================================
+
+The word "Flux" must remain part of the project name.
+
+Forks may append additional identifiers but may not remove "Flux"
+entirely.
+
+Examples:
+
+✓ Flux Community Edition
+✓ Flux – John's Fork
+✓ Flux Enhanced
+
+Not permitted:
+
+✗ Habit Hero
+✗ My Productivity App
+✗ Better Habits
+
+======================================================================
+7. LICENSE PRESERVATION
+======================================================================
+
+This License must accompany every copy and every Fork.
+
+No person may:
+
+• replace this License
+• remove this License
+• sublicense under another License
+• relicense under MIT
+• relicense under GPL
+• relicense under Apache
+• relicense under BSD
+• relicense under any other License
+
+Every Derivative Work MUST remain licensed under the
+Flux Community License.
+======================================================================
+8. FREE SOFTWARE REQUIREMENT
+======================================================================
+
+The Software and every Derivative Work must always be distributed free
+of charge.
+
+No person or organization may require payment, directly or indirectly,
+as a condition of obtaining, using, installing, activating, updating,
+or accessing the Software or any Derivative Work.
+
+The following are prohibited, including but not limited to:
+
+• Selling the Software.
+• Selling modified versions.
+• Selling binaries.
+• Selling source code.
+• Charging for downloads.
+• Charging subscription fees.
+• Charging licensing fees.
+• Charging activation fees.
+• Paid upgrades.
+• Premium editions.
+• In-app purchases.
+• Advertisements.
+• Sponsored content displayed within the Software.
+• Bundling the Software as part of a paid product or service.
+• Restricting features behind payment.
+• Any other monetization of the Software or any Derivative Work.
+• Requiring payment to obtain the Software through any distribution platform.
+• Offering paid early access or paid exclusive builds.
+
+Voluntary donations to developers or maintainers are permitted,
+provided that:
+
+• Donations are entirely optional.
+• Donations do not grant additional features, content, support,
+  privileges, or access to the Software.
+• The Software remains fully usable without payment.
+• Donations are not presented as a requirement for obtaining or
+  continuing to use the Software.
+
+Every version of the Software and every Derivative Work distributed
+under this License must remain freely available to all users.
+
+======================================================================
+9. NO FALSE CLAIMS
+======================================================================
+
+You may not:
+
+• claim to be the original creator of Flux
+• remove the Original Author
+• imply ownership of the original project
+• misrepresent the history of the Software
+
+You own only the modifications you create.
+
+The original project remains owned by Wisam Idris.
+
+======================================================================
+10. CONTRIBUTIONS
+======================================================================
+
+Unless explicitly agreed otherwise in writing, contributors retain
+copyright to their own contributions while granting the Original Author
+a perpetual, worldwide, royalty-free, irrevocable license to use,
+modify, distribute, sublicense, and include those contributions in
+Flux.
+
+======================================================================
+11. TRADEMARKS
+======================================================================
+
+This License grants no trademark rights.
+
+The name "Flux", logos, branding, and visual identity remain the
+property of the Original Author except as expressly permitted by this
+License.
+
+======================================================================
+12. TERMINATION
+======================================================================
+
+Any violation of this License immediately terminates all rights granted
+under it.
+
+Upon termination, all copies and distributions made in violation of this
+License become unauthorized.
+
+======================================================================
+13. DISCLAIMER
+======================================================================
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NONINFRINGEMENT.
+
+THE ORIGINAL AUTHOR SHALL NOT BE LIABLE FOR ANY CLAIM, DAMAGES,
+OR OTHER LIABILITY ARISING FROM THE SOFTWARE.
+
+======================================================================
+14. ENTIRE LICENSE
+======================================================================
+
+This document constitutes the complete License governing the Software.
+
+Any permissions beyond those expressly granted require prior written
+permission from the Original Author.
+
+======================================================================
+END OF LICENSE
+======================================================================

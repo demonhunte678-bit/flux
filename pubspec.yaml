@@ -16,7 +16,8 @@ dependencies:
   path_provider:
   shared_preferences:
   intl:
-  flutter_launcher_icons:
+  flutter_svg: ^2.0.10
+
 
   share_plus:
   csv:
@@ -48,6 +49,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - icon.svg
 
 flutter_launcher_icons:
   android: true

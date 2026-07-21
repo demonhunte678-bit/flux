@@ -10,25 +10,17 @@ class AccentColor {
 
 class ThemeService {
   static VoidCallback? onThemeChanged;
+  
   // Predefined accent colors with proper structure
   static final List<AccentColor> accentColors = [
-    const AccentColor('Green', Color(0xFF1DB954)),
-    const AccentColor('Blue', Color(0xFF2196F3)),
-    const AccentColor('Purple', Color(0xFF9C27B0)),
-    const AccentColor('Orange', Color(0xFFFF9800)),
-    const AccentColor('Red', Color(0xFFF44336)),
-    const AccentColor('Teal', Color(0xFF009688)),
-    const AccentColor('Indigo', Color(0xFF3F51B5)),
-    const AccentColor('Pink', Color(0xFFE91E63)),
-    const AccentColor('Deep Purple', Color(0xFF673AB7)),
-    const AccentColor('Cyan', Color(0xFF00BCD4)),
+    const AccentColor('Emerald', Color(0xFF1DB954)),
+    const AccentColor('Azure', Color(0xFF2196F3)),
+    const AccentColor('Violet', Color(0xFF9C27B0)),
+    const AccentColor('Sunset', Color(0xFFFF9800)),
+    const AccentColor('Ruby', Color(0xFFF44336)),
     const AccentColor('Amber', Color(0xFFFFC107)),
-    const AccentColor('Deep Orange', Color(0xFFFF5722)),
-    const AccentColor('Light Blue', Color(0xFF03A9F4)),
-    const AccentColor('Lime', Color(0xFFCDDC39)),
-    const AccentColor('Yellow', Color(0xFFFFEB3B)),
-    const AccentColor('Brown', Color(0xFF795548)),
-    const AccentColor('Grey', Color(0xFF607D8B)),
+    const AccentColor('Graphite', Color(0xFF4A4A4A)),
+    const AccentColor('Blossom', Color(0xFFE91E63)),
   ];
 
   static Future<bool> isDarkMode() async {
@@ -41,6 +33,9 @@ class ThemeService {
 
   static Future<Color> getAccentColor() async {
     final themeName = await getCurrentTheme();
+    if (themeName.toLowerCase() == 'system') {
+      return accentColors[0].color; // Default fallback to Emerald
+    }
     final accent = accentColors.firstWhere(
       (c) => c.colorName.toLowerCase() == themeName.toLowerCase(),
       orElse: () => accentColors[0],
@@ -57,7 +52,12 @@ class ThemeService {
   }
 
   static Future<String> getCurrentTheme() async {
-    return await SettingsService.getSelectedTheme();
+    final theme = await SettingsService.getSelectedTheme();
+    // Migrating old 'Green' theme to 'Emerald'
+    if (theme.toLowerCase() == 'green') {
+      return 'Emerald';
+    }
+    return theme;
   }
 
   static Future<void> setCurrentTheme(String themeName) async {
@@ -67,7 +67,21 @@ class ThemeService {
   static ThemeData createTheme({
     required String themeName,
     required bool isDarkMode,
+    ColorScheme? dynamicColorScheme,
   }) {
+    if (themeName.toLowerCase() == 'system' && dynamicColorScheme != null) {
+      return ThemeData(
+        useMaterial3: true,
+        brightness: isDarkMode ? Brightness.dark : Brightness.light,
+        colorScheme: dynamicColorScheme,
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+        ),
+      );
+    }
+
     final accent = accentColors.firstWhere(
       (c) => c.colorName.toLowerCase() == themeName.toLowerCase(),
       orElse: () => accentColors[0],
@@ -81,7 +95,6 @@ class ThemeService {
       colorScheme: ColorScheme.fromSeed(
         seedColor: primaryColor,
         brightness: useDark ? Brightness.dark : Brightness.light,
-        primary: primaryColor,
       ),
       appBarTheme: const AppBarTheme(
         elevation: 0,
@@ -92,7 +105,10 @@ class ThemeService {
   }
 
   static List<Color> getGradientColors(Color primary) {
-    return [primary, primary.withValues(alpha: 0.8)];
+    final hsl = HSLColor.fromColor(primary);
+    final color1 = hsl.withLightness((hsl.lightness + 0.12).clamp(0.0, 1.0)).toColor();
+    final color2 = hsl.withLightness((hsl.lightness - 0.12).clamp(0.0, 1.0)).toColor();
+    return [color1, color2];
   }
 
   static Color getComplementaryColor(Color color) {

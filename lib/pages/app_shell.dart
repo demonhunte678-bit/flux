@@ -142,21 +142,23 @@ class _AppShellState extends ConsumerState<AppShell> {
             ),
           ],
         ),
-        body: IndexedStack(
-          index: _currentIndex,
-          children: [
-            HabitsPage(
-              scrollController: _habitsScrollController,
-              onAddHabit: _showAddHabit,
-            ),
-            DashboardPage(
-              scrollController: _dashboardScrollController,
-            ),
-            const AnalyticsDashboardPage(
-              showBackButton: false,
-            ),
-            const SettingsPage(),
-          ],
+        body: SafeArea(
+          child: IndexedStack(
+            index: _currentIndex,
+            children: [
+              HabitsPage(
+                scrollController: _habitsScrollController,
+                onAddHabit: _showAddHabit,
+              ),
+              DashboardPage(
+                scrollController: _dashboardScrollController,
+              ),
+              const AnalyticsDashboardPage(
+                showBackButton: false,
+              ),
+              const SettingsPage(),
+            ],
+          ),
         ),
       ),
     );

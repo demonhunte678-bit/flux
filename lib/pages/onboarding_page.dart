@@ -29,20 +29,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
 
   late final List<OnboardStep> _stepsList;
   late AnimationController _headerAnimationController;
-  late Animation<Color?> _headerColorAnimation;
-
-  final List<Color> _stepColors = [
-    Colors.deepPurple,
-    Colors.blue,
-    Colors.teal,
-    Colors.green,
-    Colors.orange,
-    Colors.red,
-    Colors.pink,
-    Colors.indigo,
-    Colors.cyan,
-    Colors.deepPurple,
-  ];
 
   @override
   void initState() {
@@ -64,11 +50,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
-    _headerColorAnimation = ColorTween(
-      begin: _stepColors[0],
-      end: _stepColors[0],
-    ).animate(_headerAnimationController);
   }
 
   @override
@@ -76,24 +57,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     _pageController.dispose();
     _headerAnimationController.dispose();
     super.dispose();
-  }
-
-  void _animateHeaderColor() {
-    final state = ref.read(onboardingProvider);
-    final previousColor = _headerColorAnimation.value ?? _stepColors[0];
-    final nextColor = _stepColors[state.currentStep];
-
-    _headerColorAnimation = ColorTween(
-      begin: previousColor,
-      end: nextColor,
-    ).animate(
-      CurvedAnimation(
-        parent: _headerAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _headerAnimationController.forward(from: 0.0);
   }
 
   void _nextStep() {
@@ -119,12 +82,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   }
 
   void _skipToEnd() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const AppShell(),
-      ),
-    );
+    _completeOnboarding();
   }
 
   bool _canProceed() {
@@ -155,10 +113,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(onboardingProvider);
-    final currentColor = _headerColorAnimation.value ?? _stepColors[state.currentStep];
+    final currentColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -169,7 +127,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 physics: const NeverScrollableScrollPhysics(), // Prevent swipe to bypass validation
                 onPageChanged: (index) {
                   ref.read(onboardingProvider.notifier).setStep(index);
-                  _animateHeaderColor();
                 },
                 children: _stepsList
                     .map((step) => _buildStepContainer(
@@ -178,7 +135,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                           child: step.buildContent(
                             context,
                             ref,
-                            _stepColors[state.currentStep],
+                            currentColor,
                           ),
                         ))
                     .toList(),
@@ -192,75 +149,70 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   }
 
   Widget _buildAnimatedHeader(Color currentColor, int currentStep) {
-    return AnimatedBuilder(
-      animation: _headerAnimationController,
-      builder: (context, child) {
-        final animatedColor = _headerColorAnimation.value ?? currentColor;
-        return Container(
-          height: 120,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                animatedColor,
-                animatedColor.withValues(alpha: 0.8),
-              ],
-            ),
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: animatedColor.withValues(alpha: 0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
+    return Container(
+      height: 110,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            currentColor,
+            currentColor.withValues(alpha: 0.8),
+          ],
+        ),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: currentColor.withValues(alpha: 0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Flux Setup',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                const Text(
-                  'Flux Setup',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: List.generate(_stepsList.length, (index) {
-                    return Expanded(
-                      child: Container(
-                        height: 4,
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          color: index <= currentStep
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${currentStep + 1}/${_stepsList.length} - ${_stepsList[currentStep].stepName}',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 10),
+            Row(
+              children: List.generate(_stepsList.length, (index) {
+                return Expanded(
+                  child: Container(
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      color: index <= currentStep
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${currentStep + 1}/${_stepsList.length} - ${_stepsList[currentStep].stepName}',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -277,24 +229,28 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           if (title != null) ...[
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.black87,
-                fontSize: 24,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 21,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
           ],
           if (subtitle != null) ...[
             Text(
               subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-                height: 1.4,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                fontSize: 14,
+                height: 1.3,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
           ],
           Expanded(child: SingleChildScrollView(child: child)),
         ],

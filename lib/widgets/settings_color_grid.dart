@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flux/providers/index.dart';
 import 'package:flux/core/index.dart';
@@ -15,6 +17,7 @@ class SettingsColorGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = ThemeService.accentColors;
+
     return SizedBox(
       height: 44,
       child: ListView.separated(
@@ -27,35 +30,39 @@ class SettingsColorGrid extends StatelessWidget {
           final name = item.colorName;
           final isSelected = themeState.themeName.toLowerCase() == name.toLowerCase();
 
+          final decoration = BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isSelected
+                  ? (themeState.isDarkMode ? Colors.white : Colors.black87)
+                  : Colors.transparent,
+              width: 3,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.3),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          );
+
+          final buttonContent = isSelected
+              ? Icon(
+                  Icons.check,
+                  color: _isDarkColor(color) ? Colors.white : Colors.black87,
+                  size: 16,
+                )
+              : const SizedBox.shrink();
+
           return GestureDetector(
             onTap: () => onThemeSelected(name),
             child: Container(
               width: 36,
               height: 36,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? (themeState.isDarkMode ? Colors.white : Colors.black87)
-                      : Colors.transparent,
-                  width: 3,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.3),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: isSelected
-                  ? Icon(
-                      Icons.check,
-                      color: _isDarkColor(color) ? Colors.white : Colors.black87,
-                      size: 16,
-                    )
-                  : null,
+              decoration: decoration,
+              child: Center(child: buttonContent),
             ),
           );
         },

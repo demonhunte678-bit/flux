@@ -1,3 +1,6 @@
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flux/index.dart';
 
 class SettingsService {
@@ -25,6 +28,9 @@ class SettingsService {
   // Theme settings
   static Future<bool> isDarkMode() async {
     final settings = await _getSettings();
+    if (settings['dark_mode'] == null) {
+      return ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark;
+    }
     return settings['dark_mode'] ?? false;
   }
 
@@ -34,7 +40,7 @@ class SettingsService {
 
   static Future<String> getSelectedTheme() async {
     final settings = await _getSettings();
-    return settings[SELECTED_THEME_KEY] ?? 'Green';
+    return settings[SELECTED_THEME_KEY] ?? 'Emerald';
   }
 
   static Future<void> setSelectedTheme(String themeKey) async {
@@ -68,6 +74,19 @@ class SettingsService {
 
   static Future<void> setLanguage(String language) async {
     await _saveSetting(LANGUAGE_KEY, language);
+  }
+
+  // Launcher icon preference
+  static const String MATCH_LAUNCHER_ICON_KEY = 'match_launcher_icon';
+
+  static Future<bool> getMatchLauncherIcon() async {
+    final settings = await _getSettings();
+    final defaultMatch = (!kIsWeb && Platform.isAndroid);
+    return settings[MATCH_LAUNCHER_ICON_KEY] ?? defaultMatch;
+  }
+
+  static Future<void> setMatchLauncherIcon(bool match) async {
+    await _saveSetting(MATCH_LAUNCHER_ICON_KEY, match);
   }
 
   // Fallbacks for display settings referenced elsewhere in the app

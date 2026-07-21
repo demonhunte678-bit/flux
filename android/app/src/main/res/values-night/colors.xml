@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background_emerald">#121212</color>
+    <color name="ic_launcher_background_azure">#121212</color>
+    <color name="ic_launcher_background_violet">#121212</color>
+    <color name="ic_launcher_background_sunset">#121212</color>
+    <color name="ic_launcher_background_ruby">#121212</color>
+    <color name="ic_launcher_background_amber">#121212</color>
+    <color name="ic_launcher_background_graphite">#121212</color>
+    <color name="ic_launcher_background_blossom">#121212</color>
+</resources>
