@@ -36,6 +36,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
       backgroundColor: Colors.transparent,
       builder: (context) => AddEntryDialog(
         habit: habit,
+        showDateSelector: true,
         onSave: (entry) async {
           await ref.read(habitsProvider.notifier).addEntry(habit, entry);
           if (mounted) Navigator.of(context).pop();
@@ -237,37 +238,56 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     final showSuccessRate = settingsState.showSuccessRate;
     final showCurrentStreak = settingsState.showCurrentStreak;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(habit.name),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
-            Tab(icon: Icon(Icons.analytics), text: 'Analytics'),
+    final habitColor = habit.color;
+    final baseTheme = Theme.of(context);
+    final themeData = habitColor != null
+        ? (() {
+            final colorScheme = ColorScheme.fromSeed(
+              seedColor: habitColor,
+              brightness: baseTheme.brightness,
+            );
+            return baseTheme.copyWith(
+              primaryColor: habitColor,
+              scaffoldBackgroundColor: colorScheme.surface,
+              colorScheme: colorScheme,
+            );
+          })()
+        : baseTheme;
+
+    return Theme(
+      data: themeData,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(habit.name),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
+              Tab(icon: Icon(Icons.analytics), text: 'Analytics'),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => _showToggleDisplayModeDialog(habit),
+            ),
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: () => _showDeleteHabitDialog(habit),
+            ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _showToggleDisplayModeDialog(habit),
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () => _showDeleteHabitDialog(habit),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddEntryDialog(habit),
-        child: const Icon(Icons.add),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildDashboardTab(habit, showSuccessRate, showCurrentStreak),
-          _buildAnalyticsTab(habit),
-        ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _showAddEntryDialog(habit),
+          child: const Icon(Icons.add),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildDashboardTab(habit, showSuccessRate, showCurrentStreak),
+            _buildAnalyticsTab(habit),
+          ],
+        ),
       ),
     );
   }

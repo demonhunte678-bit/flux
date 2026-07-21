@@ -5,12 +5,14 @@ import 'package:flux/index.dart';
 class AddEntryDialog extends StatefulWidget {
   final Habit habit;
   final DateTime? selectedDate;
+  final bool showDateSelector;
   final Function(HabitEntry) onSave;
 
   const AddEntryDialog({
     super.key,
     required this.habit,
     this.selectedDate,
+    this.showDateSelector = false,
     required this.onSave,
   });
 
@@ -30,10 +32,45 @@ class _AddEntryDialogState extends State<AddEntryDialog>
   int _sliderValue = 0;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late DateTime _selectedDate;
+
+  bool _hasEntryForDate(DateTime date) {
+    return widget.habit.entries.any(
+      (e) =>
+          e.date.year == date.year &&
+          e.date.month == date.month &&
+          e.date.day == date.day,
+    );
+  }
+
+  DateTime _getDefaultDate() {
+    if (widget.habit.entries.isEmpty) {
+      return DateTime.now();
+    }
+
+    DateTime? latestDate;
+    for (final entry in widget.habit.entries) {
+      if (latestDate == null || entry.date.isAfter(latestDate)) {
+        latestDate = entry.date;
+      }
+    }
+
+    if (latestDate != null) {
+      final nextDay = latestDate.add(const Duration(days: 1));
+      return nextDay;
+    }
+
+    var date = DateTime.now();
+    while (_hasEntryForDate(date)) {
+      date = date.add(const Duration(days: 1));
+    }
+    return date;
+  }
 
   @override
   void initState() {
     super.initState();
+    _selectedDate = widget.selectedDate ?? _getDefaultDate();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -60,9 +97,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
   }
 
   String get _getMainTitle {
-    final dateStr = widget.selectedDate != null
-        ? DateFormat('EEE, MMM d').format(widget.selectedDate!)
-        : 'Today';
+    final dateStr = DateFormat('EEE, MMM d').format(_selectedDate);
     if (_isSkipped) return 'Skipping $dateStr';
 
     if (widget.habit.unit != HabitUnit.Count &&
@@ -89,60 +124,97 @@ class _AddEntryDialogState extends State<AddEntryDialog>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
-      decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 5),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildHeader(),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!_isSkipped) ...[
-                    const SizedBox(height: 20),
-                    _buildMainContent(),
-                    if (widget.habit.targetValue != null && !_isSkipped) ...[
-                      const SizedBox(height: 10),
-                      _buildTargetProgressIndicator(),
-                    ],
-                    const SizedBox(height: 10),
-                    _buildNotesSection(),
-                  ] else ...[
-                    const SizedBox(height: 20),
-                    _buildSkipReasonSection(),
-                  ],
-                  const SizedBox(height: 10),
-                  _buildSkipSection(),
-                  const SizedBox(height: 24),
-                  _buildActionButtons(),
-                ],
+    final habitColor = widget.habit.color;
+    final baseTheme = Theme.of(context);
+    final themeData = habitColor != null
+        ? (() {
+            final colorScheme = ColorScheme.fromSeed(
+              seedColor: habitColor,
+              brightness: baseTheme.brightness,
+            );
+            return baseTheme.copyWith(
+              primaryColor: habitColor,
+              scaffoldBackgroundColor: colorScheme.surface,
+              colorScheme: colorScheme,
+            );
+          })()
+        : baseTheme;
+
+    return Theme(
+      data: themeData,
+      child: Builder(
+        builder: (context) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.9,
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
               ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10,
+                  spreadRadius: 5,
+                ),
+              ],
             ),
-          ),
-        ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (widget.showDateSelector) ...[
+                          _buildDateSelectorSection(context),
+                          const SizedBox(height: 16),
+                        ],
+                        if (!_isSkipped) ...[
+                          _buildMainContent(context),
+                          if (widget.habit.targetValue != null &&
+                              !_isSkipped) ...[
+                            const SizedBox(height: 16),
+                            _buildTargetProgressIndicator(),
+                          ],
+                          const SizedBox(height: 16),
+                          _buildNotesSection(context),
+                        ] else ...[
+                          _buildSkipReasonSection(),
+                        ],
+                        const SizedBox(height: 16),
+                        _buildSkipSection(),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+                    child: _buildActionButtons(context),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            widget.habit.color?.withValues(alpha: 0.8) ??
-                Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
-            widget.habit.color ?? Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
+            Theme.of(context).colorScheme.primary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -190,6 +262,95 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateSelectorSection(BuildContext context) {
+    final entryExists = _hasEntryForDate(_selectedDate);
+    final dateStr = DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: entryExists
+              ? Colors.red.withValues(alpha: 0.3)
+              : Theme.of(context).dividerColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: entryExists
+                    ? Colors.red
+                    : Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Date',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedDate,
+                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+              );
+              if (picked != null) {
+                setState(() {
+                  _selectedDate = picked;
+                });
+              }
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    dateStr,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: entryExists ? Colors.red : null,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: entryExists
+                        ? Colors.red
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (entryExists) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'An entry already exists for this day.',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -259,16 +420,16 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     );
   }
 
-  Widget _buildMainContent() {
+  Widget _buildMainContent(BuildContext context) {
     if (widget.habit.type == HabitType.DoneBased &&
         widget.habit.unit == HabitUnit.Count) {
-      return _buildDoneTypeInput();
+      return _buildDoneTypeInput(context);
     } else {
-      return _buildValueInput();
+      return _buildValueInput(context);
     }
   }
 
-  Widget _buildDoneTypeInput() {
+  Widget _buildDoneTypeInput(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -341,7 +502,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     );
   }
 
-  Widget _buildValueInput() {
+  Widget _buildValueInput(BuildContext context) {
     final hasTargetValue = widget.habit.targetValue != null;
     final unitName = widget.habit.getUnitDisplayName();
 
@@ -422,18 +583,19 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        height: 30,
-                        width: 30,
+                        height: 44,
+                        width: 44,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           color: Theme.of(
                             context,
                           ).colorScheme.primary.withValues(alpha: 0.1),
                         ),
                         child: IconButton(
+                          padding: EdgeInsets.zero,
                           style: IconButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: () {
@@ -451,7 +613,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                             Icons.remove,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          iconSize: 16,
+                          iconSize: 20,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -495,18 +657,19 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                       ),
                       const SizedBox(width: 10),
                       Container(
-                        height: 30,
-                        width: 30,
+                        height: 44,
+                        width: 44,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           color: Theme.of(
                             context,
                           ).colorScheme.primary.withValues(alpha: 0.1),
                         ),
                         child: IconButton(
+                          padding: EdgeInsets.zero,
                           style: IconButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: () {
@@ -522,7 +685,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                             Icons.add,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                          iconSize: 16,
+                          iconSize: 20,
                         ),
                       ),
                     ],
@@ -533,13 +696,13 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildQuickButton('+1', 1),
+                        _buildQuickButton(context, '+1', 1),
                         const SizedBox(width: 8),
-                        _buildQuickButton('+5', 5),
+                        _buildQuickButton(context, '+5', 5),
                         const SizedBox(width: 8),
-                        _buildQuickButton('+10', 10),
+                        _buildQuickButton(context, '+10', 10),
                         const SizedBox(width: 8),
-                        _buildQuickButton('Reset', -1),
+                        _buildQuickButton(context, 'Reset', -1),
                       ],
                     ),
                   ),
@@ -690,7 +853,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     );
   }
 
-  Widget _buildNotesSection() {
+  Widget _buildNotesSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -807,7 +970,10 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
+    final entryExists =
+        widget.showDateSelector && _hasEntryForDate(_selectedDate);
+
     return Row(
       children: [
         Expanded(
@@ -828,12 +994,11 @@ class _AddEntryDialogState extends State<AddEntryDialog>
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: _saveEntry,
+            onPressed: entryExists ? null : _saveEntry,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isSkipped
                   ? Colors.orange
-                  : (widget.habit.color ??
-                        Theme.of(context).colorScheme.primary),
+                  : Theme.of(context).colorScheme.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -874,9 +1039,9 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     }
   }
 
-  Widget _buildQuickButton(String label, int value) {
+  Widget _buildQuickButton(BuildContext context, String label, int value) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 60),
+      constraints: const BoxConstraints(minWidth: 70),
       child: ElevatedButton(
         onPressed: () {
           if (value == -1) {
@@ -900,14 +1065,16 @@ class _AddEntryDialogState extends State<AddEntryDialog>
           foregroundColor: value == -1
               ? Colors.white
               : Theme.of(context).colorScheme.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          minimumSize: const Size(50, 32),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          minimumSize: const Size(70, 44),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 0,
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -916,7 +1083,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
   void _saveEntry() {
     if (_isSkipped) {
       final entry = HabitEntry(
-        date: widget.selectedDate ?? DateTime.now(),
+        date: _selectedDate,
         count: 0,
         isSkipped: true,
         notes: _skipReasonController.text.trim().isNotEmpty
@@ -943,7 +1110,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     }
 
     final entry = HabitEntry(
-      date: widget.selectedDate ?? DateTime.now(),
+      date: _selectedDate,
       count: count,
       value: value,
       unit: widget.habit.unit != HabitUnit.Count
