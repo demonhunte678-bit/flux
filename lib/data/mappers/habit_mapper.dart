@@ -10,7 +10,7 @@ class HabitMapper {
       type: HabitType.values[row.type],
       displayMode: ReportDisplay.values[row.displayMode],
       icon: row.icon != null
-          ? IconData(row.icon!, fontFamily: 'MaterialIcons')
+          ? HabitsIcon.fromCodePoint(row.icon)
           : null,
       color: row.color != null ? Color(row.color!) : null,
       isArchived: row.isArchived,

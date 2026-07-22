@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flux/index.dart';
 import 'package:flux/providers/index.dart';
 import 'package:flux/widgets/index.dart';
@@ -222,6 +225,32 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     }
   }
 
+  Future<void> _exportHabitReport(Habit habit) async {
+    try {
+      final repository = ref.read(habitsRepositoryProvider);
+      final csvData = repository.exportHabitToCsv(habit);
+
+      final tempDir = await getTemporaryDirectory();
+      final sanitizedName = habit.name.replaceAll(RegExp(r'[^\w\s-]'), '').trim().replaceAll(RegExp(r'\s+'), '_');
+      final fileName = '${sanitizedName}_report.csv';
+      final file = File('${tempDir.path}/$fileName');
+      await file.writeAsString(csvData);
+
+      final xFile = XFile(file.path, mimeType: 'text/csv');
+      await Share.shareXFiles(
+        [xFile],
+        subject: '${habit.name} - Habit Report',
+        text: 'Here is the detailed CSV report for my habit "${habit.name}".',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to export report: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final habit = ref.watch(habitDetailProvider(widget.habit.id));
@@ -268,6 +297,11 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           ),
           actions: [
             IconButton(
+              icon: const Icon(Icons.ios_share),
+              tooltip: 'Export CSV Report',
+              onPressed: () => _exportHabitReport(habit),
+            ),
+            IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () => _showDeleteHabitDialog(habit),
             ),
@@ -298,6 +332,8 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          _buildHeaderMetaCard(habit),
+          const SizedBox(height: 16),
           _buildMotivationalBanner(habit),
           _buildGoalProgressCard(habit),
           QuickStatsCard(
@@ -306,6 +342,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
             showCurrentStreak: showCurrentStreak,
           ),
           const SizedBox(height: 24),
+
           const Text(
             'History Logs',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -320,11 +357,105 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     );
   }
 
+  Widget _buildHeaderMetaCard(Habit habit) {
+    final typeName = habit.type.name;
+    final frequencyText = habit.getFrequencyDisplayText();
+    final unitText = habit.getUnitDisplayName();
+    final categoryText = habit.category ?? 'Uncategorized';
+
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            if (habit.icon != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  habit.icon,
+                  size: 28,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          typeName,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          categoryText,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Frequency: $frequencyText • Unit: $unitText',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+                    ),
+                  ),
+                  if (habit.notes != null && habit.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      habit.notes!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMotivationalBanner(Habit habit) {
+
     final hasRecentFailure = habit.type == HabitType.FailBased && habit.entries.any((e) {
       final isTodayOrYesterday = DateUtils.isSameDay(e.date, DateTime.now()) ||
           DateUtils.isSameDay(e.date, DateTime.now().subtract(const Duration(days: 1)));
-      return isTodayOrYesterday && (e.value ?? 0) > 0;
+      return isTodayOrYesterday && e.value > 0;
     });
 
     if (!hasRecentFailure) return const SizedBox.shrink();

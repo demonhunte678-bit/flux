@@ -1,5 +1,6 @@
-import 'dart:ui' as ui;
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flux/index.dart';
 
@@ -8,124 +9,187 @@ class SettingsService {
   static const String LANGUAGE_KEY = 'language';
   static const String SHOW_SUCCESS_RATE_KEY = 'show_success_rate';
   static const String SHOW_CURRENT_STREAK_KEY = 'show_current_streak';
+  static const String MATCH_LAUNCHER_ICON_KEY = 'match_launcher_icon';
+  static const String WEEKEND_DAYS_KEY = 'weekend_days';
 
-  // In-memory cache to speed up reads and avoid frequent IO
-  static Map<String, dynamic>? _cachedSettings;
+  static Map<String, dynamic>? _cache;
 
-  static Future<Map<String, dynamic>> _getSettings() async {
-    if (_cachedSettings != null) return _cachedSettings!;
-    _cachedSettings = await StorageService.loadSettings();
-    return _cachedSettings!;
+  static Future<Map<String, dynamic>> _getPrefs() async {
+    if (_cache != null) return _cache!;
+    try {
+      final file = await PathService.getSharedPrefsFile();
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        _cache = jsonDecode(content) as Map<String, dynamic>;
+        return _cache!;
+      }
+    } catch (e) {
+      print('Error loading shared prefs: $e');
+    }
+    _cache = {};
+    return _cache!;
   }
 
-  static Future<void> _saveSetting(String key, dynamic value) async {
-    final settings = await _getSettings();
-    settings[key] = value;
-    _cachedSettings = settings;
-    await StorageService.saveSettings(settings);
+  static Future<void> reloadSettings() async {
+    _cache = null;
+    await _getPrefs();
+  }
+
+  static Future<void> _savePrefs() async {
+
+    if (_cache == null) return;
+    try {
+      final file = await PathService.getSharedPrefsFile();
+      if (!await file.parent.exists()) {
+        await file.parent.create(recursive: true);
+      }
+      await file.writeAsString(jsonEncode(_cache));
+    } catch (e) {
+      print('Error saving shared prefs: $e');
+    }
+  }
+
+  static Future<T?> _getValue<T>(String key) async {
+    final prefs = await _getPrefs();
+    return prefs[key] as T?;
+  }
+
+  static Future<void> _setValue(String key, dynamic value) async {
+    final prefs = await _getPrefs();
+    prefs[key] = value;
+    await _savePrefs();
   }
 
   // Theme settings
   static Future<bool> isDarkMode() async {
-    final settings = await _getSettings();
-    if (settings['dark_mode'] == null) {
+    final prefs = await _getPrefs();
+    if (!prefs.containsKey('dark_mode')) {
       return ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark;
     }
-    return settings['dark_mode'] ?? false;
+    return prefs['dark_mode'] as bool? ?? false;
   }
 
   static Future<void> setDarkMode(bool isDarkMode) async {
-    await _saveSetting('dark_mode', isDarkMode);
+    await _setValue('dark_mode', isDarkMode);
   }
 
   static Future<String> getSelectedTheme() async {
-    final settings = await _getSettings();
-    return settings[SELECTED_THEME_KEY] ?? 'Emerald';
+    return (await _getValue<String>(SELECTED_THEME_KEY)) ?? 'Emerald';
   }
 
   static Future<void> setSelectedTheme(String themeKey) async {
-    await _saveSetting(SELECTED_THEME_KEY, themeKey);
+    await _setValue(SELECTED_THEME_KEY, themeKey);
   }
 
   // Display settings
   static Future<bool> getShowSuccessRate() async {
-    final settings = await _getSettings();
-    return settings[SHOW_SUCCESS_RATE_KEY] ?? true;
+    return (await _getValue<bool>(SHOW_SUCCESS_RATE_KEY)) ?? true;
   }
 
   static Future<void> setShowSuccessRate(bool show) async {
-    await _saveSetting(SHOW_SUCCESS_RATE_KEY, show);
+    await _setValue(SHOW_SUCCESS_RATE_KEY, show);
   }
 
   static Future<bool> getShowCurrentStreak() async {
-    final settings = await _getSettings();
-    return settings[SHOW_CURRENT_STREAK_KEY] ?? true;
+    return (await _getValue<bool>(SHOW_CURRENT_STREAK_KEY)) ?? true;
   }
 
   static Future<void> setShowCurrentStreak(bool show) async {
-    await _saveSetting(SHOW_CURRENT_STREAK_KEY, show);
+    await _setValue(SHOW_CURRENT_STREAK_KEY, show);
   }
 
   // Language settings
   static Future<String> getLanguage() async {
-    final settings = await _getSettings();
-    return settings[LANGUAGE_KEY] ?? 'English';
+    return (await _getValue<String>(LANGUAGE_KEY)) ?? 'English';
   }
 
   static Future<void> setLanguage(String language) async {
-    await _saveSetting(LANGUAGE_KEY, language);
+    await _setValue(LANGUAGE_KEY, language);
   }
 
   // Launcher icon preference
-  static const String MATCH_LAUNCHER_ICON_KEY = 'match_launcher_icon';
-
   static Future<bool> getMatchLauncherIcon() async {
-    final settings = await _getSettings();
     final defaultMatch = (!kIsWeb && Platform.isAndroid);
-    return settings[MATCH_LAUNCHER_ICON_KEY] ?? defaultMatch;
+    return (await _getValue<bool>(MATCH_LAUNCHER_ICON_KEY)) ?? defaultMatch;
   }
 
   static Future<void> setMatchLauncherIcon(bool match) async {
-    await _saveSetting(MATCH_LAUNCHER_ICON_KEY, match);
+    await _setValue(MATCH_LAUNCHER_ICON_KEY, match);
   }
 
   // Weekend Definition settings
-  static const String WEEKEND_DAYS_KEY = 'weekend_days';
-
   static Future<String> getWeekendDays() async {
-    final settings = await _getSettings();
-    return settings[WEEKEND_DAYS_KEY] ?? 'Saturday & Sunday';
+    return (await _getValue<String>(WEEKEND_DAYS_KEY)) ?? 'Saturday & Sunday';
   }
 
   static Future<void> setWeekendDays(String days) async {
-    await _saveSetting(WEEKEND_DAYS_KEY, days);
+    await _setValue(WEEKEND_DAYS_KEY, days);
   }
 
   static Future<String> getUserName() async {
-    final settings = await _getSettings();
-    return settings['user_name'] ?? '';
+    return (await _getValue<String>('user_name')) ?? '';
   }
 
   static Future<void> setUserName(String name) async {
-    await _saveSetting('user_name', name);
+    await _setValue('user_name', name);
   }
 
   static Future<String> getOccupation() async {
-    final settings = await _getSettings();
-    return settings['occupation'] ?? '';
+    return (await _getValue<String>('occupation')) ?? '';
   }
 
   static Future<void> setOccupation(String value) async {
-    await _saveSetting('occupation', value);
+    await _setValue('occupation', value);
   }
 
   static Future<String> getBiggestObstacle() async {
-    final settings = await _getSettings();
-    return settings['biggest_obstacle'] ?? '';
+    return (await _getValue<String>('biggest_obstacle')) ?? '';
   }
 
   static Future<void> setBiggestObstacle(String value) async {
-    await _saveSetting('biggest_obstacle', value);
+    await _setValue('biggest_obstacle', value);
+  }
+
+  // App launch & onboarding status
+  static Future<bool> isFirstLaunch() async {
+    return (await _getValue<bool>('first_launch')) ?? true;
+  }
+
+  static Future<void> setFirstLaunch(bool isFirst) async {
+    await _setValue('first_launch', isFirst);
+  }
+
+  static Future<bool> isOnboardingCompleted() async {
+    return (await _getValue<bool>('onboarding_completed')) ?? false;
+  }
+
+  static Future<void> setOnboardingCompleted(bool completed) async {
+    await _setValue('onboarding_completed', completed);
+  }
+
+  // Auto Backup settings
+  static Future<bool> isAutoBackupEnabled() async {
+    return (await _getValue<bool>('auto_backup_enabled')) ?? false;
+  }
+
+  static Future<void> setAutoBackupEnabled(bool enabled) async {
+    await _setValue('auto_backup_enabled', enabled);
+  }
+
+  static Future<String?> getBackupFolderPath() async {
+    return await _getValue<String>('backup_folder_path');
+  }
+
+  static Future<void> setBackupFolderPath(String? path) async {
+    await _setValue('backup_folder_path', path);
+  }
+
+  static Future<String?> getLastAutoBackupDate() async {
+    return await _getValue<String>('last_auto_backup_date');
+  }
+
+  static Future<void> setLastAutoBackupDate(String dateStr) async {
+    await _setValue('last_auto_backup_date', dateStr);
   }
 
   // Fallbacks for display settings referenced elsewhere in the app
@@ -134,3 +198,4 @@ class SettingsService {
   static Future<HabitType> getDefaultHabitType() async =>
       HabitType.SuccessBased;
 }
+

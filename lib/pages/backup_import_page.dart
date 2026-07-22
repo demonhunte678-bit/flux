@@ -40,93 +40,226 @@ class BackupImportPage extends ConsumerWidget {
       ),
       body: backupState.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Icon(
-                      Icons.storage_rounded,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    elevation: 0,
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.25),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Database Backup & Restore',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.folder_special_rounded,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 28,
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Text(
+                                  'Backup Storage Folder',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            backupState.backupFolderPath ??
+                                'No folder set (e.g. create and pick "flux backups" outside Flux)',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: backupState.backupFolderPath != null
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Colors.grey,
+                              fontWeight: backupState.backupFolderPath != null
+                                  ? FontWeight.w500
+                                  : FontWeight.normal,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              ref.read(backupProvider.notifier).setBackupFolder();
+                            },
+                            icon: const Icon(Icons.folder_open_rounded),
+                            label: Text(
+                              backupState.backupFolderPath == null
+                                  ? 'Select Backup Folder'
+                                  : 'Change Folder',
+                            ),
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Export your database to keep your habits safe, or import an existing database file to restore them.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                      textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                      ),
                     ),
-                    const SizedBox(height: 48),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        ref.read(backupProvider.notifier).exportDatabase();
+                    child: SwitchListTile(
+                      value: backupState.isAutoBackupEnabled,
+                      onChanged: (enabled) {
+                        ref.read(backupProvider.notifier).toggleAutoBackup(enabled);
                       },
-                      icon: const Icon(Icons.download_rounded, size: 24),
-                      label: const Text(
-                        'Export Database',
+                      title: const Text(
+                        'Automatic Daily Backup',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: const Text(
+                        'Creates a backup file automatically when you open Flux once per day.',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      secondary: Icon(
+                        Icons.sync_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            ref.read(backupProvider.notifier).exportDatabase();
+                          },
+                          icon: const Icon(Icons.download_rounded),
+                          label: const Text('Export Now'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _confirmAndImport(context, ref, null),
+                          icon: const Icon(Icons.upload_file_rounded),
+                          label: const Text('Browse File'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Available Backups',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
+                      IconButton(
+                        icon: const Icon(Icons.refresh_rounded),
+                        onPressed: () {
+                          ref.read(backupProvider.notifier).loadSettingsAndBackups();
+                        },
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  if (backupState.availableBackups.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      alignment: Alignment.center,
+                      child: const Column(
+                        children: [
+                          Icon(Icons.folder_off_outlined, size: 48, color: Colors.grey),
+                          SizedBox(height: 12),
+                          Text(
+                            'No backup files found in this folder.',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: backupState.availableBackups.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final backup = backupState.availableBackups[index];
+                        final dateStr =
+                            '${backup.modified.year}-${backup.modified.month.toString().padLeft(2, '0')}-${backup.modified.day.toString().padLeft(2, '0')} ${backup.modified.hour.toString().padLeft(2, '0')}:${backup.modified.minute.toString().padLeft(2, '0')}';
+
+                        return Card(
+                          margin: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            leading: const Icon(Icons.storage_rounded, color: Colors.blue),
+                            title: Text(
+                              backup.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            subtitle: Text(
+                              '$dateStr • ${backup.formattedSize} • ${backup.habitCount} Habits',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing: TextButton(
+                              onPressed: () => _confirmAndImport(context, ref, backup.path),
+                              child: const Text('Restore'),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () => _confirmAndImport(context, ref),
-                      icon: const Icon(Icons.upload_rounded, size: 24),
-                      label: const Text(
-                        'Import Database',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.secondary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 2,
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
     );
   }
 
-  void _confirmAndImport(BuildContext context, WidgetRef ref) async {
+  void _confirmAndImport(
+    BuildContext context,
+    WidgetRef ref,
+    String? filePath,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Import Database?'),
-        content: const Text(
-          'This will overwrite all your current habits and entries with the selected backup file. This action cannot be undone.',
+        title: const Text('Restore Database?'),
+        content: Text(
+          filePath != null
+              ? 'This will restore all your habits and entries from this backup file. Current data will be replaced.'
+              : 'This will overwrite all your current habits and entries with the selected backup file. This action cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -139,14 +272,14 @@ class BackupImportPage extends ConsumerWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Import'),
+            child: const Text('Restore'),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
-      ref.read(backupProvider.notifier).importDatabase();
+      ref.read(backupProvider.notifier).importDatabase(filePath: filePath);
     }
   }
 }

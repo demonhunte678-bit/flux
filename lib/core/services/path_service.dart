@@ -16,4 +16,9 @@ class PathService {
     }
     return await getApplicationSupportDirectory();
   }
+
+  static Future<File> getSharedPrefsFile() async {
+    final supportDir = await getAppSupportDirectory();
+    return File(p.join(supportDir.path, 'shared_prefs.json'));
+  }
 }

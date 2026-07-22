@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:collection/collection.dart';
 import 'package:flux/data/index.dart';
 import 'package:flux/onboard/steps/areas_step.dart';
@@ -402,7 +401,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
   Future<void> saveAndComplete() async {
     final settingsNotifier = _ref.read(settingsProvider.notifier);
 
-    // Save personalized variables globally to settings & SharedPreferences
+    // Save personalized variables globally to SettingsService
     await settingsNotifier.setUserName(state.userName);
     await settingsNotifier.setOccupation(state.occupation);
     await settingsNotifier.setBiggestObstacle(state.biggestObstacle);
@@ -413,8 +412,8 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       await _ref.read(habitsProvider.notifier).addHabit(habit);
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_completed', true);
+    await SettingsService.setOnboardingCompleted(true);
+    await SettingsService.setFirstLaunch(false);
   }
 }
 

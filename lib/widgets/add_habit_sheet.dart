@@ -40,36 +40,7 @@ class _AddHabitSheetState extends State<AddHabitSheet>
 
   late TabController _tabController;
 
-  final _icons = [
-    Icons.star,
-    Icons.fitness_center,
-    Icons.book,
-    Icons.brush,
-    Icons.run_circle,
-    Icons.water_drop,
-    Icons.food_bank,
-    Icons.bed,
-    Icons.emoji_emotions,
-    Icons.self_improvement,
-    Icons.music_note,
-    Icons.code,
-    Icons.sports_basketball,
-    Icons.smoking_rooms,
-    Icons.local_drink,
-    Icons.monitor,
-    Icons.health_and_safety,
-    Icons.directions_run,
-    Icons.dark_mode,
-    Icons.light_mode,
-    Icons.pets,
-    Icons.nature,
-    Icons.volunteer_activism,
-    Icons.school,
-    Icons.alarm,
-    Icons.piano,
-    Icons.savings,
-    Icons.attach_money,
-  ];
+  List<IconData> get _icons => HabitsIcon.icons.values.toList();
 
   final List<Color> _colorOptions = [
     const Color(0xFF1DB954),

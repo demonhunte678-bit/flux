@@ -10,3 +10,8 @@ final habitDetailProvider = Provider.family<Habit?, String>((ref, habitId) {
     orElse: () => null,
   );
 });
+
+final exportHabitCsvProvider = Provider<String Function(Habit)>((ref) {
+  final repository = ref.watch(habitsRepositoryProvider);
+  return (Habit habit) => repository.exportHabitToCsv(habit);
+});

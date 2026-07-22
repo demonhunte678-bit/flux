@@ -35,10 +35,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
       WelcomeStep(onSkip: _skipToEnd, onNext: _nextStep),
       QuestStep(),
       AreasStep(),
-      LifestyleStep(),
+      // LifestyleStep(),
       PreferencesStep(),
       StarterPackStep(),
-      RemindersStep(),
+      // RemindersStep(),
       CompleteStep(),
     ];
 
@@ -93,16 +93,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     final notifier = ref.read(onboardingProvider.notifier);
     await notifier.saveAndComplete();
 
-    final state = ref.read(onboardingProvider);
     if (widget.onComplete != null) {
       widget.onComplete!();
-    } else {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const AppShell()),
-        );
-      }
+    }
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AppShell()),
+      );
     }
   }
 
@@ -120,20 +119,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             Expanded(
               child: PageView(
                 controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(), // Prevent swipe to bypass validation
+                physics:
+                    const NeverScrollableScrollPhysics(), // Prevent swipe to bypass validation
                 onPageChanged: (index) {
                   ref.read(onboardingProvider.notifier).setStep(index);
                 },
                 children: _stepsList
-                    .map((step) => _buildStepContainer(
-                          title: step.title,
-                          subtitle: step.subtitle,
-                          child: step.buildContent(
-                            context,
-                            ref,
-                            currentColor,
-                          ),
-                        ))
+                    .map(
+                      (step) => _buildStepContainer(
+                        title: step.title,
+                        subtitle: step.subtitle,
+                        child: step.buildContent(context, ref, currentColor),
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -148,35 +146,21 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     return Container(
       height: 110,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            currentColor,
-            currentColor.withValues(alpha: 0.8),
-          ],
-        ),
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: currentColor.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Flux Setup',
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -190,8 +174,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
                       color: index <= currentStep
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.3),
+                          ? currentColor
+                          : Theme.of(context).dividerColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -202,7 +186,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             Text(
               '${currentStep + 1}/${_stepsList.length} - ${_stepsList[currentStep].stepName}',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 13,
               ),
             ),
@@ -241,7 +225,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 14,
                 height: 1.3,
               ),
@@ -255,35 +241,46 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   }
 
   Widget _buildNavigationButtons(Color currentColor, int currentStep) {
-    // Hide navigation buttons on the Welcome step (it has custom buttons)
-    if (currentStep == 0) return const SizedBox.shrink();
-
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          if (currentStep > 0)
+          if (currentStep > 0) ...[
             Expanded(
-              child: ElevatedButton(
+              child: OutlinedButton(
                 onPressed: _previousStep,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[200],
-                  foregroundColor: Colors.black87,
-                  elevation: 0,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.3)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Back'),
+                child: Text(
+                  'Back',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          if (currentStep > 0) const SizedBox(width: 16),
+            const SizedBox(width: 16),
+          ],
           Expanded(
             child: ElevatedButton(
               onPressed: _canProceed() ? _nextStep : null,
               style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: currentColor,
                 foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: Text(
                 currentStep == _stepsList.length - 1 ? 'Complete' : 'Next',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),

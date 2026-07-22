@@ -20,14 +20,17 @@ dependencies:
 
 
   share_plus:
-  csv:
+  csv: ^6.0.0
   syncfusion_flutter_charts:
+
   collection:
 
   uuid:
+  archive: ^3.6.1
   permission_handler:
   lottie:
   file_picker: ^11.0.2
+
 
   drift: ^2.20.0
   sqlite3_flutter_libs: ^0.6.0+eol

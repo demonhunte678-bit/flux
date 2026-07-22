@@ -4,6 +4,6 @@ export 'encouragement_service.dart';
 export 'keyboard_service.dart';
 export 'reports_service.dart';
 export 'settings_service.dart';
-export 'storage_service.dart';
 export 'theme_service.dart';
 export 'path_service.dart';
+export 'habit_icons.dart';

@@ -80,3 +80,8 @@ final habitsProvider =
     StateNotifierProvider<HabitsNotifier, AsyncValue<List<Habit>>>((ref) {
       return HabitsNotifier();
     });
+
+final habitsRepositoryProvider = Provider<HabitsRepository>((ref) {
+  return HabitsRepository.instance;
+});
+

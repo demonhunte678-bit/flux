@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() async {
@@ -16,8 +15,8 @@ void main() async {
   }
 
   KeyboardService().initialize();
-  final prefs = await SharedPreferences.getInstance();
-  final isFirstLaunch = prefs.getBool('first_launch') ?? true;
+  final isFirstLaunch = await SettingsService.isFirstLaunch();
+  await BackupService.performDailyAutoBackupIfEnabled();
 
   runApp(ProviderScope(child: HabitTrackerApp(isFirstLaunch: isFirstLaunch)));
 }
@@ -54,7 +53,7 @@ class HabitTrackerApp extends ConsumerWidget {
   }
 
   void _completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('first_launch', false);
+    await SettingsService.setFirstLaunch(false);
+    await SettingsService.setOnboardingCompleted(true);
   }
 }

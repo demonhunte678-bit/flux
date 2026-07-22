@@ -1,5 +1,12 @@
+import 'package:csv/csv.dart';
 import 'package:drift/drift.dart';
+import 'package:intl/intl.dart';
 import 'package:flux/index.dart';
+
+
+
+
+
 
 class HabitsRepository {
   final AppDatabase _db;
@@ -96,4 +103,66 @@ class HabitsRepository {
   bool _isSameDay(DateTime d1, DateTime d2) {
     return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
   }
+
+  String exportHabitToCsv(Habit habit) {
+    final List<List<dynamic>> rows = [];
+
+    // Header metadata block for AI friendly consumption
+    rows.add(['# HABIT SUMMARY REPORT']);
+    rows.add(['Habit Name', habit.name]);
+    rows.add(['Category', habit.category ?? 'Uncategorized']);
+    rows.add(['Habit Type', habit.type.name]);
+    rows.add(['Frequency', habit.getFrequencyDisplayText()]);
+    rows.add(['Unit', habit.getUnitDisplayName()]);
+    if (habit.targetValue != null) {
+      rows.add(['Target / Limit Value', habit.targetValue]);
+    }
+    if (habit.goalType != null && habit.goalValue != null) {
+      rows.add(['Goal Type', habit.goalType]);
+      rows.add(['Goal Target', habit.goalValue]);
+    }
+    rows.add(['Current Streak', habit.currentStreak]);
+    rows.add(['Best Streak', habit.bestStreak]);
+    rows.add(['Success Rate (%)', habit.successRate.toStringAsFixed(1)]);
+    rows.add(['Total Entries', habit.entries.length]);
+    if (habit.notes != null && habit.notes!.isNotEmpty) {
+      rows.add(['Habit Description / Notes', habit.notes]);
+    }
+    rows.add([]); // Blank line separator
+
+    // Log table header
+    rows.add([
+      'Date',
+      'Day of Week',
+      'Value',
+      'Unit',
+      'Status',
+      'Is Skipped',
+      'Notes',
+    ]);
+
+    final sortedEntries = [...habit.entries]..sort((a, b) => b.date.compareTo(a.date));
+    final DateFormat dateFmt = DateFormat('yyyy-MM-dd');
+    final DateFormat dayFmt = DateFormat('EEEE');
+
+    for (final entry in sortedEntries) {
+      final isPositive = habit.isPositiveDay(entry);
+      final status = entry.isSkipped
+          ? 'Skipped'
+          : (isPositive ? 'Success/Met' : 'Missed/Exceeded');
+
+      rows.add([
+        dateFmt.format(entry.date),
+        dayFmt.format(entry.date),
+        entry.value,
+        entry.unit ?? habit.getUnitDisplayName(),
+        status,
+        entry.isSkipped ? 'Yes' : 'No',
+        entry.notes ?? '',
+      ]);
+    }
+
+    return ListToCsvConverter().convert(rows);
+  }
 }
+
