@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/providers/index.dart';
-import 'package:flux/core/index.dart';
-import 'package:flux/data/index.dart';
+import 'package:flux/index.dart';
 
 class BackupImportPage extends ConsumerWidget {
   const BackupImportPage({super.key});
@@ -13,16 +11,31 @@ class BackupImportPage extends ConsumerWidget {
 
     ref.listen<BackupState>(backupProvider, (previous, next) {
       if (next.successMessage != null) {
+        final msg = next.successMessage!;
+        String localizedMsg = msg;
+        if (msg.startsWith('Backup folder set to:')) {
+          final path = msg.replaceFirst('Backup folder set to: ', '');
+          localizedMsg = L10n.of(context)!.backupFolderSet(path);
+        } else if (msg == 'Backup exported successfully!') {
+          localizedMsg = L10n.of(context)!.backupExportedSuccessfully;
+        } else if (msg == 'Database imported successfully!') {
+          localizedMsg = L10n.of(context)!.databaseImportedSuccessfully;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.successMessage!),
+            content: Text(localizedMsg),
             backgroundColor: Colors.green,
           ),
         );
       } else if (next.errorMessage != null) {
+        final err = next.errorMessage!;
+        String localizedErr = err;
+        if (err == 'Export failed: Location not chosen.') {
+          localizedErr = L10n.of(context)!.exportFailedLocation;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.errorMessage!),
+            content: Text(localizedErr),
             backgroundColor: Colors.red,
           ),
         );
@@ -31,9 +44,9 @@ class BackupImportPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Backup & Restore',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          L10n.of(context)!.backupRestore,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
@@ -64,10 +77,10 @@ class BackupImportPage extends ConsumerWidget {
                                 size: 28,
                               ),
                               const SizedBox(width: 12),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
-                                  'Backup Storage Folder',
-                                  style: TextStyle(
+                                  L10n.of(context)!.backupStorageFolder,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -78,7 +91,7 @@ class BackupImportPage extends ConsumerWidget {
                           const SizedBox(height: 8),
                           Text(
                             backupState.backupFolderPath ??
-                                'No folder set (e.g. create and pick "flux backups" outside Flux)',
+                                L10n.of(context)!.noFolderSet,
                             style: TextStyle(
                               fontSize: 13,
                               color: backupState.backupFolderPath != null
@@ -97,8 +110,8 @@ class BackupImportPage extends ConsumerWidget {
                             icon: const Icon(Icons.folder_open_rounded),
                             label: Text(
                               backupState.backupFolderPath == null
-                                  ? 'Select Backup Folder'
-                                  : 'Change Folder',
+                                  ? L10n.of(context)!.selectBackupFolder
+                                  : L10n.of(context)!.changeFolder,
                             ),
                           ),
                         ],
@@ -119,13 +132,13 @@ class BackupImportPage extends ConsumerWidget {
                       onChanged: (enabled) {
                         ref.read(backupProvider.notifier).toggleAutoBackup(enabled);
                       },
-                      title: const Text(
-                        'Automatic Daily Backup',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      title: Text(
+                        L10n.of(context)!.autoDailyBackup,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: const Text(
-                        'Creates a backup file automatically when you open Flux once per day.',
-                        style: TextStyle(fontSize: 12),
+                      subtitle: Text(
+                        L10n.of(context)!.autoDailyBackupSubtitle,
+                        style: const TextStyle(fontSize: 12),
                       ),
                       secondary: Icon(
                         Icons.sync_rounded,
@@ -142,7 +155,7 @@ class BackupImportPage extends ConsumerWidget {
                             ref.read(backupProvider.notifier).exportDatabase();
                           },
                           icon: const Icon(Icons.download_rounded),
-                          label: const Text('Export Now'),
+                          label: Text(L10n.of(context)!.exportNow),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             backgroundColor: Theme.of(context).colorScheme.primary,
@@ -158,7 +171,7 @@ class BackupImportPage extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           onPressed: () => _confirmAndImport(context, ref, null),
                           icon: const Icon(Icons.upload_file_rounded),
-                          label: const Text('Browse File'),
+                          label: Text(L10n.of(context)!.browseFile),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
@@ -173,9 +186,9 @@ class BackupImportPage extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Available Backups',
-                        style: TextStyle(
+                      Text(
+                        L10n.of(context)!.availableBackups,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -193,13 +206,13 @@ class BackupImportPage extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(32),
                       alignment: Alignment.center,
-                      child: const Column(
+                      child: Column(
                         children: [
-                          Icon(Icons.folder_off_outlined, size: 48, color: Colors.grey),
-                          SizedBox(height: 12),
+                          const Icon(Icons.folder_off_outlined, size: 48, color: Colors.grey),
+                          const SizedBox(height: 12),
                           Text(
-                            'No backup files found in this folder.',
-                            style: TextStyle(color: Colors.grey),
+                            L10n.of(context)!.noBackupFound,
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
@@ -235,7 +248,7 @@ class BackupImportPage extends ConsumerWidget {
                             ),
                             trailing: TextButton(
                               onPressed: () => _confirmAndImport(context, ref, backup.path),
-                              child: const Text('Restore'),
+                              child: Text(L10n.of(context)!.restore),
                             ),
                           ),
                         );
@@ -255,16 +268,16 @@ class BackupImportPage extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Restore Database?'),
+        title: Text(L10n.of(context)!.restoreDatabaseTitle),
         content: Text(
           filePath != null
-              ? 'This will restore all your habits and entries from this backup file. Current data will be replaced.'
-              : 'This will overwrite all your current habits and entries with the selected backup file. This action cannot be undone.',
+              ? L10n.of(context)!.restoreDatabaseConfirm
+              : L10n.of(context)!.restoreDatabaseOverwrite,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(L10n.of(context)!.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -272,7 +285,7 @@ class BackupImportPage extends ConsumerWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Restore'),
+            child: Text(L10n.of(context)!.restore),
           ),
         ],
       ),

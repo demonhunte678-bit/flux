@@ -9,6 +9,7 @@ class HabitEntryMapper {
       unit: row.unit,
       notes: row.notes,
       isSkipped: row.isSkipped,
+      isArchived: row.isArchived,
     );
   }
 
@@ -21,6 +22,7 @@ class HabitEntryMapper {
       unit: Value(entry.unit),
       notes: Value(entry.notes),
       isSkipped: entry.isSkipped,
+      isArchived: Value(entry.isArchived),
     );
   }
 }

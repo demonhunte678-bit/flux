@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flux/pages/add_habit_page.dart';
 import 'package:flux/providers/index.dart';
 import 'package:flux/widgets/index.dart';
 import 'package:flux/data/index.dart';
 import 'package:flux/core/index.dart';
+import 'package:flux/l10n/generated/app_localizations.dart';
 
 import 'habits_page.dart';
 import 'dashboard_page.dart';
@@ -73,24 +75,16 @@ class _AppShellState extends ConsumerState<AppShell> {
       orElse: () => <Habit>[],
     );
 
-    final existingCategories = activeHabits
-        .where((h) => h.category != null)
-        .map((h) => h.category!)
-        .toSet()
-        .toList()
-      ..sort();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => AddHabitSheet(
-        existingCategories: existingCategories,
-        onSave: (h) async {
-          if (h.name.isEmpty) return;
-          await ref.read(habitsProvider.notifier).addHabit(h);
-          if (mounted) Navigator.pop(context);
-        },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddHabitPage(
+          onSave: (h) async {
+            if (h.name.isEmpty) return;
+            await ref.read(habitsProvider.notifier).addHabit(h);
+            if (mounted) Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
@@ -119,26 +113,26 @@ class _AppShellState extends ConsumerState<AppShell> {
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: _onTabChanged,
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.check_circle_outline),
-              selectedIcon: Icon(Icons.check_circle),
-              label: 'Today',
+              icon: const Icon(Icons.check_circle_outline),
+              selectedIcon: const Icon(Icons.check_circle),
+              label: L10n.of(context)!.todayTab,
             ),
             NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: 'Dashboard',
+              icon: const Icon(Icons.dashboard_outlined),
+              selectedIcon: const Icon(Icons.dashboard),
+              label: L10n.of(context)!.dashboardTab,
             ),
             NavigationDestination(
-              icon: Icon(Icons.analytics_outlined),
-              selectedIcon: Icon(Icons.analytics),
-              label: 'Analytics',
+              icon: const Icon(Icons.analytics_outlined),
+              selectedIcon: const Icon(Icons.analytics),
+              label: L10n.of(context)!.analyticsTab,
             ),
             NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings),
+              label: L10n.of(context)!.settingsTab,
             ),
           ],
         ),

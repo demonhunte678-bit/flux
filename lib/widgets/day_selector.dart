@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flux/l10n/index.dart';
 
 class DaySelector extends StatefulWidget {
   final DateTime selectedDate;
@@ -86,7 +87,7 @@ class _DaySelectorState extends State<DaySelector> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    DateFormat('E').format(date).substring(0, 2),
+                    _getLocalizedDayName(context, date),
                     style: TextStyle(
                       fontSize: 12,
                       color: isSelected
@@ -97,7 +98,7 @@ class _DaySelectorState extends State<DaySelector> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    DateFormat('d').format(date),
+                    DateFormat('d', Localizations.localeOf(context).toString()).format(date).toLatinNumbers(),
                     style: TextStyle(
                       fontSize: 16,
                       color: isSelected
@@ -113,5 +114,18 @@ class _DaySelectorState extends State<DaySelector> {
         },
       ),
     );
+  }
+
+  String _getLocalizedDayName(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).toString();
+    final dayStr = DateFormat('E', locale).format(date);
+    if (locale.startsWith('ar')) {
+      String cleanStr = dayStr;
+      if (cleanStr.startsWith('ال')) {
+        cleanStr = cleanStr.substring(2);
+      }
+      return cleanStr.length >= 2 ? cleanStr.substring(0, 2) : cleanStr;
+    }
+    return dayStr.length >= 2 ? dayStr.substring(0, 2) : dayStr;
   }
 }

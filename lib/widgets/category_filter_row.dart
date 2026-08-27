@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flux/data/models/category.dart';
 
 class CategoryFilterRow extends StatelessWidget {
-  final List<String> categories;
-  final String? selectedCategory;
-  final ValueChanged<String?> onCategorySelected;
+  final List<Category> categories;
+  final Category? selectedCategory;
+  final ValueChanged<Category?> onCategorySelected;
 
   const CategoryFilterRow({
     super.key,
@@ -33,8 +34,8 @@ class CategoryFilterRow extends StatelessWidget {
             (cat) => Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: Text(cat),
-                selected: selectedCategory == cat,
+                label: Text(cat.getLocalizedName(context)),
+                selected: selectedCategory?.id == cat.id,
                 onSelected: (selected) {
                   onCategorySelected(selected ? cat : null);
                 },

@@ -1,4 +1,5 @@
 import 'package:csv/csv.dart';
+import 'package:flutter/material.dart' show Color;
 import 'package:drift/drift.dart';
 import 'package:intl/intl.dart';
 import 'package:flux/index.dart';
@@ -17,7 +18,32 @@ class HabitsRepository {
     AppDatabase.instance,
   );
 
+  Future<void> loadCustomCategories() async {
+    final rows = await _db.select(_db.categories).get();
+    Category.customCategories.clear();
+    for (final row in rows) {
+      Category.customCategories[row.id] = Category(
+        id: row.id,
+        name: row.name,
+        color: row.color != null ? Color(row.color!) : null,
+        iconSymbol: row.icon != null ? HabitsIcon.getSymbol(row.icon) : null,
+      );
+    }
+  }
+
+  Future<void> saveCategory(Category category) async {
+    final companion = CategoryData(
+      id: category.id,
+      name: category.name,
+      color: category.color?.value,
+      icon: category.iconSymbol != null ? HabitsIcon.getSymbolId(category.iconSymbol!) : null,
+    );
+    await _db.into(_db.categories).insertOnConflictUpdate(companion);
+    Category.customCategories[category.id] = category;
+  }
+
   Future<List<Habit>> loadAllHabits() async {
+    await loadCustomCategories();
     final habitRows = await _db.select(_db.habits).get();
     final entryRows = await _db.select(_db.habitEntries).get();
 
@@ -54,6 +80,23 @@ class HabitsRepository {
     await (_db.delete(_db.habits)..where((tbl) => tbl.id.equals(habitId))).go();
   }
 
+  Future<void> saveEntry(Habit habit, HabitEntry entry) async {
+    await _db.transaction(() async {
+      final companion = HabitEntryMapper.toCompanion(habit.id, entry);
+      await _db.into(_db.habitEntries).insertOnConflictUpdate(companion);
+
+      // Update in-memory list
+      final index = habit.entries.indexWhere(
+        (e) => _isSameDay(e.date, entry.date),
+      );
+      if (index != -1) {
+        habit.entries[index] = entry;
+      } else {
+        habit.entries.add(entry);
+      }
+    });
+  }
+
   Future<void> updateEntry(
     Habit habit,
     HabitEntry oldEntry,
@@ -73,6 +116,7 @@ class HabitsRepository {
           unit: Value(newEntry.unit),
           notes: Value(newEntry.notes),
           isSkipped: Value(newEntry.isSkipped),
+          isArchived: Value(newEntry.isArchived),
         ),
       );
 
@@ -82,6 +126,27 @@ class HabitsRepository {
       );
       if (index != -1) {
         habit.entries[index] = newEntry;
+      }
+    });
+  }
+
+  Future<void> archivePastEntries(Habit habit, DateTime cutOffDate) async {
+    await _db.transaction(() async {
+      final query = _db.update(_db.habitEntries)
+        ..where((tbl) => tbl.habitId.equals(habit.id))
+        ..where((tbl) => tbl.date.isSmallerThanValue(cutOffDate));
+
+      await query.write(
+        const HabitEntriesCompanion(
+          isArchived: Value(true),
+        ),
+      );
+
+      // Update in-memory list
+      for (var entry in habit.entries) {
+        if (entry.date.isBefore(cutOffDate)) {
+          entry.isArchived = true;
+        }
       }
     });
   }
@@ -110,7 +175,7 @@ class HabitsRepository {
     // Header metadata block for AI friendly consumption
     rows.add(['# HABIT SUMMARY REPORT']);
     rows.add(['Habit Name', habit.name]);
-    rows.add(['Category', habit.category ?? 'Uncategorized']);
+    rows.add(['Category', habit.category?.name ?? 'Uncategorized']);
     rows.add(['Habit Type', habit.type.name]);
     rows.add(['Frequency', habit.getFrequencyDisplayText()]);
     rows.add(['Unit', habit.getUnitDisplayName()]);

@@ -1,0 +1,656 @@
+{
+  "@@locale": "en",
+  "appName": "Flux",
+  "todayTab": "Today",
+  "dashboardTab": "Dashboard",
+  "analyticsTab": "Analytics",
+  "settingsTab": "Settings",
+  "editEntryNotesValue": "Edit Entry Notes/Value",
+  "deleteEntry": "Delete Entry",
+  "editHabit": "Edit Habit",
+  "pauseHabit": "Pause Habit",
+  "resumeHabit": "Resume Habit",
+  "archiveHabit": "Archive Habit",
+  "restoreHabit": "Restore Habit",
+  "deletePermanently": "Delete Permanently",
+  "confirmDeletion": "Confirm Deletion",
+  "areYouSureDeleteHabit": "Are you sure you want to permanently delete \"{habitName}\"? This action cannot be undone.",
+  "@areYouSureDeleteHabit": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureDeleteEntry": "Are you sure you want to delete this entry?",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "editHabitSubtitle": "Change name, schedule, limit/goal, icon, and colors",
+  "pauseHabitSubtitle": "Temporarily stop tracking without affecting streaks",
+  "resumeHabitSubtitle": "Continue tracking this habit",
+  "archiveHabitSubtitle": "Hide it from the main list but keep the data",
+  "restoreHabitSubtitle": "Bring it back to the active list",
+  "deletePermanentlySubtitle": "This cannot be undone",
+  "manageHabit": "Manage Habit",
+  "whatWouldYouDoWith": "What would you like to do with \"{habitName}\"?",
+  "@whatWouldYouDoWith": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToExportReport": "Failed to export report: {error}",
+  "@failedToExportReport": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "habitNotFound": "Habit not found or deleted.",
+  "exportCsvReport": "Export CSV Report",
+  "historyLogs": "History Logs",
+  "frequencyAndUnit": "Frequency: {frequency} • Unit: {unit}",
+  "@frequencyAndUnit": {
+    "placeholders": {
+      "frequency": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "slipUpStreakBanner": "Don't let one slip-up stop you from reaching your {streakVal}-day streak goal!",
+  "@slipUpStreakBanner": {
+    "placeholders": {
+      "streakVal": {
+        "type": "String"
+      }
+    }
+  },
+  "slipUpSuccessBanner": "Don't let one slip-up stop you from reaching your {successVal}% success rate goal!",
+  "@slipUpSuccessBanner": {
+    "placeholders": {
+      "successVal": {
+        "type": "String"
+      }
+    }
+  },
+  "slipUpGenericBanner": "1 slip-up doesn't erase your progress. Let's start fresh and make today a win!",
+  "youCanGetIt": "You can get it!",
+  "noActiveGoalSet": "No Active Goal Set",
+  "noActiveGoalSubtitle": "Tap here to set a target streak or success rate to stay motivated!",
+  "achieved": "Achieved!",
+  "reachedPercent": "{percent}% reached",
+  "@reachedPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "daysLeft": "{days} days left",
+  "@daysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "completionsGoal": "Completions Goal: {value} times",
+  "@completionsGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "streakGoal": "Streak Goal: {value} Days",
+  "@streakGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "successRateGoal": "Success Rate Goal: {value}%",
+  "@successRateGoal": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLabelDays": "{current} of {target} days",
+  "@progressLabelDays": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLabelPercentage": "{current}% of {target}%",
+  "@progressLabelPercentage": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLabelCompletions": "{current} of {target} completions",
+  "@progressLabelCompletions": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "trends": "Trends",
+  "valueTrends": "Value Trends",
+  "values": "Values",
+  "successRateTrends": "Success Rate Trends",
+  "successRatePercent": "Success Rate (%)",
+  "streakTrends": "Streak Trends",
+  "streaks": "Streaks",
+  "currentStreaks": "Current Streaks",
+  "daysLabel": "Days",
+  "distribution": "Distribution",
+  "heatmap": "Heatmap",
+  "insights": "Insights",
+  "last7Days": "Last 7 Days",
+  "last30Days": "Last 30 Days",
+  "last90Days": "Last 90 Days",
+  "thisYear": "This Year",
+  "allTime": "All Time",
+  "customRange": "Custom Range",
+  "activityHeatmap": "Activity Heatmap",
+  "appearance": "Appearance",
+  "darkMode": "Dark Mode",
+  "toggleDarkLight": "Toggle dark or light theme",
+  "themeColor": "Theme Color",
+  "matchLauncherIcon": "Match Launcher Icon",
+  "matchLauncherIconSubtitle": "Sync home screen icon with theme color",
+  "displayPreferences": "Display Preferences",
+  "showSuccessRate": "Show Success Rate",
+  "showSuccessRateSubtitle": "Show percentage rates in the app",
+  "showStreakDays": "Show Streak Days",
+  "showStreakDaysSubtitle": "Show daily streaks in the app",
+  "general": "General",
+  "language": "Language",
+  "backupRestore": "Backup & Restore",
+  "backupRestoreSubtitle": "Export or import your habit database",
+  "selectLanguage": "Select Language",
+  "english": "English",
+  "arabic": "Arabic",
+  "backupStorageFolder": "Backup Storage Folder",
+  "noFolderSet": "No folder set (e.g. create and pick \"flux backups\" outside Flux)",
+  "selectBackupFolder": "Select Backup Folder",
+  "changeFolder": "Change Folder",
+  "autoDailyBackup": "Automatic Daily Backup",
+  "autoDailyBackupSubtitle": "Creates a backup file automatically when you open Flux once per day.",
+  "exportNow": "Export Now",
+  "browseFile": "Browse File",
+  "availableBackups": "Available Backups",
+  "noBackupFound": "No backup files found in this folder.",
+  "restore": "Restore",
+  "restoreDatabaseTitle": "Restore Database?",
+  "restoreDatabaseConfirm": "This will restore all your habits and entries from this backup file. Current data will be replaced.",
+  "restoreDatabaseOverwrite": "This will overwrite all your current habits and entries with the selected backup file. This action cannot be undone.",
+  "backupFolderSet": "Backup folder set to: {path}",
+  "@backupFolderSet": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "backupExportedSuccessfully": "Backup exported successfully!",
+  "databaseImportedSuccessfully": "Database imported successfully!",
+  "exportFailedLocation": "Export failed: Location not chosen.",
+  "successRate": "Success Rate",
+  "todaySuccessRate": "Today's Success Rate",
+  "bestStreak": "Best Streak",
+  "bestStreakDays": "{days} Days",
+  "@bestStreakDays": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "bestStreakHabitOn": "on {habitName}",
+  "@bestStreakHabitOn": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      }
+    }
+  },
+  "dailySuccessHistory": "Daily Success Rate History",
+  "errorLoadingHabits": "Error loading habits: {error}",
+  "@errorLoadingHabits": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardSetupTitle": "Flux Setup",
+  "back": "Back",
+  "complete": "Complete",
+  "next": "Next",
+  "identityStepName": "Identity",
+  "questStepName": "Change Goal",
+  "welcomeStepName": "Welcome",
+  "welcomeTitle": "Welcome to Flux",
+  "welcomeSubtitle": "Choose how you want to get started with tracking your habits.",
+  "guidedSetup": "Guided Setup",
+  "guidedSetupDesc": "Answer 5 quick questions to customize your recommendation style",
+  "restoreBackup": "Restore Backup",
+  "restoreBackupDesc": "Import your existing database and history logs",
+  "quickStart": "Quick Start",
+  "quickStartDesc": "Skip setup entirely and create your habits from scratch",
+  "namePrompt": "What is your name? (Optional)",
+  "nameHint": "Enter your name...",
+  "occupationPrompt": "What is your daily occupation? (Optional)",
+  "questTitle": "What are you trying to change?",
+  "questSubtitle": "This determines your recommendation style.",
+  "breakHabits": "Break Bad Habits",
+  "breakHabitsDesc": "I want to avoid triggers, limit distractions, or stop bad routines.",
+  "createHabits": "Creating Habits",
+  "createHabitsDesc": "I want to establish new daily activities, positive routines, or targets.",
+  "bothHabits": "Don't Know / Both",
+  "bothHabitsDesc": "I want to build a mix of positive additions and avoid slips.",
+  "areasTitle": "What are you trying to change in your life?",
+  "areasSubtitle": "Choose the focus areas that matter to you right now.",
+  "areasStepName": "Focus Areas",
+  "preferencesTitle": "Experience & Tracking Style",
+  "preferencesSubtitle": "Customize how you track your habits.",
+  "preferencesStepName": "Preferences",
+  "starterPackTitle": "Choose your starting habits",
+  "starterPackSubtitle": "Starting small is the secret to 90-day consistency. Choose 1 to 3 habits.",
+  "starterPackStepName": "Starter Habits",
+  "starterHabitsWarn": "Starting small (1-3 habits) dramatically increases your chance of long-term success!",
+  "generatingSuggestions": "Generating custom suggestions...",
+  "completeTitle": "Your Journey Begins",
+  "completeSubtitle": "Imagine opening Flux 100 days from now and seeing every single promise you've kept.",
+  "completeStepName": "Complete",
+  "completeRoadmap": "Your Personalized Roadmap:",
+  "completeName": "Name: {name}",
+  "@completeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "completeOccupation": "Occupation: {occupation}",
+  "@completeOccupation": {
+    "placeholders": {
+      "occupation": {
+        "type": "String"
+      }
+    }
+  },
+  "completeFocusAreas": "Focus areas: {areas}",
+  "@completeFocusAreas": {
+    "placeholders": {
+      "areas": {
+        "type": "String"
+      }
+    }
+  },
+  "completeSeeding": "Seeding: {count} starter habits",
+  "@completeSeeding": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "never": "Never",
+  "aLittle": "A little",
+  "regularly": "Regularly",
+  "trackedBeforePrompt": "Have you tracked habits before?",
+  "measureProgressPrompt": "How do you prefer to measure progress?",
+  "streaksFocus": "Streaks Focus",
+  "streaksFocusDesc": "Counts consecutive days you keep the habit alive.",
+  "percentagesFocus": "Percentages Focus",
+  "percentagesFocusDesc": "Shows your overall consistency percentage over time.",
+  "newHabit": "New Habit",
+  "basicTab": "Basic",
+  "scheduleTab": "Schedule",
+  "detailsTab": "Details",
+  "styleTab": "Style",
+  "saveChanges": "Save Changes",
+  "createHabit": "Create Habit",
+  "type": "Type",
+  "checkDoneBased": "Check (Done-based)",
+  "achieveSuccessBased": "Achieve (Success-based)",
+  "avoidFailBased": "Avoid (Failure-based)",
+  "check": "Check",
+  "achieve": "Achieve",
+  "avoid": "Avoid",
+  "weekendDays": "Weekend Days",
+  "selectDays": "Select Days",
+  "frequency": "Frequency",
+  "analyticsDashboard": "Analytics Dashboard",
+  "frequencyHint": "e.g., 3",
+  "saturdaySunday": "Saturday & Sunday",
+  "fridaySaturday": "Friday & Saturday",
+  "thursdayFriday": "Thursday & Friday",
+  "unitOfMeasurement": "Unit of Measurement",
+  "customUnitName": "Custom Unit Name",
+  "customUnitHint": "e.g., cups, sets, chapters",
+  "maxLimitOptional": "Maximum Limit (Optional)",
+  "targetValueOptional": "Target Value (Optional)",
+  "setGoalOptional": "Set a Goal (Optional)",
+  "setGoalDesc": "Set a target streak, completion rate, or total count to keep yourself motivated.",
+  "goalMetric": "Goal Metric",
+  "totalCompletions": "Total Completions",
+  "quickTemplates": "Quick Templates",
+  "targetStreakDays": "Target Streak (Days)",
+  "targetSuccessRatePercent": "Target Success Rate (%)",
+  "targetCompletions": "Target Completions",
+  "noActiveGoal": "No active goal",
+  "bestStreakDaysMetric": "Best Streak (Days)",
+  "successRatePercentMetric": "Success Rate (%)",
+  "streakHint": "e.g., 90 (days clean)",
+  "percentageHint": "e.g., 80 (percent success)",
+  "completionsHint": "e.g., 100 (times)",
+  "daysCleanTemplate": "{count} Days Clean",
+  "@daysCleanTemplate": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "successPercentTemplate": "{count}% Success",
+  "@successPercentTemplate": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "daysStreakTemplate": "{count} Days Streak",
+  "@daysStreakTemplate": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "completionsTemplate": "{count} Completions",
+  "@completionsTemplate": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "icon": "Icon",
+  "colorTheme": "Color Theme",
+  "name": "Name",
+  "nameHintPlaceholder": "e.g., Read Books, Workout",
+  "notes": "Notes",
+  "notesOptional": "Notes (Optional)",
+  "notesHintOptional": "Optional description or notes",
+  "category": "Category",
+  "newCategoryOptional": "New Category (Optional)",
+  "newCategoryHint": "e.g., Fitness, Learning, Health",
+  "daily": "Daily",
+  "weekdays": "Weekdays",
+  "weekends": "Weekends",
+  "customDays": "Custom Days",
+  "xTimesPerWeek": "X / Week",
+  "xTimesPerMonth": "X / Month",
+  "timesPerWeek": "Times per week",
+  "timesPerMonth": "Times per month",
+  "countTimes": "Count/Times",
+  "minutes": "Minutes",
+  "hours": "Hours",
+  "pages": "Pages",
+  "kilometers": "Kilometers",
+  "miles": "Miles",
+  "grams": "Grams",
+  "pounds": "Pounds",
+  "dollars": "Dollars",
+  "custom": "Custom",
+  "maximumLimit": "Maximum Limit",
+  "dailyTarget": "Daily Target",
+  "targetAmount": "Target Amount",
+  "maxLimitHint": "e.g., 0 (no failures allowed)",
+  "targetValueHint": "e.g., 30 (read 30 pages)",
+  "targetAmountHint": "e.g., 10 (meditate 10 minutes)",
+  "skippingDate": "Skipping {date}",
+  "@skippingDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "trackFailure": "Track Failure",
+  "trackProgress": "Track Progress",
+  "markDone": "Mark as Done",
+  "trackSuccess": "Track Success",
+  "markCompletion": "Mark Completion",
+  "date": "Date",
+  "entryExistsForDay": "An entry already exists for this day.",
+  "noHabitsForToday": "No habits for today",
+  "createHabitToGetStarted": "Create a habit to get started!",
+  "skipThisDay": "Skip this day?",
+  "skipThisDaySubtitle": "Won't break your streak or affect statistics",
+  "didYouCompleteToday": "Did you complete this habit today?",
+  "completedCheck": "Completed ✓",
+  "notCompletedCross": "Not Completed ✗",
+  "targetGoal": "Target Goal",
+  "progressStatus": "Progress Status",
+  "whySkippingToday": "Why are you skipping today?",
+  "whySkippingHint": "e.g., sick, traveling, planned rest day...",
+  "skipDay": "Skip Day",
+  "saveEntry": "Save Entry",
+  "withinLimit": "Within limit ✓",
+  "overLimitBy": "Over limit by {amount}",
+  "@overLimitBy": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "targetReached": "Target reached! ✓",
+  "needMore": "Need {amount} more",
+  "@needMore": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAchieved": "Goal achieved! ✓",
+  "progressTowardsGoal": "Progress towards goal",
+  "goodMorning": "Good morning",
+  "goodAfternoon": "Good afternoon",
+  "goodEvening": "Good evening",
+  "startJourneyTitle": "Start Your Journey!",
+  "startJourneySubtitle": "A blank slate is the beginning of greatness.",
+  "startJourneyMsg": "No habits tracked yet. Today is the perfect day to build new muscle! I believe in you! 💪",
+  "stayStrongTitle": "Stay Strong!",
+  "stayStrongSubtitle": "Every setback is a setup for a comeback.",
+  "stayStrongMsg": "You are strong, you can get more than 10%. I believe in you! Let's crush the next check! 🏋️‍♂️",
+  "keepBuildingTitle": "Keep Building!",
+  "keepBuildingSubtitle": "Real growth takes time.",
+  "keepBuildingMsg": "Progress is progress! Keep building that muscle. You're getting stronger every single day! ⚡",
+  "consistencyPaysTitle": "Consistency pays off!",
+  "consistencyPaysSubtitle": "You're building momentum.",
+  "consistencyPaysMsg": "Outstanding consistency! You are building habits like a champion! Keep pushing! 🔥",
+  "legendaryConsistencyTitle": "Legendary Consistency!",
+  "legendaryConsistencySubtitle": "Absolute royalty.",
+  "legendaryConsistencyMsg": "Phenomenal success! You are absolute royalty. A legend in the making! 👑",
+  "occStudent": "Student",
+  "occWorking": "Working",
+  "occShiftWorker": "Shift Worker",
+  "occParent": "Parent",
+  "occRetired": "Retired",
+  "occOther": "Other",
+  "areaHealth": "Health",
+  "areaGrowth": "Growth",
+  "areaFinances": "Finance",
+  "areaMental": "Mind",
+  "areaHome": "Home",
+  "areaSleep": "Sleep",
+  "areaRelationships": "Social",
+  "weekdaysMonFri": "Weekdays (Mon-Fri)",
+  "weekdaysSunThu": "Weekdays (Sun-Thu)",
+  "weekdaysSatWed": "Weekdays (Sat-Wed)",
+  "weekendsSatSun": "Weekends (Sat-Sun)",
+  "weekendsFriSat": "Weekends (Fri-Sat)",
+  "weekendsThuFri": "Weekends (Thu-Fri)",
+  "unknown": "Unknown",
+  "triggerHint": "What triggered this? Any insights...",
+  "enterValue": "Enter value",
+  "enterAmount": "Enter amount",
+  "value": "Value",
+  "amount": "Amount",
+  "reset": "Reset",
+  "skippedDay": "Skipped day",
+  "habitCorrelations": "Habit Correlations",
+  "habitCorrelationsDesc": "Shows which habits tend to succeed or fail together. A coefficient close to 1.0 means they occur together, while -1.0 means one succeeds when the other fails.",
+  "notEnoughDataCorrelations": "Not enough data to calculate correlations yet",
+  "habit1": "Habit 1",
+  "habit2": "Habit 2",
+  "strength": "Strength",
+  "performanceInsights": "Performance Insights",
+  "notEnoughDataInsights": "Add more entries to generate insights!",
+  "bestPerformer": "Best Performer",
+  "bestPerformerDesc": "{habitName} has {rate}% success rate",
+  "@bestPerformerDesc": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "mostConsistent": "Most Consistent",
+  "mostConsistentDesc": "{habitName} has a {streak}-day streak",
+  "@mostConsistentDesc": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      },
+      "streak": {
+        "type": "String"
+      }
+    }
+  },
+  "mostActiveDay": "Most Active Day",
+  "mostActiveDayDesc": "{dayName} with {count} entries",
+  "@mostActiveDayDesc": {
+    "placeholders": {
+      "dayName": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "recommendations": "Recommendations",
+  "notEnoughDataRecommendations": "Keep tracking to receive recommendations!",
+  "strugglingHabitRec": "Consider reviewing {habitName} - try adjusting the target or frequency",
+  "@strugglingHabitRec": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      }
+    }
+  },
+  "staleHabitRec": "You haven't logged {habitName} recently - consider adding an entry",
+  "@staleHabitRec": {
+    "placeholders": {
+      "habitName": {
+        "type": "String"
+      }
+    }
+  },
+  "correlationRec": "{habit1} and {habit2} work well together - consider doing them consecutively",
+  "@correlationRec": {
+    "placeholders": {
+      "habit1": {
+        "type": "String"
+      },
+      "habit2": {
+        "type": "String"
+      }
+    }
+  },
+  "aggregateActivityHeatmap": "Aggregate Activity Heatmap",
+  "noEntries": "No entries",
+  "succeededFailures": "Succeeded ({actual}/{limit} failures)",
+  "@succeededFailures": {
+    "placeholders": {
+      "actual": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "failedFailures": "Failed ({actual}/{limit} failures)",
+  "@failedFailures": {
+    "placeholders": {
+      "actual": {
+        "type": "String"
+      },
+      "limit": {
+        "type": "String"
+      }
+    }
+  },
+  "completedUnit": "{actual}/{target} {unit} completed",
+  "@completedUnit": {
+    "placeholders": {
+      "actual": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "habitsCompleted": "{successes}/{total} habits completed",
+  "@habitsCompleted": {
+    "placeholders": {
+      "successes": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "selectFont": "Select Font",
+  "searchFonts": "Search fonts...",
+  "font": "Font"
+}

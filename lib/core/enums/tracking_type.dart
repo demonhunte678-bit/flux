@@ -1,0 +1,1 @@
+enum TrackingType { check, quantity }

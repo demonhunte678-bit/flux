@@ -1,3 +1,1 @@
-// lib/app_enums.dart
-
-enum HabitType { FailBased, SuccessBased, DoneBased }
+enum HabitType { good, bad }

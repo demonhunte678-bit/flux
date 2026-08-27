@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:collection/collection.dart';
 import 'package:flux/index.dart';
-import 'package:flux/providers/index.dart';
-import 'package:flux/widgets/index.dart';
-import 'package:flux/data/index.dart';
 
 class HabitDetailPage extends ConsumerStatefulWidget {
   final Habit habit;
@@ -50,121 +48,26 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
   }
 
   void _showEditHabitSheet(Habit habit) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AddHabitSheet(
-        habitToEdit: habit,
-        onSave: (updatedHabit) async {
-          await ref.read(habitsProvider.notifier).updateHabit(updatedHabit);
-        },
-        existingCategories: (ref.read(habitsProvider).value ?? [])
-            .map((h) => h.category)
-            .whereType<String>()
-            .toSet()
-            .toList(),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddHabitPage(
+          habitToEdit: habit,
+          onSave: (updatedHabit) async {
+            await ref.read(habitsProvider.notifier).updateHabit(updatedHabit);
+            if (mounted) Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
 
-  void _showDeleteHabitDialog(Habit habit) {
-    showDialog(
+  void _showShareProgressSheet(Habit habit) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Manage Habit'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('What would you like to do with "${habit.name}"?'),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: const Icon(Icons.edit, color: Colors.blue),
-              title: const Text('Edit Habit'),
-              subtitle: const Text(
-                'Change name, schedule, limit/goal, icon, and colors',
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _showEditHabitSheet(habit);
-              },
-            ),
-            const Divider(),
-            if (!habit.isPaused)
-              ListTile(
-                leading: const Icon(Icons.pause_circle, color: Colors.orange),
-                title: const Text('Pause Habit'),
-                subtitle: const Text(
-                  'Temporarily stop tracking without affecting streaks',
-                ),
-                onTap: () async {
-                  habit.isPaused = true;
-                  habit.pauseStartDate = DateTime.now();
-                  await ref.read(habitsProvider.notifier).updateHabit(habit);
-                  if (context.mounted) Navigator.pop(context);
-                },
-              ),
-            if (habit.isPaused)
-              ListTile(
-                leading: const Icon(Icons.play_circle, color: Colors.green),
-                title: const Text('Resume Habit'),
-                subtitle: const Text('Continue tracking this habit'),
-                onTap: () async {
-                  habit.isPaused = false;
-                  habit.pauseEndDate = DateTime.now();
-                  await ref.read(habitsProvider.notifier).updateHabit(habit);
-                  if (context.mounted) Navigator.pop(context);
-                },
-              ),
-            if (!habit.isArchived)
-              ListTile(
-                leading: const Icon(Icons.archive, color: Colors.amber),
-                title: const Text('Archive Habit'),
-                subtitle: const Text(
-                  'Hide it from the main list but keep the data',
-                ),
-                onTap: () async {
-                  habit.isArchived = true;
-                  await ref.read(habitsProvider.notifier).updateHabit(habit);
-                  if (context.mounted) {
-                    Navigator.pop(context); // Close dialog
-                    Navigator.pop(context); // Go back to home/shell
-                  }
-                },
-              ),
-            if (habit.isArchived)
-              ListTile(
-                leading: const Icon(Icons.unarchive, color: Colors.green),
-                title: const Text('Restore Habit'),
-                subtitle: const Text('Bring it back to the active list'),
-                onTap: () async {
-                  habit.isArchived = false;
-                  await ref.read(habitsProvider.notifier).updateHabit(habit);
-                  if (context.mounted) {
-                    Navigator.pop(context); // Close dialog
-                    Navigator.pop(context); // Go back to home/shell
-                  }
-                },
-              ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.delete_forever, color: Colors.red),
-              title: const Text('Delete Permanently'),
-              subtitle: const Text('This cannot be undone'),
-              onTap: () {
-                _confirmDelete(habit);
-              },
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ProgressShareSheet(habit: habit),
     );
   }
 
@@ -172,14 +75,14 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Deletion'),
+        title: Text(L10n.of(context)!.confirmDeletion),
         content: Text(
-          'Are you sure you want to permanently delete "${habit.name}"? This action cannot be undone.',
+          L10n.of(context)!.areYouSureDeleteHabit(habit.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(L10n.of(context)!.cancel),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -191,7 +94,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
                 Navigator.pop(context); // Go back to home/shell
               }
             },
-            child: const Text('Delete'),
+            child: Text(L10n.of(context)!.delete),
           ),
         ],
       ),
@@ -202,19 +105,19 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Entry'),
-        content: const Text(
-          'Are you sure you want to delete this entry?',
+        title: Text(L10n.of(context)!.deleteEntry),
+        content: Text(
+          L10n.of(context)!.areYouSureDeleteEntry,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(L10n.of(context)!.cancel),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(L10n.of(context)!.delete),
           ),
         ],
       ),
@@ -245,7 +148,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to export report: $e')),
+          SnackBar(content: Text(L10n.of(context)!.failedToExportReport(e.toString()))),
         );
       }
     }
@@ -257,9 +160,9 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     final settingsState = ref.watch(settingsProvider);
 
     if (habit == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: Text('Habit not found or deleted.'),
+          child: Text(L10n.of(context)!.habitNotFound),
         ),
       );
     }
@@ -290,27 +193,109 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           title: Text(habit.name),
           bottom: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
-              Tab(icon: Icon(Icons.analytics), text: 'Analytics'),
+            tabs: [
+              Tab(icon: const Icon(Icons.dashboard), text: L10n.of(context)!.dashboardTab),
+              Tab(icon: const Icon(Icons.analytics), text: L10n.of(context)!.analyticsTab),
             ],
           ),
           actions: [
             IconButton(
               icon: const Icon(Icons.ios_share),
-              tooltip: 'Export CSV Report',
-              onPressed: () => _exportHabitReport(habit),
+              tooltip: 'Share Progress Card',
+              onPressed: () => _showShareProgressSheet(habit),
             ),
-            IconButton(
+            PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
-              onPressed: () => _showDeleteHabitDialog(habit),
+              onSelected: (value) async {
+                if (value == 'edit') {
+                  _showEditHabitSheet(habit);
+                } else if (value == 'archive') {
+                  habit.isArchived = !habit.isArchived;
+                  await ref.read(habitsProvider.notifier).updateHabit(habit);
+                  if (mounted) {
+                    if (habit.isArchived) {
+                      Navigator.pop(context);
+                    } else {
+                      setState(() {});
+                    }
+                  }
+                } else if (value == 'reset') {
+                  _showArchiveLogsDialog(habit);
+                } else if (value == 'csv') {
+                  _exportHabitReport(habit);
+                } else if (value == 'delete') {
+                  _confirmDelete(habit);
+                }
+              },
+              itemBuilder: (ctx) => [
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, color: themeData.colorScheme.primary, size: 20),
+                      const SizedBox(width: 12),
+                      Text(L10n.of(ctx)!.editHabit),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'archive',
+                  child: Row(
+                    children: [
+                      Icon(
+                        habit.isArchived ? Icons.unarchive : Icons.archive,
+                        color: Colors.amber,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(habit.isArchived ? 'Unarchive Habit' : L10n.of(ctx)!.archiveHabit),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'reset',
+                  child: const Row(
+                    children: [
+                      Icon(Icons.history_toggle_off, color: Colors.blueGrey, size: 20),
+                      const SizedBox(width: 12),
+                      Text('Reset past records'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'csv',
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_present, color: themeData.colorScheme.secondary, size: 20),
+                      const SizedBox(width: 12),
+                      Text(L10n.of(ctx)!.exportCsvReport),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.delete_forever, color: Colors.red, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        L10n.of(ctx)!.deletePermanently,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _showAddEntryDialog(habit),
-          child: const Icon(Icons.add),
-        ),
+        floatingActionButton: _shouldShowFab(habit)
+            ? FloatingActionButton(
+                onPressed: () => _showAddEntryDialog(habit),
+                child: const Icon(Icons.add),
+              )
+            : null,
         body: TabBarView(
           controller: _tabController,
           children: [
@@ -336,6 +321,14 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           const SizedBox(height: 16),
           _buildMotivationalBanner(habit),
           _buildGoalProgressCard(habit),
+          const SizedBox(height: 16),
+          HabitStreakCalendar(
+            habit: habit,
+            onModified: () {
+              setState(() {});
+            },
+          ),
+          const SizedBox(height: 16),
           QuickStatsCard(
             habit: habit,
             showSuccessRate: showSuccessRate,
@@ -343,9 +336,9 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
           ),
           const SizedBox(height: 24),
 
-          const Text(
-            'History Logs',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            L10n.of(context)!.historyLogs,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           EntriesHistoryList(
@@ -361,7 +354,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     final typeName = habit.type.name;
     final frequencyText = habit.getFrequencyDisplayText();
     final unitText = habit.getUnitDisplayName();
-    final categoryText = habit.category ?? 'Uncategorized';
+    final categoryText = habit.category?.getLocalizedName(context) ?? 'Uncategorized';
 
     return Card(
       elevation: 0,
@@ -371,21 +364,19 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            if (habit.icon != null) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  habit.icon,
-                  size: 28,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
               ),
-              const SizedBox(width: 16),
-            ],
+              child: HabitIcon(
+                symbol: habit.symbol,
+                size: 28,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,7 +417,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Frequency: $frequencyText • Unit: $unitText',
+                    L10n.of(context)!.frequencyAndUnit(frequencyText, unitText),
                     style: TextStyle(
                       fontSize: 13,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
@@ -452,7 +443,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
 
   Widget _buildMotivationalBanner(Habit habit) {
 
-    final hasRecentFailure = habit.type == HabitType.FailBased && habit.entries.any((e) {
+    final hasRecentFailure = habit.type == HabitType.bad && habit.entries.any((e) {
       final isTodayOrYesterday = DateUtils.isSameDay(e.date, DateTime.now()) ||
           DateUtils.isSameDay(e.date, DateTime.now().subtract(const Duration(days: 1)));
       return isTodayOrYesterday && e.value > 0;
@@ -461,8 +452,10 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     if (!hasRecentFailure) return const SizedBox.shrink();
 
     final goalText = habit.goalType != null
-        ? "Don't let one slip-up stop you from reaching your ${habit.goalType == 'streak' ? '${habit.goalValue?.toInt() ?? 90}-day streak' : '${habit.goalValue?.toInt() ?? 80}% success rate'} goal!"
-        : "1 slip-up doesn't erase your progress. Let's start fresh and make today a win!";
+        ? (habit.goalType == GoalType.streak
+            ? L10n.of(context)!.slipUpStreakBanner((habit.goalValue?.toInt() ?? 90).toString())
+            : L10n.of(context)!.slipUpSuccessBanner((habit.goalValue?.toInt() ?? 80).toString()))
+        : L10n.of(context)!.slipUpGenericBanner;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -487,9 +480,9 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
                children: [
-                 const Text(
-                   "You can get it!",
-                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                 Text(
+                   L10n.of(context)!.youCanGetIt,
+                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                  ),
                  const SizedBox(height: 4),
                  Text(
@@ -535,16 +528,16 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "No Active Goal Set",
+                        L10n.of(context)!.noActiveGoalSet,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        "Tap here to set a target streak or success rate to stay motivated!",
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        L10n.of(context)!.noActiveGoalSubtitle,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -562,19 +555,19 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
     String progressLabel = "";
     String goalLabel = "";
 
-    if (habit.goalType == 'streak') {
+    if (habit.goalType == GoalType.streak) {
       progress = (habit.currentStreak / goalVal).clamp(0.0, 1.0);
-      progressLabel = "${habit.currentStreak} of ${goalVal.toInt()} days";
-      goalLabel = "Streak Goal: ${goalVal.toInt()} Days";
-    } else if (habit.goalType == 'percentage') {
+      progressLabel = L10n.of(context)!.progressLabelDays(habit.currentStreak.toString(), goalVal.toInt().toString());
+      goalLabel = L10n.of(context)!.streakGoal(goalVal.toInt().toString());
+    } else if (habit.goalType == GoalType.percentage) {
       progress = (habit.successRate / goalVal).clamp(0.0, 1.0);
-      progressLabel = "${habit.successRate.toStringAsFixed(0)}% of ${goalVal.toInt()}%";
-      goalLabel = "Success Rate Goal: ${goalVal.toInt()}%";
+      progressLabel = L10n.of(context)!.progressLabelPercentage(habit.successRate.toStringAsFixed(0), goalVal.toInt().toString());
+      goalLabel = L10n.of(context)!.successRateGoal(goalVal.toInt().toString());
     } else {
       final totalCount = habit.entries.length;
       progress = (totalCount / goalVal).clamp(0.0, 1.0);
-      progressLabel = "$totalCount of ${goalVal.toInt()} completions";
-      goalLabel = "Completions Goal: ${goalVal.toInt()} times";
+      progressLabel = L10n.of(context)!.progressLabelCompletions(totalCount.toString(), goalVal.toInt().toString());
+      goalLabel = L10n.of(context)!.completionsGoal(goalVal.toInt().toString());
     }
 
     final isCompleted = progress >= 1.0;
@@ -612,9 +605,9 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
                       color: Colors.green.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      "Achieved!",
-                      style: TextStyle(
+                    child: Text(
+                      L10n.of(context)!.achieved,
+                      style: const TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -623,7 +616,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
                   )
                 else
                   Text(
-                    "${(progress * 100).toStringAsFixed(0)}% reached",
+                    L10n.of(context)!.reachedPercent((progress * 100).toStringAsFixed(0)),
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -652,9 +645,9 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
                   progressLabel,
                   style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500),
                 ),
-                if (!isCompleted && habit.goalType == 'streak')
+                if (!isCompleted && habit.goalType == GoalType.streak)
                   Text(
-                    "${(goalVal - habit.currentStreak).toInt()} days left",
+                    L10n.of(context)!.daysLeft((goalVal - habit.currentStreak).toInt().toString()),
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
               ],
@@ -675,7 +668,7 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
         const SizedBox(height: 16),
         SuccessRateTrendChart(habits: filteredHabits),
         const SizedBox(height: 16),
-        if (habit.unit != HabitUnit.Count) ...[
+        if (habit.unit != HabitUnit.count) ...[
           ValueTrendChart(habits: filteredHabits),
           const SizedBox(height: 16),
         ],
@@ -685,6 +678,83 @@ class _HabitDetailPageState extends ConsumerState<HabitDetailPage>
         const SizedBox(height: 16),
         AnalyticsReport(habits: filteredHabits),
       ],
+    );
+  }
+
+  bool _shouldShowFab(Habit habit) {
+    if (!habit.isDueToday(weekendDaysSetting: habit.weekendDays)) {
+      return false;
+    }
+    if (habit.trackingType == TrackingType.check) {
+      final todayEntry = habit.entries.firstWhereOrNull(
+        (e) => DateUtils.isSameDay(e.date, DateTime.now()),
+      );
+      if (todayEntry != null && habit.isPositiveDay(todayEntry)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _showArchiveLogsDialog(Habit habit) {
+    final now = DateTime.now();
+    final startOfCurrentMonth = DateTime(now.year, now.month, 1);
+    final startOfCurrentYear = DateTime(now.year, 1, 1);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset & Archive Past Logs'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: const Text(
+          'Archive logs from previous months or years to reset your success statistics and start fresh. '
+          'Your old logs will remain visible in the history view for reference, but they will not be counted in active streaks or success rates. '
+          'This action cannot be undone.',
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await HabitsRepository.instance.archivePastEntries(habit, startOfCurrentMonth);
+              ref.read(habitsProvider.notifier).loadHabits();
+              setState(() {});
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Archived logs before the current month.')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Before Current Month'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await HabitsRepository.instance.archivePastEntries(habit, startOfCurrentYear);
+              ref.read(habitsProvider.notifier).loadHabits();
+              setState(() {});
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Archived logs before the current year.')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepOrange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Before Current Year'),
+          ),
+        ],
+      ),
     );
   }
 }

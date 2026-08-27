@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flux/index.dart';
 
 class AccentColor {
@@ -67,13 +68,45 @@ class ThemeService {
   static ThemeData createTheme({
     required String themeName,
     required bool isDarkMode,
+    required String fontName,
     ColorScheme? dynamicColorScheme,
   }) {
+    final useDark = isDarkMode;
+    ThemeData baseTheme;
+
     if (themeName.toLowerCase() == 'system' && dynamicColorScheme != null) {
-      return ThemeData(
+      baseTheme = ThemeData(
         useMaterial3: true,
-        brightness: isDarkMode ? Brightness.dark : Brightness.light,
+        brightness: useDark ? Brightness.dark : Brightness.light,
         colorScheme: dynamicColorScheme,
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+        ),
+      );
+    } else {
+      final accent = accentColors.firstWhere(
+        (c) => c.colorName.toLowerCase() == themeName.toLowerCase(),
+        orElse: () => accentColors[0],
+      );
+      final primaryColor = accent.color;
+
+      final colorScheme = ColorScheme.fromSeed(
+        seedColor: primaryColor,
+        brightness: useDark ? Brightness.dark : Brightness.light,
+      ).copyWith(
+        surface: useDark ? const Color(0xFF161618) : const Color(0xFFFAF9F6),
+        surfaceContainer: useDark ? const Color(0xFF202023) : const Color(0xFFFFFFFF),
+        surfaceContainerHighest: useDark ? const Color(0xFF2C2C30) : const Color(0xFFF1EFF0),
+        onSurface: useDark ? const Color(0xFFECECEF) : const Color(0xFF1E1E22),
+      );
+
+      baseTheme = ThemeData(
+        useMaterial3: true,
+        brightness: useDark ? Brightness.dark : Brightness.light,
+        colorScheme: colorScheme,
+        scaffoldBackgroundColor: colorScheme.surface,
         appBarTheme: const AppBarTheme(
           elevation: 0,
           centerTitle: false,
@@ -82,33 +115,8 @@ class ThemeService {
       );
     }
 
-    final accent = accentColors.firstWhere(
-      (c) => c.colorName.toLowerCase() == themeName.toLowerCase(),
-      orElse: () => accentColors[0],
-    );
-    final primaryColor = accent.color;
-    final useDark = isDarkMode;
-
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: primaryColor,
-      brightness: useDark ? Brightness.dark : Brightness.light,
-    ).copyWith(
-      surface: useDark ? const Color(0xFF161618) : const Color(0xFFFAF9F6),
-      surfaceContainer: useDark ? const Color(0xFF202023) : const Color(0xFFFFFFFF),
-      surfaceContainerHighest: useDark ? const Color(0xFF2C2C30) : const Color(0xFFF1EFF0),
-      onSurface: useDark ? const Color(0xFFECECEF) : const Color(0xFF1E1E22),
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: useDark ? Brightness.dark : Brightness.light,
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
-      appBarTheme: const AppBarTheme(
-        elevation: 0,
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-      ),
+    return baseTheme.copyWith(
+      textTheme: GoogleFonts.getTextTheme(fontName, baseTheme.textTheme),
     );
   }
 

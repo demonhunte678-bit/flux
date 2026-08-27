@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flux/index.dart';
+import 'package:flux/l10n/localized_string.dart';
+
+import '../l10n/localizations_extension.dart';
 
 class AddEntryDialog extends StatefulWidget {
   final Habit habit;
   final DateTime? selectedDate;
   final bool showDateSelector;
-  final String? weekendDaysSetting;
+  final WeekendDays? weekendDaysSetting;
   final Function(HabitEntry) onSave;
 
   const AddEntryDialog({
@@ -107,28 +110,17 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     super.dispose();
   }
 
-  String get _getMainTitle {
-    final dateStr = DateFormat('EEE, MMM d').format(_selectedDate);
-    if (_isSkipped) return 'Skipping $dateStr';
+  String _getMainTitle(BuildContext context) {
+    final dateStr = DateFormat('EEE, MMM d', Localizations.localeOf(context).toString()).format(_selectedDate).toLatinNumbers();
+    if (_isSkipped) return context.l10n.skippingDate(dateStr);
 
-    if (widget.habit.unit != HabitUnit.Count &&
-        widget.habit.targetValue != null) {
-      switch (widget.habit.type) {
-        case HabitType.FailBased:
-          return 'Track Failure';
-        case HabitType.SuccessBased:
-          return 'Track Progress';
-        case HabitType.DoneBased:
-          return 'Mark as Done';
-      }
+    if (widget.habit.type == HabitType.bad) {
+      return context.l10n.trackFailure;
     } else {
-      switch (widget.habit.type) {
-        case HabitType.FailBased:
-          return 'Track Failure';
-        case HabitType.SuccessBased:
-          return 'Track Success';
-        case HabitType.DoneBased:
-          return 'Mark Completion';
+      if (widget.habit.trackingType == TrackingType.quantity) {
+        return context.l10n.trackProgress;
+      } else {
+        return context.l10n.markCompletion;
       }
     }
   }
@@ -243,10 +235,10 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(
-              widget.habit.icon ?? Icons.star,
-              color: Colors.white,
+            child: HabitIcon(
+              symbol: widget.habit.symbol,
               size: 32,
+              color: Colors.white,
             ),
           ),
           const SizedBox(width: 16),
@@ -264,7 +256,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _getMainTitle,
+                  _getMainTitle(context),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.white.withValues(alpha: 0.9),
@@ -280,7 +272,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
 
   Widget _buildDateSelectorSection(BuildContext context) {
     final entryExists = _hasEntryForDate(_selectedDate);
-    final dateStr = DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate);
+    final dateStr = DateFormat('EEEE, MMMM d, yyyy', Localizations.localeOf(context).toString()).format(_selectedDate).toLatinNumbers();
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -306,9 +298,9 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Date',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              Text(
+                context.l10n.date,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -401,7 +393,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Skip this day?',
+                  context.l10n.skipThisDay,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -410,7 +402,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Won't break your streak or affect statistics",
+                  context.l10n.skipThisDaySubtitle,
                   style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
@@ -437,8 +429,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
   }
 
   Widget _buildMainContent(BuildContext context) {
-    if (widget.habit.type == HabitType.DoneBased &&
-        widget.habit.unit == HabitUnit.Count) {
+    if (widget.habit.trackingType == TrackingType.check) {
       return _buildDoneTypeInput(context);
     } else {
       return _buildValueInput(context);
@@ -459,10 +450,10 @@ class _AddEntryDialogState extends State<AddEntryDialog>
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Did you complete this habit today?',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  context.l10n.didYouCompleteToday,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ),
               Switch(
@@ -502,7 +493,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                   ),
                   const SizedBox(width: 12),
                   Text(
-                    _isDone ? 'Completed ✓' : 'Not Completed ✗',
+                    _isDone ? context.l10n.completedCheck : context.l10n.notCompletedCross,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -561,7 +552,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Target Goal',
+                          context.l10n.targetGoal,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
@@ -585,7 +576,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
             const SizedBox(height: 20),
           ],
 
-          if (widget.habit.unit == HabitUnit.Count) ...[
+          if (widget.habit.unit == HabitUnit.count) ...[
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -718,7 +709,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                         const SizedBox(width: 8),
                         _buildQuickButton(context, '+10', 10),
                         const SizedBox(width: 8),
-                        _buildQuickButton(context, 'Reset', -1),
+                        _buildQuickButton(context, context.l10n.reset, -1),
                       ],
                     ),
                   ),
@@ -728,7 +719,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
             const SizedBox(height: 16),
           ] else ...[
             Text(
-              'Enter ${unitName.isNotEmpty ? "${unitName[0].toUpperCase()}${unitName.substring(1)}" : "Amount"}',
+              unitName.isNotEmpty ? '${context.l10n.enterValue} ($unitName)' : context.l10n.enterAmount,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
@@ -737,7 +728,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               decoration: InputDecoration(
                 labelText: unitName.isNotEmpty
                     ? '${unitName[0].toUpperCase()}${unitName.substring(1)}'
-                    : 'Amount',
+                    : context.l10n.amount,
                 hintText: '0.0',
                 suffixText: unitName,
                 filled: true,
@@ -774,12 +765,12 @@ class _AddEntryDialogState extends State<AddEntryDialog>
 
   Widget _buildTargetProgressIndicator() {
     final targetValue = widget.habit.targetValue!;
-    final currentValue = widget.habit.unit == HabitUnit.Count
+    final currentValue = widget.habit.unit == HabitUnit.count
         ? (int.tryParse(_countController.text) ?? 0).toDouble()
         : (double.tryParse(_valueController.text) ?? 0.0);
 
     final progress = (currentValue / targetValue).clamp(0.0, 1.0);
-    final isOnTrack = widget.habit.type == HabitType.FailBased
+    final isOnTrack = widget.habit.type == HabitType.bad
         ? currentValue <= targetValue
         : currentValue >= targetValue;
 
@@ -828,7 +819,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Progress Status',
+                      context.l10n.progressStatus,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -837,7 +828,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _getProgressText(isOnTrack, currentValue, targetValue),
+                      _getProgressText(context, isOnTrack, currentValue, targetValue),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: isOnTrack ? Colors.green : Colors.orange,
@@ -892,9 +883,9 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                 size: 20,
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Notes (Optional)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              Text(
+                context.l10n.notesOptional,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -902,9 +893,9 @@ class _AddEntryDialogState extends State<AddEntryDialog>
           TextFormField(
             controller: _notesController,
             decoration: InputDecoration(
-              hintText: widget.habit.type == HabitType.FailBased
-                  ? 'What triggered this? Any insights...'
-                  : 'How did it go? Any thoughts...',
+              hintText: widget.habit.type == HabitType.bad
+                  ? context.l10n.triggerHint
+                  : context.l10n.notesHintOptional,
               filled: true,
               fillColor: Theme.of(context).cardColor,
               border: OutlineInputBorder(
@@ -949,7 +940,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               const Icon(Icons.help_outline, color: Colors.orange, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Why are you skipping today?',
+                context.l10n.whySkippingToday,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -962,7 +953,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
           TextFormField(
             controller: _skipReasonController,
             decoration: InputDecoration(
-              hintText: 'e.g., sick, traveling, planned rest day...',
+              hintText: context.l10n.whySkippingHint,
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(
@@ -1003,9 +994,9 @@ class _AddEntryDialogState extends State<AddEntryDialog>
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            child: Text(
+              context.l10n.cancel,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -1025,7 +1016,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
               elevation: 2,
             ),
             child: Text(
-              _isSkipped ? 'Skip Day' : 'Save Entry',
+              _isSkipped ? context.l10n.skipDay : context.l10n.saveEntry,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
@@ -1034,26 +1025,27 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     );
   }
 
-  String _getProgressText(bool isOnTrack, double current, double target) {
-    switch (widget.habit.type) {
-      case HabitType.FailBased:
-        if (current <= target) {
-          return 'Within limit ✓';
-        } else {
-          return 'Over limit by ${(current - target).toStringAsFixed(1)}';
-        }
-      case HabitType.SuccessBased:
+  String _getProgressText(BuildContext context, bool isOnTrack, double current, double target) {
+    if (widget.habit.type == HabitType.bad) {
+      if (current <= target) {
+        return context.l10n.withinLimit;
+      } else {
+        return context.l10n.overLimitBy((current - target).toStringAsFixed(1));
+      }
+    } else {
+      if (widget.habit.trackingType == TrackingType.quantity) {
         if (current >= target) {
-          return 'Target reached! ✓';
+          return context.l10n.targetReached;
         } else {
-          return 'Need ${(target - current).toStringAsFixed(1)} more';
+          return context.l10n.needMore((target - current).toStringAsFixed(1));
         }
-      case HabitType.DoneBased:
+      } else {
         if (current >= target) {
-          return 'Goal achieved! ✓';
+          return context.l10n.goalAchieved;
         } else {
-          return 'Progress towards goal';
+          return context.l10n.progressTowardsGoal;
         }
+      }
     }
   }
 
@@ -1105,8 +1097,8 @@ class _AddEntryDialogState extends State<AddEntryDialog>
         value: 0.0,
         isSkipped: true,
         notes: _skipReasonController.text.trim().isNotEmpty
-            ? 'Skip reason: ${_skipReasonController.text.trim()}'
-            : 'Skipped day',
+            ? '${context.l10n.whySkippingToday} ${_skipReasonController.text.trim()}'
+            : context.l10n.skippedDay,
       );
       widget.onSave(entry);
       return;
@@ -1114,10 +1106,9 @@ class _AddEntryDialogState extends State<AddEntryDialog>
 
     double value = 0.0;
 
-    if (widget.habit.type == HabitType.DoneBased &&
-        widget.habit.unit == HabitUnit.Count) {
+    if (widget.habit.trackingType == TrackingType.check) {
       value = _isDone ? 1.0 : 0.0;
-    } else if (widget.habit.unit == HabitUnit.Count) {
+    } else if (widget.habit.unit == HabitUnit.count) {
       value = (double.tryParse(_countController.text) ?? _sliderValue.toDouble());
     } else {
       value = double.tryParse(_valueController.text) ?? 0.0;
@@ -1126,7 +1117,7 @@ class _AddEntryDialogState extends State<AddEntryDialog>
     final entry = HabitEntry(
       date: _selectedDate,
       value: value,
-      unit: widget.habit.unit != HabitUnit.Count
+      unit: widget.habit.unit != HabitUnit.count
           ? widget.habit.getUnitDisplayName()
           : null,
       notes: _notesController.text.trim().isNotEmpty

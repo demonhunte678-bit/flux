@@ -28,7 +28,7 @@ class AnalyticsState {
         name: habit.name,
         type: habit.type,
         displayMode: habit.displayMode,
-        icon: habit.icon,
+        symbol: habit.symbol,
         color: habit.color,
         isArchived: habit.isArchived,
         notes: habit.notes,

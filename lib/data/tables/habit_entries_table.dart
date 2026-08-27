@@ -12,4 +12,5 @@ class HabitEntries extends Table {
   TextColumn get unit => text().nullable()();
   TextColumn get notes => text().nullable()();
   BoolColumn get isSkipped => boolean()();
+  BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
 }

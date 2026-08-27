@@ -1,3 +1,3 @@
 // lib/app_enums.dart
 
-enum ReportDisplay { Rate, Streak }
+enum ReportDisplay { rate, streak }

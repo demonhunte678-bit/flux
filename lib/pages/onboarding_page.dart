@@ -4,13 +4,13 @@ import 'package:flux/providers/index.dart';
 import 'package:flux/pages/app_shell.dart';
 import 'package:flux/onboard/onboard_step.dart';
 import 'package:flux/onboard/steps/welcome_step.dart';
+import 'package:flux/onboard/steps/identity_step.dart';
 import 'package:flux/onboard/steps/quest_step.dart';
 import 'package:flux/onboard/steps/areas_step.dart';
-import 'package:flux/onboard/steps/lifestyle_step.dart';
 import 'package:flux/onboard/steps/preferences_step.dart';
 import 'package:flux/onboard/steps/starter_pack_step.dart';
-import 'package:flux/onboard/steps/reminders_step.dart';
 import 'package:flux/onboard/steps/complete_step.dart';
+import 'package:flux/l10n/generated/app_localizations.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   final VoidCallback? onComplete;
@@ -33,6 +33,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
     super.initState();
     _stepsList = [
       WelcomeStep(onSkip: _skipToEnd, onNext: _nextStep),
+      IdentityStep(),
       QuestStep(),
       AreasStep(),
       // LifestyleStep(),
@@ -127,8 +128,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 children: _stepsList
                     .map(
                       (step) => _buildStepContainer(
-                        title: step.title,
-                        subtitle: step.subtitle,
+                        title: step.title?.of(context),
+                        subtitle: step.subtitle?.of(context),
                         child: step.buildContent(context, ref, currentColor),
                       ),
                     )
@@ -158,7 +159,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Flux Setup',
+              L10n.of(context)!.onboardSetupTitle,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 22,
@@ -184,7 +185,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
             ),
             const SizedBox(height: 8),
             Text(
-              '${currentStep + 1}/${_stepsList.length} - ${_stepsList[currentStep].stepName}',
+              '${currentStep + 1}/${_stepsList.length} - ${_stepsList[currentStep].stepName.of(context)}',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                 fontSize: 13,
@@ -241,6 +242,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
   }
 
   Widget _buildNavigationButtons(Color currentColor, int currentStep) {
+    if (currentStep == 0) return const SizedBox.shrink();
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
@@ -257,7 +260,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                   ),
                 ),
                 child: Text(
-                  'Back',
+                  L10n.of(context)!.back,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
@@ -279,7 +282,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage>
                 ),
               ),
               child: Text(
-                currentStep == _stepsList.length - 1 ? 'Complete' : 'Next',
+                currentStep == _stepsList.length - 1 ? L10n.of(context)!.complete : L10n.of(context)!.next,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),

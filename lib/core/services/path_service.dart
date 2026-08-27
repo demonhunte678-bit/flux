@@ -7,7 +7,7 @@ class PathService {
     if (Platform.isWindows) {
       final appData = Platform.environment['APPDATA'];
       if (appData != null) {
-        final dir = Directory(p.join(appData, 'dev.wisamidris77', 'flux'));
+        final dir = Directory(p.join(appData, 'Wisam Idris', 'Flux'));
         if (!await dir.exists()) {
           await dir.create(recursive: true);
         }

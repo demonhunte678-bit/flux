@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flux/l10n/index.dart';
 
 class SuccessRateCard extends StatelessWidget {
-  final double overallSuccessRate;
+  final int completedCount;
+  final int totalCount;
   final bool show;
 
   const SuccessRateCard({
     super.key,
-    required this.overallSuccessRate,
+    required this.completedCount,
+    required this.totalCount,
     this.show = true,
   });
 
   @override
   Widget build(BuildContext context) {
     if (!show) return const SizedBox.shrink();
+    final double progress = totalCount > 0 ? completedCount / totalCount : 0.0;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.all(16),
@@ -36,12 +40,12 @@ class SuccessRateCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Today's Success Rate",
+                  'Today\'s Completion',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 LinearProgressIndicator(
-                  value: overallSuccessRate / 100,
+                  value: progress,
                   backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation<Color>(
                     Theme.of(context).colorScheme.primary,
@@ -52,7 +56,7 @@ class SuccessRateCard extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Text(
-            '${overallSuccessRate.toStringAsFixed(0)}%',
+            '$completedCount/$totalCount',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ],

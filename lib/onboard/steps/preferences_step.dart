@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
 import 'package:flux/providers/index.dart';
+import '../../l10n/localizations_extension.dart';
 import '../onboard_step.dart';
+import 'package:flux/l10n/localized_string.dart';
 
 class PreferencesStep implements OnboardStep {
   @override
-  String get stepName => 'Preferences';
+  LocalizedString get stepName => LocalizedString((l) => l.preferencesStepName);
 
   @override
-  String? get title => 'Experience & Tracking Style';
+  LocalizedString? get title => LocalizedString((l) => l.preferencesTitle);
 
   @override
-  String? get subtitle => 'Customize how you track your habits.';
+  LocalizedString? get subtitle => LocalizedString((l) => l.preferencesSubtitle);
 
   @override
   bool canProceed(WidgetRef ref) {
@@ -25,9 +27,9 @@ class PreferencesStep implements OnboardStep {
     final notifier = ref.read(onboardingProvider.notifier);
 
     final levels = [
-      {'value': 'never', 'label': 'Never'},
-      {'value': 'little', 'label': 'A little'},
-      {'value': 'regular', 'label': 'Regularly'},
+      {'value': 'never', 'label': context.l10n.never},
+      {'value': 'little', 'label': context.l10n.aLittle},
+      {'value': 'regular', 'label': context.l10n.regularly},
     ];
 
     return SingleChildScrollView(
@@ -35,7 +37,7 @@ class PreferencesStep implements OnboardStep {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Have you tracked habits before?',
+            context.l10n.trackedBeforePrompt,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -78,7 +80,7 @@ class PreferencesStep implements OnboardStep {
           ),
           const SizedBox(height: 28),
           Text(
-            'How do you prefer to measure progress?',
+            context.l10n.measureProgressPrompt,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -112,7 +114,7 @@ class PreferencesStep implements OnboardStep {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Streaks Focus',
+                          context.l10n.streaksFocus,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: !state.showSuccessRate ? stepColor : Theme.of(context).colorScheme.onSurface,
@@ -120,7 +122,7 @@ class PreferencesStep implements OnboardStep {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Counts consecutive days you keep the habit alive.',
+                          context.l10n.streaksFocusDesc,
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
@@ -160,7 +162,7 @@ class PreferencesStep implements OnboardStep {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Percentages Focus',
+                          context.l10n.percentagesFocus,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: state.showSuccessRate ? stepColor : Theme.of(context).colorScheme.onSurface,
@@ -168,7 +170,7 @@ class PreferencesStep implements OnboardStep {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Shows your overall consistency percentage over time.',
+                          context.l10n.percentagesFocusDesc,
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),

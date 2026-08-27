@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
 import 'package:flux/widgets/index.dart';
+import '../l10n/app_languages.dart';
+import '../l10n/localizations_extension.dart';
 import 'backup_import_page.dart';
+import 'package:flux/l10n/localized_string.dart';
 
 class SettingsPage extends ConsumerWidget {
   final bool wrapWithScaffold;
@@ -22,7 +25,7 @@ class SettingsPage extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Settings',
+              L10n.of(context)!.settingsTab,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -32,11 +35,11 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 24),
             _buildSettingsSection(
               context,
-              title: 'Appearance',
+              title: L10n.of(context)!.appearance,
               children: [
                 SettingsSwitchTile(
-                  title: 'Dark Mode',
-                  subtitle: 'Toggle dark or light theme',
+                  title: L10n.of(context)!.darkMode,
+                  subtitle: L10n.of(context)!.toggleDarkLight,
                   value: themeState.isDarkMode,
                   onChanged: (value) {
                     ref.read(themeProvider.notifier).toggleDarkMode(value);
@@ -53,9 +56,9 @@ class SettingsPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Theme Color',
-                        style: TextStyle(
+                      Text(
+                        L10n.of(context)!.themeColor,
+                        style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 15,
                         ),
@@ -72,8 +75,8 @@ class SettingsPage extends ConsumerWidget {
                         const Divider(height: 1),
                         const SizedBox(height: 12),
                         SettingsSwitchTile(
-                          title: 'Match Launcher Icon',
-                          subtitle: 'Sync home screen icon with theme color',
+                          title: L10n.of(context)!.matchLauncherIcon,
+                          subtitle: L10n.of(context)!.matchLauncherIconSubtitle,
                           value: settingsState.matchLauncherIcon,
                           onChanged: (value) {
                             ref
@@ -86,16 +89,26 @@ class SettingsPage extends ConsumerWidget {
                     ],
                   ),
                 ),
+                SettingsNavigationTile(
+                  title: context.l10n.font,
+                  subtitle: settingsState.selectedFont,
+                  icon: Icons.font_download_outlined,
+                  onTap: () => _showFontSelector(
+                    context,
+                    ref,
+                    settingsState.selectedFont,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
             _buildSettingsSection(
               context,
-              title: 'Display Preferences',
+              title: L10n.of(context)!.displayPreferences,
               children: [
                 SettingsSwitchTile(
-                  title: 'Show Success Rate',
-                  subtitle: 'Show percentage rates in the app',
+                  title: L10n.of(context)!.showSuccessRate,
+                  subtitle: L10n.of(context)!.showSuccessRateSubtitle,
                   value: settingsState.showSuccessRate,
                   onChanged: (value) {
                     ref
@@ -105,8 +118,8 @@ class SettingsPage extends ConsumerWidget {
                   icon: Icons.percent_rounded,
                 ),
                 SettingsSwitchTile(
-                  title: 'Show Streak Days',
-                  subtitle: 'Show daily streaks in the app',
+                  title: L10n.of(context)!.showStreakDays,
+                  subtitle: L10n.of(context)!.showStreakDaysSubtitle,
                   value: settingsState.showCurrentStreak,
                   onChanged: (value) {
                     ref
@@ -120,11 +133,13 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 24),
             _buildSettingsSection(
               context,
-              title: 'General',
+              title: L10n.of(context)!.general,
               children: [
                 SettingsNavigationTile(
-                  title: 'Language',
-                  subtitle: settingsState.language,
+                  title: context.l10n.language,
+                  subtitle: settingsState.language == 'ar'
+                      ? context.l10n.arabic
+                      : context.l10n.english,
                   icon: Icons.language_outlined,
                   onTap: () => _showLanguageSelector(
                     context,
@@ -133,8 +148,8 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ),
                 SettingsNavigationTile(
-                  title: 'Backup & Restore',
-                  subtitle: 'Export or import your habit database',
+                  title: L10n.of(context)!.backupRestore,
+                  subtitle: L10n.of(context)!.backupRestoreSubtitle,
                   icon: Icons.backup_outlined,
                   onTap: () {
                     Navigator.push(
@@ -221,17 +236,19 @@ class SettingsPage extends ConsumerWidget {
     WidgetRef ref,
     String currentLanguage,
   ) {
-    final languages = ['English', 'Arabic'];
+    final languages = AppLanguages.supportedCodes;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
+        title: Text(context.l10n.selectLanguage),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: languages.map((lang) {
             return RadioListTile<String>(
-              title: Text(lang),
+              title: Text(lang == 'ar'
+                  ? context.l10n.arabic
+                  : context.l10n.english),
               value: lang,
               groupValue: currentLanguage,
               onChanged: (String? value) {
@@ -243,6 +260,25 @@ class SettingsPage extends ConsumerWidget {
             );
           }).toList(),
         ),
+      ),
+    );
+  }
+
+  void _showFontSelector(
+    BuildContext context,
+    WidgetRef ref,
+    String currentFont,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FontSelectorDialog(
+        currentFont: currentFont,
+        onFontSelected: (String fontName) {
+          ref.read(settingsProvider.notifier).changeFont(fontName);
+          Navigator.pop(context);
+        },
       ),
     );
   }

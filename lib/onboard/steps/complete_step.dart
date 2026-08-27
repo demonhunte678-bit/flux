@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flux/providers/index.dart';
+import 'package:flux/index.dart';
 import '../onboard_step.dart';
 
 class CompleteStep implements OnboardStep {
   @override
-  String get stepName => 'Complete';
+  LocalizedString get stepName => LocalizedString((l) => l.completeStepName);
 
   @override
-  String? get title => 'Your Journey Begins';
+  LocalizedString? get title => LocalizedString((l) => l.completeTitle);
 
   @override
-  String? get subtitle => null;
+  LocalizedString? get subtitle => null;
 
   @override
   bool canProceed(WidgetRef ref) => true;
@@ -40,15 +40,15 @@ class CompleteStep implements OnboardStep {
           ),
           const SizedBox(height: 24),
           Text(
-            "Imagine opening Flux 100 days from now and seeing every single promise you've kept.",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              height: 1.4,
-            ),
-            textAlign: TextAlign.center,
-          ),
+             context.l10n.completeSubtitle ?? '',
+             style: TextStyle(
+               color: Theme.of(context).colorScheme.onSurface,
+               fontSize: 20,
+               fontWeight: FontWeight.bold,
+               height: 1.4,
+             ),
+             textAlign: TextAlign.center,
+           ),
           const SizedBox(height: 20),
           Container(
             width: double.infinity,
@@ -62,7 +62,7 @@ class CompleteStep implements OnboardStep {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Your Personalized Roadmap:',
+                  context.l10n.completeRoadmap,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -71,16 +71,16 @@ class CompleteStep implements OnboardStep {
                 ),
                 const SizedBox(height: 12),
                 if (state.userName.trim().isNotEmpty) ...[
-                  Text('Name: ${state.userName}', style: const TextStyle(fontSize: 14)),
+                  Text(context.l10n.completeName(state.userName), style: const TextStyle(fontSize: 14)),
                   const SizedBox(height: 6),
                 ],
                 if (state.occupation.trim().isNotEmpty) ...[
-                  Text('Occupation: ${state.occupation}', style: const TextStyle(fontSize: 14)),
+                  Text(context.l10n.completeOccupation(state.occupation), style: const TextStyle(fontSize: 14)),
                   const SizedBox(height: 6),
                 ],
-                Text('Focus areas: ${state.selectedAreas.map((a) => a.label).join(", ")}', style: const TextStyle(fontSize: 14)),
+                Text(context.l10n.completeFocusAreas(state.selectedAreas.map((a) => a.label(context)).join(", ")), style: const TextStyle(fontSize: 14)),
                 const SizedBox(height: 6),
-                Text('Seeding: ${state.selectedHabits.length} starter habits', style: const TextStyle(fontSize: 14)),
+                Text(context.l10n.completeSeeding(state.selectedHabits.length.toString()), style: const TextStyle(fontSize: 14)),
               ],
             ),
           ),

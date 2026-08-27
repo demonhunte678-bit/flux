@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/providers/index.dart';
+import '../../l10n/localizations_extension.dart';
 import '../onboard_step.dart';
 import 'package:flux/index.dart';
+import 'package:flux/l10n/localized_string.dart';
 
 enum FocusArea {
   health,
@@ -13,22 +15,22 @@ enum FocusArea {
   sleep,
   relationships;
 
-  String get label {
+  String label(BuildContext context) {
     switch (this) {
       case FocusArea.health:
-        return 'Fitness & Health';
+        return context.l10n.areaHealth;
       case FocusArea.growth:
-        return 'Learning & Productivity';
+        return context.l10n.areaGrowth;
       case FocusArea.finances:
-        return 'Finances';
+        return context.l10n.areaFinances;
       case FocusArea.mental:
-        return 'Mindfulness & Mental Health';
+        return context.l10n.areaMental;
       case FocusArea.home:
-        return 'Routines & Organization';
+        return context.l10n.areaHome;
       case FocusArea.sleep:
-        return 'Sleep';
+        return context.l10n.areaSleep;
       case FocusArea.relationships:
-        return 'Relationships';
+        return context.l10n.areaRelationships;
     }
   }
 
@@ -56,13 +58,13 @@ enum FocusArea {
 
 class AreasStep implements OnboardStep {
   @override
-  String get stepName => 'Focus Areas';
+  LocalizedString get stepName => LocalizedString((l) => l.areasStepName);
 
   @override
-  String? get title => 'What are you trying to change in your life?';
+  LocalizedString? get title => LocalizedString((l) => l.areasTitle);
 
   @override
-  String? get subtitle => 'Choose the focus areas that matter to you right now.';
+  LocalizedString? get subtitle => LocalizedString((l) => l.areasSubtitle);
 
   @override
   bool canProceed(WidgetRef ref) {
@@ -107,7 +109,7 @@ class AreasStep implements OnboardStep {
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      area.label,
+                      area.label(context),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

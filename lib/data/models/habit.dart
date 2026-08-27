@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:collection/collection.dart';
 import 'package:flux/index.dart';
 
 class Habit {
   String id;
   String name;
   HabitType type;
+  TrackingType trackingType;
   ReportDisplay displayMode;
-  IconData? icon;
+  HabitSymbol symbol;
   List<HabitEntry> entries;
   Color? color;
   bool isArchived;
   String? notes;
 
   // Enhanced functionality fields
-  String? category;
+  Category? category;
   HabitFrequency frequency;
   List<int> customDays;
   int? targetFrequency;
@@ -25,70 +27,61 @@ class Habit {
   DateTime? pauseEndDate;
   bool isPaused;
 
-  String? weekendDays;
-  String? goalType;
+  WeekendDays? weekendDays;
+  GoalType? goalType;
   double? goalValue;
 
   // Custom motivational messages
-  List<String> motivationalMessages;
   String? customSuccessMessage;
   String? customFailureMessage;
 
   Habit({
     String? id,
     required this.name,
-    this.type = HabitType.DoneBased,
-    this.displayMode = ReportDisplay.Rate,
-    this.icon,
+    this.type = HabitType.good,
+    this.trackingType = TrackingType.check,
+    this.displayMode = ReportDisplay.rate,
+    HabitSymbol? symbol,
     this.color,
     this.isArchived = false,
     this.notes,
     this.category,
-    this.frequency = HabitFrequency.Daily,
+    this.frequency = HabitFrequency.daily,
     this.customDays = const [],
     this.targetFrequency,
     this.targetValue,
-    this.unit = HabitUnit.Count,
+    this.unit = HabitUnit.count,
     this.customUnit,
     this.pauseStartDate,
     this.pauseEndDate,
     this.isPaused = false,
-    this.weekendDays = 'Saturday & Sunday',
+    this.weekendDays = WeekendDays.saturdaySunday,
     this.goalType,
     this.goalValue,
     List<HabitEntry>? entries,
-    List<String>? motivationalMessages,
     this.customSuccessMessage,
     this.customFailureMessage,
   }) : id = id ?? const Uuid().v4(),
-       entries = entries ?? [],
-       motivationalMessages =
-           motivationalMessages ??
-           [
-             "You've got this! 💪",
-             "Every day is a new opportunity! ✨",
-             "Small steps lead to big changes! 🚀",
-             "Consistency is key! 🔑",
-             "Believe in yourself! 🌟",
-           ];
-
+       symbol = symbol ?? HabitsIcon.getSymbol(null),
+       entries = entries ?? [];
 
   bool isPositiveDay(HabitEntry entry) {
     if (entry.isSkipped) return true;
 
-    switch (type) {
-      case HabitType.FailBased:
-        final limit = targetValue ?? 0.0;
-        return entry.value <= limit;
-      case HabitType.SuccessBased:
+    if (type == HabitType.good) {
+      if (trackingType == TrackingType.check) {
+        return entry.value > 0;
+      } else {
         final target = targetValue ?? 0.0;
         return target > 0 ? entry.value >= target : entry.value > 0;
-      case HabitType.DoneBased:
-        return entry.value > 0;
+      }
+    } else {
+      final limit = targetValue ?? 0.0;
+      return entry.value <= limit;
     }
   }
 
-  bool isDueOnDate(DateTime date, {String? weekendDaysSetting}) {
+  bool isDueOnDate(DateTime date, {WeekendDays? weekendDaysSetting}) {
     if (isPaused) {
       if (pauseStartDate != null && date.isAfter(pauseStartDate!.subtract(const Duration(days: 1)))) {
         if (pauseEndDate == null || date.isBefore(pauseEndDate!.add(const Duration(days: 1)))) {
@@ -98,58 +91,58 @@ class Habit {
     }
 
     final targetDate = DateTime(date.year, date.month, date.day);
-    final weekendSetting = weekendDaysSetting ?? this.weekendDays ?? 'Saturday & Sunday';
+    final weekendSetting = weekendDaysSetting ?? this.weekendDays ?? WeekendDays.saturdaySunday;
 
     final List<int> weekendDays;
-    if (weekendSetting == 'Friday & Saturday') {
+    if (weekendSetting == WeekendDays.fridaySaturday) {
       weekendDays = [5, 6];
-    } else if (weekendSetting == 'Thursday & Friday') {
+    } else if (weekendSetting == WeekendDays.thursdayFriday) {
       weekendDays = [4, 5];
     } else {
       weekendDays = [6, 7];
     }
 
     switch (frequency) {
-      case HabitFrequency.Daily:
+      case HabitFrequency.daily:
         return true;
-      case HabitFrequency.Weekdays:
+      case HabitFrequency.weekdays:
         return !weekendDays.contains(date.weekday);
-      case HabitFrequency.Weekends:
+      case HabitFrequency.weekends:
         return weekendDays.contains(date.weekday);
-      case HabitFrequency.CustomDays:
+      case HabitFrequency.customDays:
         final todayIndex = date.weekday % 7;
         return customDays.contains(todayIndex);
-      case HabitFrequency.XTimesPerWeek:
-      case HabitFrequency.XTimesPerMonth:
+      case HabitFrequency.xTimesPerWeek:
+      case HabitFrequency.xTimesPerMonth:
         return _checkFrequencyTarget(targetDate);
     }
   }
 
-  bool isDueToday({String? weekendDaysSetting}) {
+  bool isDueToday({WeekendDays? weekendDaysSetting}) {
     return isDueOnDate(DateTime.now(), weekendDaysSetting: weekendDaysSetting);
   }
 
-  String getFrequencyDisplayText({String? weekendSetting}) {
-    final weekend = weekendSetting ?? 'Saturday & Sunday';
+  String getFrequencyDisplayText({WeekendDays? weekendSetting}) {
+    final weekend = weekendSetting ?? this.weekendDays ?? WeekendDays.saturdaySunday;
 
     switch (frequency) {
-      case HabitFrequency.Daily:
+      case HabitFrequency.daily:
         return 'Daily';
-      case HabitFrequency.Weekdays:
-        if (weekend == 'Friday & Saturday') return 'Weekdays (Sun-Thu)';
-        if (weekend == 'Thursday & Friday') return 'Weekdays (Sat-Wed)';
+      case HabitFrequency.weekdays:
+        if (weekend == WeekendDays.fridaySaturday) return 'Weekdays (Sun-Thu)';
+        if (weekend == WeekendDays.thursdayFriday) return 'Weekdays (Sat-Wed)';
         return 'Weekdays (Mon-Fri)';
-      case HabitFrequency.Weekends:
-        if (weekend == 'Friday & Saturday') return 'Weekends (Fri-Sat)';
-        if (weekend == 'Thursday & Friday') return 'Weekends (Thu-Fri)';
+      case HabitFrequency.weekends:
+        if (weekend == WeekendDays.fridaySaturday) return 'Weekends (Fri-Sat)';
+        if (weekend == WeekendDays.thursdayFriday) return 'Weekends (Thu-Fri)';
         return 'Weekends (Sat-Sun)';
-      case HabitFrequency.CustomDays:
+      case HabitFrequency.customDays:
         final dayNames = const ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         final selectedDays = customDays.map((i) => dayNames[i]).join(', ');
         return 'Custom Days ($selectedDays)';
-      case HabitFrequency.XTimesPerWeek:
+      case HabitFrequency.xTimesPerWeek:
         return '$targetFrequency times per week';
-      case HabitFrequency.XTimesPerMonth:
+      case HabitFrequency.xTimesPerMonth:
         return '$targetFrequency times per month';
     }
   }
@@ -157,7 +150,7 @@ class Habit {
   bool _checkFrequencyTarget(DateTime today) {
     if (targetFrequency == null) return true;
 
-    if (frequency == HabitFrequency.XTimesPerWeek) {
+    if (frequency == HabitFrequency.xTimesPerWeek) {
       final weekStart = today.subtract(Duration(days: today.weekday % 7));
       final weekEnd = weekStart.add(Duration(days: 6));
       final weekEntries = entries
@@ -169,7 +162,7 @@ class Habit {
           )
           .length;
       return weekEntries < targetFrequency!;
-    } else if (frequency == HabitFrequency.XTimesPerMonth) {
+    } else if (frequency == HabitFrequency.xTimesPerMonth) {
       final monthStart = DateTime(today.year, today.month, 1);
       final monthEnd = DateTime(today.year, today.month + 1, 0);
       final monthEntries = entries
@@ -187,7 +180,7 @@ class Habit {
   }
 
   String getTimeSinceLastFailure() {
-    if (type != HabitType.FailBased || entries.isEmpty) return "No data";
+    if (type != HabitType.bad || entries.isEmpty) return "No data";
 
     final failureEntries = entries
         .where((e) => !isPositiveDay(e) && !e.isSkipped)
@@ -214,19 +207,22 @@ class Habit {
     }
   }
 
-  int get positiveCount => entries.where((e) => isPositiveDay(e)).length;
-  int get negativeCount => entries.length - positiveCount;
+  List<HabitEntry> get activeEntries => entries.where((e) => !e.isArchived).toList();
+
+  int get positiveCount => activeEntries.where((e) => isPositiveDay(e)).length;
+  int get negativeCount => activeEntries.length - positiveCount;
   double get successRate {
-    if (entries.isEmpty) return 0;
+    final active = activeEntries;
+    if (active.isEmpty) return 0;
 
     double totalPoints = 0;
-    for (var entry in entries) {
+    for (var entry in active) {
       if (entry.isSkipped) {
         totalPoints += 1.0;
         continue;
       }
 
-      if (type == HabitType.FailBased) {
+      if (type == HabitType.bad) {
         final limit = targetValue ?? 0.0;
         final actual = entry.value;
         if (actual <= limit) {
@@ -241,37 +237,38 @@ class Habit {
       }
     }
 
-    final rawRate = (totalPoints / entries.length) * 100;
+    final rawRate = (totalPoints / active.length) * 100;
     return rawRate.clamp(0.0, 100.0);
   }
 
   int get currentStreak {
+    final active = activeEntries;
+    if (active.isEmpty) return 0;
+
     int streak = 0;
-    if (entries.isEmpty) return 0;
+    var checkDate = DateTime.now();
+    checkDate = DateTime(checkDate.year, checkDate.month, checkDate.day);
 
-    var sortedEntries = [...entries]..sort((a, b) => b.date.compareTo(a.date));
+    while (true) {
+      final isDue = isDueOnDate(checkDate, weekendDaysSetting: weekendDays);
+      if (isDue) {
+        final entry = active.firstWhereOrNull((e) => DateUtils.isSameDay(e.date, checkDate));
+        final isSuccess = entry != null && !entry.isSkipped && isPositiveDay(entry);
 
-    if (frequency != HabitFrequency.Daily) {
-      return _calculateFrequencyStreak(sortedEntries);
-    }
-
-    for (var entry in sortedEntries) {
-      if (isPositiveDay(entry)) {
-        streak++;
-      } else {
-        break;
+        if (isSuccess) {
+          streak++;
+        } else {
+          // If it is today and they haven't completed it yet, don't break the streak just yet
+          if (DateUtils.isSameDay(checkDate, DateTime.now())) {
+            // Keep going to look at previous days
+          } else {
+            break;
+          }
+        }
       }
-    }
-
-    return streak;
-  }
-
-  int _calculateFrequencyStreak(List<HabitEntry> sortedEntries) {
-    int streak = 0;
-    for (var entry in sortedEntries) {
-      if (isPositiveDay(entry)) {
-        streak++;
-      } else {
+      checkDate = checkDate.subtract(const Duration(days: 1));
+      
+      if (streak > active.length + 30 || checkDate.isBefore(DateTime.now().subtract(const Duration(days: 365)))) {
         break;
       }
     }
@@ -279,59 +276,75 @@ class Habit {
   }
 
   int get bestStreak {
-    if (entries.isEmpty) return 0;
+    final active = activeEntries;
+    if (active.isEmpty) return 0;
+
+    var earliestDate = active.map((e) => e.date).reduce((a, b) => a.isBefore(b) ? a : b);
+    earliestDate = DateTime(earliestDate.year, earliestDate.month, earliestDate.day);
+    
+    var today = DateTime.now();
+    today = DateTime(today.year, today.month, today.day);
 
     int currentBest = 0;
     int current = 0;
 
-    var sortedEntries = [...entries]..sort((a, b) => a.date.compareTo(b.date));
+    var checkDate = earliestDate;
+    while (!checkDate.isAfter(today)) {
+      final isDue = isDueOnDate(checkDate, weekendDaysSetting: weekendDays);
+      if (isDue) {
+        final entry = active.firstWhereOrNull((e) => DateUtils.isSameDay(e.date, checkDate));
+        final isSuccess = entry != null && !entry.isSkipped && isPositiveDay(entry);
 
-    for (var entry in sortedEntries) {
-      if (isPositiveDay(entry)) {
-        current++;
-        if (current > currentBest) {
-          currentBest = current;
+        if (isSuccess) {
+          current++;
+          if (current > currentBest) {
+            currentBest = current;
+          }
+        } else {
+          if (!DateUtils.isSameDay(checkDate, today)) {
+            current = 0;
+          }
         }
-      } else {
-        current = 0;
       }
+      checkDate = checkDate.add(const Duration(days: 1));
     }
 
     return currentBest;
   }
 
-  bool get hasEntries => entries.isNotEmpty;
+  bool get hasEntries => activeEntries.isNotEmpty;
 
   double getTotalValue() {
-    return entries.fold(0.0, (sum, e) => sum + e.value);
+    return activeEntries.fold(0.0, (sum, e) => sum + e.value);
   }
 
   double getAverageValue() {
-    if (entries.isEmpty) return 0.0;
-    return getTotalValue() / entries.length;
+    final active = activeEntries;
+    if (active.isEmpty) return 0.0;
+    return getTotalValue() / active.length;
   }
 
   String getUnitDisplayName() {
     switch (unit) {
-      case HabitUnit.Count:
+      case HabitUnit.count:
         return 'times';
-      case HabitUnit.Minutes:
+      case HabitUnit.minutes:
         return 'min';
-      case HabitUnit.Hours:
+      case HabitUnit.hours:
         return 'hrs';
-      case HabitUnit.Pages:
+      case HabitUnit.pages:
         return 'pages';
-      case HabitUnit.Kilometers:
+      case HabitUnit.kilometers:
         return 'km';
-      case HabitUnit.Miles:
+      case HabitUnit.miles:
         return 'miles';
-      case HabitUnit.Grams:
+      case HabitUnit.grams:
         return 'g';
-      case HabitUnit.Pounds:
+      case HabitUnit.pounds:
         return 'lbs';
-      case HabitUnit.Dollars:
+      case HabitUnit.dollars:
         return '\$';
-      case HabitUnit.Custom:
+      case HabitUnit.custom:
         return customUnit ?? 'units';
     }
   }
@@ -358,41 +371,8 @@ class Habit {
     return maxNegative;
   }
 
-  String getRandomMotivationalMessage() {
-    if (motivationalMessages.isEmpty) return "Keep going! 💪";
-    motivationalMessages.shuffle();
-    return motivationalMessages.first;
-  }
-
   bool isStreakMilestone() {
     final milestones = [7, 14, 21, 30, 50, 75, 100, 150, 200, 365];
     return milestones.contains(currentStreak);
-  }
-
-  String getMilestoneMessage() {
-    switch (currentStreak) {
-      case 7:
-        return "🔥 One week strong! You're building momentum!";
-      case 14:
-        return "⚡ Two weeks of excellence! You're unstoppable!";
-      case 21:
-        return "💎 Three weeks! This is becoming a real habit!";
-      case 30:
-        return "🏆 One month champion! You've proven your dedication!";
-      case 50:
-        return "🚀 Fifty days! You're in the elite zone now!";
-      case 75:
-        return "👑 Seventy-five days! You're absolutely crushing it!";
-      case 100:
-        return "🎖️ ONE HUNDRED DAYS! You're a true habit master!";
-      case 150:
-        return "🌟 150 days! Your consistency is inspirational!";
-      case 200:
-        return "🔥 200 days! You've transcended ordinary limits!";
-      case 365:
-        return "🏅 ONE FULL YEAR! You are a legend!";
-      default:
-        return "🎉 Amazing streak! Keep the momentum going!";
-    }
   }
 }

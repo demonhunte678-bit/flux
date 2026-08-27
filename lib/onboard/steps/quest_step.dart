@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
 import 'package:flux/providers/index.dart';
+import '../../l10n/localizations_extension.dart';
 import '../onboard_step.dart';
+import 'package:flux/l10n/localized_string.dart';
 
 class QuestStep implements OnboardStep {
   @override
-  String get stepName => 'Change Goal';
+  LocalizedString get stepName => LocalizedString((l) => l.questStepName);
 
   @override
-  String? get title => 'What are you trying to change?';
+  LocalizedString? get title => LocalizedString((l) => l.questTitle);
 
   @override
-  String? get subtitle => 'This determines your recommendation style.';
+  LocalizedString? get subtitle => LocalizedString((l) => l.questSubtitle);
 
   @override
   bool canProceed(WidgetRef ref) {
@@ -28,20 +30,20 @@ class QuestStep implements OnboardStep {
     final options = [
       {
         'value': 'break',
-        'title': 'Break Bad Habits',
-        'desc': 'I want to avoid triggers, limit distractions, or stop bad routines.',
+        'title': context.l10n.breakHabits,
+        'desc': context.l10n.breakHabitsDesc,
         'icon': Icons.block,
       },
       {
         'value': 'create',
-        'title': 'Creating Habits',
-        'desc': 'I want to establish new daily activities, positive routines, or targets.',
+        'title': context.l10n.createHabits,
+        'desc': context.l10n.createHabitsDesc,
         'icon': Icons.add_task,
       },
       {
         'value': 'both',
-        'title': 'Don\'t Know / Both',
-        'desc': 'I want to build a mix of positive additions and avoid slips.',
+        'title': context.l10n.bothHabits,
+        'desc': context.l10n.bothHabitsDesc,
         'icon': Icons.alt_route,
       },
     ];

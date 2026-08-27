@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flux/providers/index.dart';
 import 'package:flux/widgets/index.dart';
 import 'package:flux/data/index.dart';
+import 'package:flux/l10n/index.dart';
 
 class AnalyticsDashboardPage extends ConsumerStatefulWidget {
   final bool showBackButton;
@@ -49,14 +50,14 @@ class _AnalyticsDashboardPageState extends ConsumerState<AnalyticsDashboardPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics Dashboard'),
+        title: Text(context.l10n.analyticsDashboard),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(icon: Icon(Icons.timeline), text: 'Trends'),
-            Tab(icon: Icon(Icons.pie_chart), text: 'Distribution'),
-            Tab(icon: Icon(Icons.grid_view), text: 'Heatmap'),
-            Tab(icon: Icon(Icons.analytics), text: 'Insights'),
+          tabs: [
+            Tab(icon: const Icon(Icons.timeline), text: context.l10n.trends),
+            Tab(icon: const Icon(Icons.pie_chart), text: context.l10n.distribution),
+            Tab(icon: const Icon(Icons.grid_view), text: context.l10n.heatmap),
+            Tab(icon: const Icon(Icons.analytics), text: context.l10n.insights),
           ],
         ),
         automaticallyImplyLeading: widget.showBackButton,
@@ -71,7 +72,7 @@ class _AnalyticsDashboardPageState extends ConsumerState<AnalyticsDashboardPage>
               }
             },
             itemBuilder: (context) => _timeRanges
-                .map((range) => PopupMenuItem(value: range, child: Text(range)))
+                .map((range) => PopupMenuItem(value: range, child: Text(_getTimeRangeLabel(context, range))))
                 .toList(),
           ),
         ],
@@ -128,9 +129,9 @@ class _AnalyticsDashboardPageState extends ConsumerState<AnalyticsDashboardPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Activity Heatmap',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Text(
+            context.l10n.activityHeatmap,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           ActivityHeatmap(habits: filtered),
@@ -147,9 +148,10 @@ class _AnalyticsDashboardPageState extends ConsumerState<AnalyticsDashboardPage>
   }
 
   Widget _buildDateRangeInfo(AnalyticsState state) {
-    String rangeText = state.selectedTimeRange;
+    String rangeText = _getTimeRangeLabel(context, state.selectedTimeRange);
     if (state.startDate != null && state.endDate != null) {
-      final formatter = DateFormat('MMM d, yyyy');
+      final locale = Localizations.localeOf(context).toString();
+      final formatter = DateFormat('MMM d, yyyy', locale);
       rangeText +=
           '\n${formatter.format(state.startDate!)} - ${formatter.format(state.endDate!)}';
     }
@@ -188,6 +190,24 @@ class _AnalyticsDashboardPageState extends ConsumerState<AnalyticsDashboardPage>
 
     if (picked != null) {
       ref.read(analyticsProvider.notifier).setCustomRange(picked.start, picked.end);
+    }
+  }
+  String _getTimeRangeLabel(BuildContext context, String range) {
+    switch (range) {
+      case 'Last 7 Days':
+        return context.l10n.last7Days;
+      case 'Last 30 Days':
+        return context.l10n.last30Days;
+      case 'Last 90 Days':
+        return context.l10n.last90Days;
+      case 'This Year':
+        return context.l10n.thisYear;
+      case 'All Time':
+        return context.l10n.allTime;
+      case 'Custom Range':
+        return context.l10n.customRange;
+      default:
+        return range;
     }
   }
 }

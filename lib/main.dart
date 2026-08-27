@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
@@ -29,6 +27,9 @@ class HabitTrackerApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
+    final settingsState = ref.watch(settingsProvider);
+
+    final locale = settingsState.locale;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -36,12 +37,17 @@ class HabitTrackerApp extends ConsumerWidget {
       theme: ThemeService.createTheme(
         themeName: themeState.themeName,
         isDarkMode: false,
+        fontName: settingsState.selectedFont,
       ),
       darkTheme: ThemeService.createTheme(
         themeName: themeState.themeName,
         isDarkMode: true,
+        fontName: settingsState.selectedFont,
       ),
       themeMode: themeState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      locale: locale,
+      localizationsDelegates: L10n.localizationsDelegates,
+      supportedLocales: L10n.supportedLocales,
       home: isFirstLaunch
           ? OnboardingPage(
               onComplete: () {

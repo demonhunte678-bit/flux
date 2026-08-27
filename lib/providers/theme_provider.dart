@@ -41,6 +41,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
           themeData: ThemeService.createTheme(
             themeName: 'Emerald',
             isDarkMode: ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark,
+            fontName: 'Outfit',
           ),
           themeName: 'Emerald',
           isDarkMode: ui.PlatformDispatcher.instance.platformBrightness == ui.Brightness.dark,
@@ -52,6 +53,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   Future<void> _loadTheme() async {
     final isDark = await ThemeService.isDarkMode();
     var name = await ThemeService.getCurrentTheme();
+    final fontName = ref.read(settingsProvider).selectedFont;
 
     if (!kIsWeb && Platform.isAndroid) {
       try {
@@ -66,6 +68,7 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
       themeData: ThemeService.createTheme(
         themeName: name,
         isDarkMode: isDark,
+        fontName: fontName,
       ),
       themeName: name,
       isDarkMode: isDark,
@@ -74,10 +77,12 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   Future<void> toggleDarkMode(bool isDark) async {
     await ThemeService.setDarkMode(isDark);
+    final fontName = ref.read(settingsProvider).selectedFont;
     state = state.copyWith(
       themeData: ThemeService.createTheme(
         themeName: state.themeName,
         isDarkMode: isDark,
+        fontName: fontName,
       ),
       isDarkMode: isDark,
     );
@@ -85,10 +90,12 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
 
   Future<void> selectTheme(String themeName) async {
     await ThemeService.setCurrentTheme(themeName);
+    final fontName = ref.read(settingsProvider).selectedFont;
     state = state.copyWith(
       themeData: ThemeService.createTheme(
         themeName: themeName,
         isDarkMode: state.isDarkMode,
+        fontName: fontName,
       ),
       themeName: themeName,
     );

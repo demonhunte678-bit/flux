@@ -49,12 +49,12 @@ class HabitListItem extends ConsumerWidget {
                             ).colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
-                        habit.icon ?? Icons.star,
+                      child: HabitIcon(
+                        symbol: habit.symbol,
+                        size: 28,
                         color:
                             habit.color ??
                             Theme.of(context).colorScheme.primary,
-                        size: 28,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -103,7 +103,7 @@ class HabitListItem extends ConsumerWidget {
                         if (habit.category != null) ...[
                           const SizedBox(height: 2),
                           Text(
-                            habit.category!,
+                            habit.category!.getLocalizedName(context),
                             style: TextStyle(
                               fontSize: 11,
                               color: Theme.of(context).colorScheme.primary,
@@ -120,7 +120,7 @@ class HabitListItem extends ConsumerWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (habit.type == HabitType.FailBased &&
+                      if (habit.type == HabitType.bad &&
                           habit.hasEntries) ...[
                         Text(
                           habit.getTimeSinceLastFailure(),
@@ -220,6 +220,23 @@ class HabitListItem extends ConsumerWidget {
   }
 
   Widget _buildCompletionButton(BuildContext context, bool isCompact) {
+    if (selectedDate != null && !habit.isDueOnDate(selectedDate!, weekendDaysSetting: habit.weekendDays)) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          shape: BoxShape.circle,
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
+        ),
+        child: Icon(
+          Icons.block_outlined,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.25),
+          size: 18,
+        ),
+      );
+    }
+
     final entry = _getEntryForSelectedDate();
     final themeColor = habit.color ?? Theme.of(context).colorScheme.primary;
 
@@ -296,26 +313,20 @@ class HabitListItem extends ConsumerWidget {
       return val.toStringAsFixed(1);
     }
 
-    switch (habit.type) {
-      case HabitType.FailBased:
-        final total = habit.entries.fold(
-          0.0,
-          (sum, e) => sum + e.value,
-        );
-        return 'Failures: ${formatValue(total)} ${habit.getUnitDisplayName()}';
-      case HabitType.SuccessBased:
-        final total = habit.entries.fold(
-          0.0,
-          (sum, e) => sum + e.value,
-        );
+    final total = habit.entries.fold(
+      0.0,
+      (sum, e) => sum + e.value,
+    );
+
+    if (habit.type == HabitType.bad) {
+      return 'Failures: ${formatValue(total)} ${habit.getUnitDisplayName()}';
+    } else {
+      if (habit.trackingType == TrackingType.quantity) {
         return 'Successes: ${formatValue(total)} ${habit.getUnitDisplayName()}';
-      case HabitType.DoneBased:
-        final total = habit.entries.fold(
-          0.0,
-          (sum, e) => sum + e.value,
-        );
+      } else {
         final totalInt = total.toInt();
         return 'Completed $totalInt time${totalInt != 1 ? 's' : ''}';
+      }
     }
   }
 }

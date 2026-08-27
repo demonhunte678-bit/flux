@@ -63,14 +63,14 @@ class EntriesHistoryList extends StatelessWidget {
               ),
             ),
             title: Text(
-              DateFormat('MMMM d, yyyy').format(entry.date),
+              DateFormat('MMMM d, yyyy', Localizations.localeOf(context).toString()).format(entry.date).toLatinNumbers(),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  DateFormat('EEEE').format(entry.date),
+                  DateFormat('EEEE', Localizations.localeOf(context).toString()).format(entry.date),
                   style: const TextStyle(fontSize: 12),
                 ),
                 const SizedBox(height: 4),
@@ -103,24 +103,20 @@ class EntriesHistoryList extends StatelessWidget {
     final unit = entry.unit ?? habit.getUnitDisplayName();
     final valueStr = formatValue(entry.value);
 
-    switch (habit.type) {
-      case HabitType.FailBased:
-        description = entry.value == 0
-            ? 'Success (0 failures)'
-            : '$valueStr failure(s)';
-        break;
-      case HabitType.SuccessBased:
+    if (habit.type == HabitType.bad) {
+      description = entry.value == 0
+          ? 'Success (0 failures)'
+          : '$valueStr failure(s)';
+    } else {
+      if (habit.trackingType == TrackingType.quantity) {
         description = entry.value > 0
-            ? '$valueStr success(es) / $unit'
+            ? '$valueStr / $unit'
             : 'Failed (0 successes)';
-        break;
-      case HabitType.DoneBased:
+      } else {
         description = entry.value > 0
-            ? (habit.unit == HabitUnit.Count ? 'Completed' : 'Completed ($valueStr $unit)')
+            ? (habit.unit == HabitUnit.count ? 'Completed' : 'Completed ($valueStr $unit)')
             : 'Not completed';
-        break;
-      default:
-        description = '';
+      }
     }
 
     if (entry.notes != null && entry.notes!.isNotEmpty) {

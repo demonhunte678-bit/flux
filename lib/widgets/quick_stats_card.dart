@@ -77,14 +77,10 @@ class QuickStatsCard extends StatelessWidget {
 
   String _getHabitTypeText(HabitType type) {
     switch (type) {
-      case HabitType.FailBased:
-        return 'Avoid (Failure-based)';
-      case HabitType.SuccessBased:
-        return 'Achieve (Success-based)';
-      case HabitType.DoneBased:
-        return 'Check (Done-based)';
-      default:
-        return '';
+      case HabitType.bad:
+        return 'Bad Habit (Avoid)';
+      case HabitType.good:
+        return 'Good Habit (Build)';
     }
   }
 }

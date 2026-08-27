@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flux/index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart' show Locale;
 
 class SettingsState {
   final bool showSuccessRate;
@@ -12,6 +13,7 @@ class SettingsState {
   final String userName;
   final String occupation;
   final String biggestObstacle;
+  final String selectedFont;
 
   SettingsState({
     required this.showSuccessRate,
@@ -22,7 +24,10 @@ class SettingsState {
     required this.userName,
     required this.occupation,
     required this.biggestObstacle,
+    required this.selectedFont,
   });
+
+  Locale get locale => Locale(language);
 
   SettingsState copyWith({
     bool? showSuccessRate,
@@ -33,6 +38,7 @@ class SettingsState {
     String? userName,
     String? occupation,
     String? biggestObstacle,
+    String? selectedFont,
   }) {
     return SettingsState(
       showSuccessRate: showSuccessRate ?? this.showSuccessRate,
@@ -43,6 +49,7 @@ class SettingsState {
       userName: userName ?? this.userName,
       occupation: occupation ?? this.occupation,
       biggestObstacle: biggestObstacle ?? this.biggestObstacle,
+      selectedFont: selectedFont ?? this.selectedFont,
     );
   }
 }
@@ -55,12 +62,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         SettingsState(
           showSuccessRate: true,
           showCurrentStreak: true,
-          language: 'English',
+          language: 'en',
           matchLauncherIcon: (!kIsWeb && defaultTargetPlatform == TargetPlatform.android),
           weekendDays: 'Saturday & Sunday',
           userName: '',
           occupation: '',
           biggestObstacle: '',
+          selectedFont: 'Outfit',
         ),
       ) {
     _loadSettings();
@@ -75,6 +83,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final name = await SettingsService.getUserName();
     final occ = await SettingsService.getOccupation();
     final obstacle = await SettingsService.getBiggestObstacle();
+    final fontName = await SettingsService.getSelectedFont();
     state = SettingsState(
       showSuccessRate: successRate,
       showCurrentStreak: currentStreak,
@@ -84,6 +93,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       userName: name,
       occupation: occ,
       biggestObstacle: obstacle,
+      selectedFont: fontName,
     );
   }
 
@@ -121,6 +131,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> setBiggestObstacle(String value) async {
     await SettingsService.setBiggestObstacle(value);
     state = state.copyWith(biggestObstacle: value);
+  }
+
+  Future<void> changeFont(String fontName) async {
+    await SettingsService.setSelectedFont(fontName);
+    state = state.copyWith(selectedFont: fontName);
   }
 
   Future<void> toggleMatchLauncherIcon(bool value) async {

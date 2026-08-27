@@ -19,17 +19,13 @@ class HabitTypeDistributionChart extends StatelessWidget {
       Color color;
 
       switch (entry.key) {
-        case HabitType.SuccessBased:
-          label = 'Achieve';
+        case HabitType.good:
+          label = 'Build';
           color = Colors.green;
           break;
-        case HabitType.FailBased:
+        case HabitType.bad:
           label = 'Avoid';
           color = Colors.red;
-          break;
-        case HabitType.DoneBased:
-          label = 'Check';
-          color = Colors.blue;
           break;
       }
 
@@ -88,11 +84,11 @@ class CategoryDistributionChart extends StatelessWidget {
 
   const CategoryDistributionChart({super.key, required this.habits});
 
-  List<PieDataPoint> _generateCategoryData() {
+  List<PieDataPoint> _generateCategoryData(BuildContext context) {
     final Map<String, int> categoryCount = {};
 
     for (var habit in habits) {
-      final category = habit.category ?? 'Uncategorized';
+      final category = habit.category?.getLocalizedName(context) ?? 'Uncategorized';
       categoryCount[category] = (categoryCount[category] ?? 0) + 1;
     }
 
@@ -115,7 +111,7 @@ class CategoryDistributionChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoryData = _generateCategoryData();
+    final categoryData = _generateCategoryData(context);
 
     if (categoryData.isEmpty) return const SizedBox();
 

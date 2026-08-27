@@ -6,3 +6,4 @@ export 'dashboard_page.dart';
 export 'app_shell.dart';
 export 'onboarding_page.dart';
 export 'settings_page.dart';
+export 'add_habit_page.dart';

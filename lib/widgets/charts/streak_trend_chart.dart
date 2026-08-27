@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flux/index.dart';
-import 'chart_data_models.dart';
+import '../chart_data_models.dart';
+import 'package:flux/l10n/index.dart';
 
 class StreakTrendChart extends StatelessWidget {
   final List<Habit> habits;
@@ -32,9 +33,9 @@ class StreakTrendChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Current Streaks',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.currentStreaks,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -45,7 +46,7 @@ class StreakTrendChart extends StatelessWidget {
                   majorGridLines: const MajorGridLines(width: 0),
                 ),
                 primaryYAxis: NumericAxis(
-                  title: AxisTitle(text: 'Days'),
+                  title: AxisTitle(text: context.l10n.daysLabel),
                   axisLine: const AxisLine(width: 0),
                   majorTickLines: const MajorTickLines(size: 0),
                 ),

@@ -1,47 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:collection/collection.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'chart_data_models.dart';
 import 'package:flux/index.dart';
+import 'package:flux/l10n/index.dart';
 
-class SuccessRateTrendChart extends StatelessWidget {
+class ValueTrendChart extends StatelessWidget {
   final List<Habit> habits;
 
-  const SuccessRateTrendChart({super.key, required this.habits});
+  const ValueTrendChart({super.key, required this.habits});
 
-  List<HabitTrendData> _generateSuccessRateData() {
-    return habits.take(5).map((habit) {
+  List<HabitTrendData> _generateValueTrendData() {
+    return habits.where((h) => h.unit != HabitUnit.count).take(3).map((habit) {
       List<ChartDataPoint> points = [];
 
-      // Group entries by day and calculate daily success rate
-      final groupedEntries = groupBy(
-        habit.entries,
-        (HabitEntry entry) =>
+      for (var entry in habit.entries) {
+        points.add(
+          ChartDataPoint(
             DateTime(entry.date.year, entry.date.month, entry.date.day),
-      );
-
-      groupedEntries.forEach((date, entries) {
-        final positiveEntries = entries
-            .where((e) => habit.isPositiveDay(e))
-            .length;
-        final successRate = (positiveEntries / entries.length) * 100;
-        points.add(ChartDataPoint(date, successRate));
-      });
+            entry.value!,
+          ),
+        );
+      }
 
       points.sort((a, b) => a.date.compareTo(b.date));
 
       return HabitTrendData(
         habitName: habit.name,
         points: points,
-        color: habit.color ?? Colors.blue,
+        color: habit.color ?? Colors.green,
       );
     }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final chartData = _generateSuccessRateData();
+    final chartData = _generateValueTrendData();
+
+    if (chartData.isEmpty) return const SizedBox();
+
+    final locale = Localizations.localeOf(context).toString();
 
     return Card(
       elevation: 2,
@@ -51,9 +48,9 @@ class SuccessRateTrendChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Success Rate Trends',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.valueTrends,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -61,15 +58,12 @@ class SuccessRateTrendChart extends StatelessWidget {
               child: SfCartesianChart(
                 plotAreaBorderWidth: 0,
                 primaryXAxis: DateTimeAxis(
-                  dateFormat: DateFormat('MMM d'),
+                  dateFormat: DateFormat('MMM d', locale),
                   intervalType: DateTimeIntervalType.days,
                   majorGridLines: const MajorGridLines(width: 0),
                 ),
                 primaryYAxis: NumericAxis(
-                  minimum: 0,
-                  maximum: 100,
-                  interval: 25,
-                  title: AxisTitle(text: 'Success Rate (%)'),
+                  title: AxisTitle(text: context.l10n.values),
                   axisLine: const AxisLine(width: 0),
                   majorTickLines: const MajorTickLines(size: 0),
                 ),
@@ -80,18 +74,14 @@ class SuccessRateTrendChart extends StatelessWidget {
                 tooltipBehavior: TooltipBehavior(enable: true),
                 series: chartData
                     .map(
-                      (habitData) => SplineSeries<ChartDataPoint, DateTime>(
+                      (habitData) => ColumnSeries<ChartDataPoint, DateTime>(
                         name: habitData.habitName,
                         dataSource: habitData.points,
                         xValueMapper: (point, _) => point.date,
                         yValueMapper: (point, _) => point.value,
                         color: habitData.color,
-                        width: 3,
-                        markerSettings: const MarkerSettings(
-                          isVisible: true,
-                          shape: DataMarkerType.circle,
-                          width: 6,
-                          height: 6,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(6),
                         ),
                       ),
                     )

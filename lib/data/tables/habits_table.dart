@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:drift/drift.dart';
+import 'package:flux/core/enums/weekend_days.dart';
 
 @DataClassName('HabitData')
 class Habits extends Table {
   TextColumn get id => text()();
   TextColumn get name => text()();
   IntColumn get type => integer()();
+  IntColumn get trackingType => integer()();
   IntColumn get displayMode => integer()();
   IntColumn get icon => integer().nullable()();
   IntColumn get color => integer().nullable()();
@@ -13,7 +15,7 @@ class Habits extends Table {
   TextColumn get notes => text().nullable()();
 
   // New fields
-  TextColumn get category => text().nullable()();
+  IntColumn get category => integer().nullable()();
   IntColumn get frequency => integer()();
   TextColumn get customDays => text().map(const IntListConverter())();
   IntColumn get targetFrequency => integer().nullable()();
@@ -24,11 +26,12 @@ class Habits extends Table {
   DateTimeColumn get pauseEndDate => dateTime().nullable()();
   BoolColumn get isPaused => boolean()();
 
-  // Custom motivational messages
-  TextColumn get motivationalMessages =>
-      text().map(const StringListConverter())();
   TextColumn get customSuccessMessage => text().nullable()();
   TextColumn get customFailureMessage => text().nullable()();
+
+  IntColumn get weekendDays => intEnum<WeekendDays>().nullable()();
+  TextColumn get goalType => text().nullable()();
+  RealColumn get goalValue => real().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -48,24 +51,6 @@ class IntListConverter extends TypeConverter<List<int>, String> {
 
   @override
   String toSql(List<int> value) {
-    return json.encode(value);
-  }
-}
-
-class StringListConverter extends TypeConverter<List<String>, String> {
-  const StringListConverter();
-
-  @override
-  List<String> fromSql(String fromDb) {
-    try {
-      return List<String>.from(json.decode(fromDb));
-    } catch (_) {
-      return [];
-    }
-  }
-
-  @override
-  String toSql(List<String> value) {
     return json.encode(value);
   }
 }

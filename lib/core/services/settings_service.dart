@@ -11,6 +11,7 @@ class SettingsService {
   static const String SHOW_CURRENT_STREAK_KEY = 'show_current_streak';
   static const String MATCH_LAUNCHER_ICON_KEY = 'match_launcher_icon';
   static const String WEEKEND_DAYS_KEY = 'weekend_days';
+  static const String SELECTED_FONT_KEY = 'selected_font';
 
   static Map<String, dynamic>? _cache;
 
@@ -100,7 +101,15 @@ class SettingsService {
 
   // Language settings
   static Future<String> getLanguage() async {
-    return (await _getValue<String>(LANGUAGE_KEY)) ?? 'English';
+    final stored = await _getValue<String>(LANGUAGE_KEY);
+    if (stored != null) {
+      if (stored.toLowerCase() == 'english') return 'en';
+      if (stored.toLowerCase() == 'arabic') return 'ar';
+      return stored;
+    }
+    final deviceCode = ui.PlatformDispatcher.instance.locale.languageCode.toLowerCase();
+    if (deviceCode == 'ar') return 'ar';
+    return 'en';
   }
 
   static Future<void> setLanguage(String language) async {
@@ -124,6 +133,15 @@ class SettingsService {
 
   static Future<void> setWeekendDays(String days) async {
     await _setValue(WEEKEND_DAYS_KEY, days);
+  }
+
+  // Font settings
+  static Future<String> getSelectedFont() async {
+    return (await _getValue<String>(SELECTED_FONT_KEY)) ?? 'Outfit';
+  }
+
+  static Future<void> setSelectedFont(String fontName) async {
+    await _setValue(SELECTED_FONT_KEY, fontName);
   }
 
   static Future<String> getUserName() async {
@@ -196,6 +214,26 @@ class SettingsService {
   static Future<bool> getShowHabitIcons() async => true;
   static Future<bool> getCompactMode() async => false;
   static Future<HabitType> getDefaultHabitType() async =>
-      HabitType.SuccessBased;
+      HabitType.good;
+
+  // Category custom colors storage
+  static const String CATEGORY_COLORS_KEY = 'category_colors';
+
+  static Future<Map<String, int>> getCategoryColors() async {
+    final raw = await _getValue<String>(CATEGORY_COLORS_KEY);
+    if (raw == null) return {};
+    try {
+      final Map<String, dynamic> decoded = jsonDecode(raw);
+      return decoded.map((key, value) => MapEntry(key, value as int));
+    } catch (_) {
+      return {};
+    }
+  }
+
+  static Future<void> saveCategoryColor(String category, int colorValue) async {
+    final colors = await getCategoryColors();
+    colors[category] = colorValue;
+    await _setValue(CATEGORY_COLORS_KEY, jsonEncode(colors));
+  }
 }
 

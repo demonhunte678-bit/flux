@@ -16,7 +16,7 @@ void main() {
       test('Daily frequency is always due', () {
         final habit = Habit(
           name: 'Daily Test',
-          frequency: HabitFrequency.Daily,
+          frequency: HabitFrequency.daily,
         );
 
         for (int d = 1; d <= 7; d++) {
@@ -28,8 +28,8 @@ void main() {
       test('Weekdays frequency - Saturday & Sunday Weekend (Default)', () {
         final habit = Habit(
           name: 'Weekdays Default',
-          frequency: HabitFrequency.Weekdays,
-          weekendDays: 'Saturday & Sunday',
+          frequency: HabitFrequency.weekdays,
+          weekendDays: WeekendDays.saturdaySunday,
         );
 
         // Monday to Friday
@@ -45,8 +45,8 @@ void main() {
       test('Weekdays frequency - Friday & Saturday Weekend', () {
         final habit = Habit(
           name: 'Weekdays Fri-Sat',
-          frequency: HabitFrequency.Weekdays,
-          weekendDays: 'Friday & Saturday',
+          frequency: HabitFrequency.weekdays,
+          weekendDays: WeekendDays.fridaySaturday,
         );
 
         // Sun-Thu are weekdays (due)
@@ -62,8 +62,8 @@ void main() {
       test('Weekdays frequency - Thursday & Friday Weekend', () {
         final habit = Habit(
           name: 'Weekdays Thu-Fri',
-          frequency: HabitFrequency.Weekdays,
-          weekendDays: 'Thursday & Friday',
+          frequency: HabitFrequency.weekdays,
+          weekendDays: WeekendDays.thursdayFriday,
         );
 
         // Sat-Wed are weekdays (due)
@@ -80,8 +80,8 @@ void main() {
       test('Weekends frequency - Saturday & Sunday Weekend (Default)', () {
         final habit = Habit(
           name: 'Weekends Default',
-          frequency: HabitFrequency.Weekends,
-          weekendDays: 'Saturday & Sunday',
+          frequency: HabitFrequency.weekends,
+          weekendDays: WeekendDays.saturdaySunday,
         );
 
         // Mon-Fri (not due)
@@ -97,8 +97,8 @@ void main() {
       test('Weekends frequency - Friday & Saturday Weekend', () {
         final habit = Habit(
           name: 'Weekends Fri-Sat',
-          frequency: HabitFrequency.Weekends,
-          weekendDays: 'Friday & Saturday',
+          frequency: HabitFrequency.weekends,
+          weekendDays: WeekendDays.fridaySaturday,
         );
 
         // Sun-Thu (not due)
@@ -114,7 +114,7 @@ void main() {
       test('CustomDays frequency - Specific Days chosen', () {
         final habit = Habit(
           name: 'Custom Days Test',
-          frequency: HabitFrequency.CustomDays,
+          frequency: HabitFrequency.customDays,
           customDays: [1, 3, 5], // Mon, Wed, Fri
         );
 
@@ -132,7 +132,8 @@ void main() {
       test('Avoid Habit (FailBased)', () {
         final habit = Habit(
           name: 'Avoid Smoking',
-          type: HabitType.FailBased,
+          type: HabitType.bad,
+          trackingType: TrackingType.check,
           targetValue: 0, // 0 failures allowed
         );
 
@@ -146,7 +147,8 @@ void main() {
       test('Avoid Habit (FailBased) with limit > 0', () {
         final habit = Habit(
           name: 'Avoid Caffeine Coffee limit',
-          type: HabitType.FailBased,
+          type: HabitType.bad,
+          trackingType: TrackingType.quantity,
           targetValue: 2, // Up to 2 failures allowed
         );
 
@@ -158,7 +160,8 @@ void main() {
       test('Achieve Habit (SuccessBased)', () {
         final habit = Habit(
           name: 'Read Pages',
-          type: HabitType.SuccessBased,
+          type: HabitType.good,
+          trackingType: TrackingType.quantity,
           targetValue: 10,
         );
 
@@ -172,7 +175,8 @@ void main() {
       test('Check Habit (DoneBased)', () {
         final habit = Habit(
           name: 'Drink Water',
-          type: HabitType.DoneBased,
+          type: HabitType.good,
+          trackingType: TrackingType.check,
         );
 
         final positiveEntry = HabitEntry(date: DateTime.now(), value: 1.0);
@@ -192,7 +196,8 @@ void main() {
       test('Skipped entry counts as full success point', () {
         final habit = Habit(
           name: 'Skipped Habit Test',
-          type: HabitType.SuccessBased,
+          type: HabitType.good,
+          trackingType: TrackingType.quantity,
           targetValue: 10,
           entries: [
             HabitEntry(date: DateTime.now(), value: 5.0, isSkipped: true),
@@ -206,7 +211,8 @@ void main() {
         // Limit of 2 failures
         final habit = Habit(
           name: 'Smoking Limit',
-          type: HabitType.FailBased,
+          type: HabitType.bad,
+          trackingType: TrackingType.quantity,
           targetValue: 2,
         );
 
@@ -229,7 +235,8 @@ void main() {
         // successRate = (0.75 / 2) * 100 = 37.5%
         final positiveHabit = Habit(
           name: 'Sweets Limit',
-          type: HabitType.FailBased,
+          type: HabitType.bad,
+          trackingType: TrackingType.quantity,
           targetValue: 1,
           entries: [
             HabitEntry(date: DateTime.now().subtract(const Duration(days: 1)), value: 1.0),
@@ -244,8 +251,9 @@ void main() {
       test('Streak calculation chronologically sorts entries', () {
         final habit = Habit(
           name: 'Daily Running',
-          frequency: HabitFrequency.Daily,
-          type: HabitType.DoneBased,
+          frequency: HabitFrequency.daily,
+          type: HabitType.good,
+          trackingType: TrackingType.check,
           targetValue: 1,
         );
 
@@ -266,8 +274,9 @@ void main() {
       test('Consecutive positive days build streak', () {
         final habit = Habit(
           name: 'Reading Books',
-          frequency: HabitFrequency.Daily,
-          type: HabitType.DoneBased,
+          frequency: HabitFrequency.daily,
+          type: HabitType.good,
+          trackingType: TrackingType.check,
           targetValue: 1,
           entries: [
             HabitEntry(date: DateTime.now().subtract(const Duration(days: 2)), value: 1.0),

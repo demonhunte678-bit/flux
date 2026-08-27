@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'chart_data_models.dart';
 import 'package:flux/index.dart';
+import 'package:intl/intl.dart';
+import 'package:flux/l10n/index.dart';
 
 class AnalyticsReport extends StatelessWidget {
   final List<Habit> habits;
@@ -14,10 +16,10 @@ class AnalyticsReport extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildCorrelationAnalysis(context),
-        const SizedBox(height: 24),
-        _buildPerformanceInsights(),
-        const SizedBox(height: 24),
-        _buildRecommendations(),
+        const SizedBox(height: 16),
+        _buildPerformanceInsights(context),
+        const SizedBox(height: 16),
+        _buildRecommendations(context),
       ],
     );
   }
@@ -33,21 +35,21 @@ class AnalyticsReport extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Habit Correlations',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.habitCorrelations,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Shows which habits tend to succeed or fail together. A coefficient close to 1.0 means they occur together, while -1.0 means one succeeds when the other fails.',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+            Text(
+              context.l10n.habitCorrelationsDesc,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
             const SizedBox(height: 16),
             if (correlations.isEmpty)
-              const Center(
+              Center(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24),
-                  child: Text('Not enough data to calculate correlations yet'),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(context.l10n.notEnoughDataCorrelations),
                 ),
               )
             else
@@ -63,7 +65,7 @@ class AnalyticsReport extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          'Habit 1',
+                          context.l10n.habit1,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -73,7 +75,7 @@ class AnalyticsReport extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          'Habit 2',
+                          context.l10n.habit2,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -83,7 +85,7 @@ class AnalyticsReport extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          'Strength',
+                          context.l10n.strength,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,
@@ -128,8 +130,8 @@ class AnalyticsReport extends StatelessWidget {
     );
   }
 
-  Widget _buildPerformanceInsights() {
-    final insights = _generatePerformanceInsights();
+  Widget _buildPerformanceInsights(BuildContext context) {
+    final insights = _generatePerformanceInsights(context);
 
     return Card(
       elevation: 2,
@@ -139,14 +141,14 @@ class AnalyticsReport extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Performance Insights',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.performanceInsights,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             if (insights.isEmpty)
-              const Center(
-                child: Text('Add more entries to generate insights!'),
+              Center(
+                child: Text(context.l10n.notEnoughDataInsights),
               )
             else
               ...insights.map((insight) => _buildInsightItem(insight)),
@@ -190,8 +192,8 @@ class AnalyticsReport extends StatelessWidget {
     );
   }
 
-  Widget _buildRecommendations() {
-    final recommendations = _generateRecommendations();
+  Widget _buildRecommendations(BuildContext context) {
+    final recommendations = _generateRecommendations(context);
 
     return Card(
       elevation: 2,
@@ -201,14 +203,14 @@ class AnalyticsReport extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Recommendations',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.recommendations,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             if (recommendations.isEmpty)
-              const Center(
-                child: Text('Keep tracking to receive recommendations!'),
+              Center(
+                child: Text(context.l10n.notEnoughDataRecommendations),
               )
             else
               ...recommendations.map((rec) => _buildRecommendationItem(rec)),
@@ -312,7 +314,7 @@ class AnalyticsReport extends StatelessWidget {
     return (agreements - oneSuccessOneFail) / total;
   }
 
-  List<InsightData> _generatePerformanceInsights() {
+  List<InsightData> _generatePerformanceInsights(BuildContext context) {
     List<InsightData> insights = [];
 
     if (habits.isEmpty) return insights;
@@ -322,9 +324,11 @@ class AnalyticsReport extends StatelessWidget {
     );
     insights.add(
       InsightData(
-        title: 'Best Performer',
-        description:
-            '${bestHabit.name} has ${bestHabit.successRate.toStringAsFixed(1)}% success rate',
+        title: context.l10n.bestPerformer,
+        description: context.l10n.bestPerformerDesc(
+          bestHabit.name,
+          bestHabit.successRate.toStringAsFixed(1),
+        ),
         icon: Icons.star,
         color: Colors.green,
       ),
@@ -336,9 +340,11 @@ class AnalyticsReport extends StatelessWidget {
     if (mostConsistent.currentStreak > 0) {
       insights.add(
         InsightData(
-          title: 'Most Consistent',
-          description:
-              '${mostConsistent.name} has a ${mostConsistent.currentStreak}-day streak',
+          title: context.l10n.mostConsistent,
+          description: context.l10n.mostConsistentDesc(
+            mostConsistent.name,
+            mostConsistent.currentStreak.toString(),
+          ),
           icon: Icons.local_fire_department,
           color: Colors.orange,
         ),
@@ -359,21 +365,18 @@ class AnalyticsReport extends StatelessWidget {
       final mostActiveDay = dayCount.entries.reduce(
         (a, b) => a.value > b.value ? a : b,
       );
-      final dayNames = [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday',
-      ];
+
+      final locale = Localizations.localeOf(context).toString();
+      final formatter = DateFormat.EEEE(locale);
+      final dayName = formatter.format(DateTime(2023, 1, 2 + (mostActiveDay.key - 1)));
 
       insights.add(
         InsightData(
-          title: 'Most Active Day',
-          description:
-              '${dayNames[mostActiveDay.key - 1]} with ${mostActiveDay.value} entries',
+          title: context.l10n.mostActiveDay,
+          description: context.l10n.mostActiveDayDesc(
+            dayName,
+            mostActiveDay.value.toString(),
+          ),
           icon: Icons.calendar_today,
           color: Colors.blue,
         ),
@@ -383,7 +386,7 @@ class AnalyticsReport extends StatelessWidget {
     return insights;
   }
 
-  List<RecommendationData> _generateRecommendations() {
+  List<RecommendationData> _generateRecommendations(BuildContext context) {
     List<RecommendationData> recommendations = [];
 
     final strugglingHabits = habits
@@ -393,7 +396,7 @@ class AnalyticsReport extends StatelessWidget {
     if (strugglingHabits.isNotEmpty) {
       recommendations.add(
         RecommendationData(
-          'Consider reviewing ${strugglingHabits.first.name} - try adjusting the target or frequency',
+          context.l10n.strugglingHabitRec(strugglingHabits.first.name),
         ),
       );
     }
@@ -410,7 +413,7 @@ class AnalyticsReport extends StatelessWidget {
     if (staleHabits.isNotEmpty) {
       recommendations.add(
         RecommendationData(
-          'You haven\'t logged ${staleHabits.first.name} recently - consider adding an entry',
+          context.l10n.staleHabitRec(staleHabits.first.name),
         ),
       );
     }
@@ -426,7 +429,7 @@ class AnalyticsReport extends StatelessWidget {
       final correlation = strongPositiveCorrelations.first;
       recommendations.add(
         RecommendationData(
-          '${correlation.habit1} and ${correlation.habit2} work well together - consider doing them consecutively',
+          context.l10n.correlationRec(correlation.habit1, correlation.habit2),
         ),
       );
     }

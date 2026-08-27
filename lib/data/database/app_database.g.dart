@@ -35,6 +35,17 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _trackingTypeMeta = const VerificationMeta(
+    'trackingType',
+  );
+  @override
+  late final GeneratedColumn<int> trackingType = GeneratedColumn<int>(
+    'tracking_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _displayModeMeta = const VerificationMeta(
     'displayMode',
   );
@@ -91,11 +102,11 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     'category',
   );
   @override
-  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+  late final GeneratedColumn<int> category = GeneratedColumn<int>(
     'category',
     aliasedName,
     true,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _frequencyMeta = const VerificationMeta(
@@ -197,15 +208,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
       'CHECK ("is_paused" IN (0, 1))',
     ),
   );
-  @override
-  late final GeneratedColumnWithTypeConverter<List<String>, String>
-  motivationalMessages = GeneratedColumn<String>(
-    'motivational_messages',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  ).withConverter<List<String>>($HabitsTable.$convertermotivationalMessages);
   static const VerificationMeta _customSuccessMessageMeta =
       const VerificationMeta('customSuccessMessage');
   @override
@@ -229,10 +231,42 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         requiredDuringInsert: false,
       );
   @override
+  late final GeneratedColumnWithTypeConverter<WeekendDays?, int> weekendDays =
+      GeneratedColumn<int>(
+        'weekend_days',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      ).withConverter<WeekendDays?>($HabitsTable.$converterweekendDaysn);
+  static const VerificationMeta _goalTypeMeta = const VerificationMeta(
+    'goalType',
+  );
+  @override
+  late final GeneratedColumn<String> goalType = GeneratedColumn<String>(
+    'goal_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _goalValueMeta = const VerificationMeta(
+    'goalValue',
+  );
+  @override
+  late final GeneratedColumn<double> goalValue = GeneratedColumn<double>(
+    'goal_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     name,
     type,
+    trackingType,
     displayMode,
     icon,
     color,
@@ -248,9 +282,11 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     pauseStartDate,
     pauseEndDate,
     isPaused,
-    motivationalMessages,
     customSuccessMessage,
     customFailureMessage,
+    weekendDays,
+    goalType,
+    goalValue,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -284,6 +320,17 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
       );
     } else if (isInserting) {
       context.missing(_typeMeta);
+    }
+    if (data.containsKey('tracking_type')) {
+      context.handle(
+        _trackingTypeMeta,
+        trackingType.isAcceptableOrUnknown(
+          data['tracking_type']!,
+          _trackingTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_trackingTypeMeta);
     }
     if (data.containsKey('display_mode')) {
       context.handle(
@@ -412,6 +459,18 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         ),
       );
     }
+    if (data.containsKey('goal_type')) {
+      context.handle(
+        _goalTypeMeta,
+        goalType.isAcceptableOrUnknown(data['goal_type']!, _goalTypeMeta),
+      );
+    }
+    if (data.containsKey('goal_value')) {
+      context.handle(
+        _goalValueMeta,
+        goalValue.isAcceptableOrUnknown(data['goal_value']!, _goalValueMeta),
+      );
+    }
     return context;
   }
 
@@ -432,6 +491,10 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
       type: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}type'],
+      )!,
+      trackingType: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}tracking_type'],
       )!,
       displayMode: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -454,7 +517,7 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         data['${effectivePrefix}notes'],
       ),
       category: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}category'],
       ),
       frequency: attachedDatabase.typeMapping.read(
@@ -495,12 +558,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_paused'],
       )!,
-      motivationalMessages: $HabitsTable.$convertermotivationalMessages.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}motivational_messages'],
-        )!,
-      ),
       customSuccessMessage: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}custom_success_message'],
@@ -508,6 +565,20 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
       customFailureMessage: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}custom_failure_message'],
+      ),
+      weekendDays: $HabitsTable.$converterweekendDaysn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}weekend_days'],
+        ),
+      ),
+      goalType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}goal_type'],
+      ),
+      goalValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}goal_value'],
       ),
     );
   }
@@ -519,20 +590,23 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
 
   static TypeConverter<List<int>, String> $convertercustomDays =
       const IntListConverter();
-  static TypeConverter<List<String>, String> $convertermotivationalMessages =
-      const StringListConverter();
+  static JsonTypeConverter2<WeekendDays, int, int> $converterweekendDays =
+      const EnumIndexConverter<WeekendDays>(WeekendDays.values);
+  static JsonTypeConverter2<WeekendDays?, int?, int?> $converterweekendDaysn =
+      JsonTypeConverter2.asNullable($converterweekendDays);
 }
 
 class HabitData extends DataClass implements Insertable<HabitData> {
   final String id;
   final String name;
   final int type;
+  final int trackingType;
   final int displayMode;
   final int? icon;
   final int? color;
   final bool isArchived;
   final String? notes;
-  final String? category;
+  final int? category;
   final int frequency;
   final List<int> customDays;
   final int? targetFrequency;
@@ -542,13 +616,16 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   final DateTime? pauseStartDate;
   final DateTime? pauseEndDate;
   final bool isPaused;
-  final List<String> motivationalMessages;
   final String? customSuccessMessage;
   final String? customFailureMessage;
+  final WeekendDays? weekendDays;
+  final String? goalType;
+  final double? goalValue;
   const HabitData({
     required this.id,
     required this.name,
     required this.type,
+    required this.trackingType,
     required this.displayMode,
     this.icon,
     this.color,
@@ -564,9 +641,11 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     this.pauseStartDate,
     this.pauseEndDate,
     required this.isPaused,
-    required this.motivationalMessages,
     this.customSuccessMessage,
     this.customFailureMessage,
+    this.weekendDays,
+    this.goalType,
+    this.goalValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -574,6 +653,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
     map['type'] = Variable<int>(type);
+    map['tracking_type'] = Variable<int>(trackingType);
     map['display_mode'] = Variable<int>(displayMode);
     if (!nullToAbsent || icon != null) {
       map['icon'] = Variable<int>(icon);
@@ -586,7 +666,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       map['notes'] = Variable<String>(notes);
     }
     if (!nullToAbsent || category != null) {
-      map['category'] = Variable<String>(category);
+      map['category'] = Variable<int>(category);
     }
     map['frequency'] = Variable<int>(frequency);
     {
@@ -611,16 +691,22 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       map['pause_end_date'] = Variable<DateTime>(pauseEndDate);
     }
     map['is_paused'] = Variable<bool>(isPaused);
-    {
-      map['motivational_messages'] = Variable<String>(
-        $HabitsTable.$convertermotivationalMessages.toSql(motivationalMessages),
-      );
-    }
     if (!nullToAbsent || customSuccessMessage != null) {
       map['custom_success_message'] = Variable<String>(customSuccessMessage);
     }
     if (!nullToAbsent || customFailureMessage != null) {
       map['custom_failure_message'] = Variable<String>(customFailureMessage);
+    }
+    if (!nullToAbsent || weekendDays != null) {
+      map['weekend_days'] = Variable<int>(
+        $HabitsTable.$converterweekendDaysn.toSql(weekendDays),
+      );
+    }
+    if (!nullToAbsent || goalType != null) {
+      map['goal_type'] = Variable<String>(goalType);
+    }
+    if (!nullToAbsent || goalValue != null) {
+      map['goal_value'] = Variable<double>(goalValue);
     }
     return map;
   }
@@ -630,6 +716,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       id: Value(id),
       name: Value(name),
       type: Value(type),
+      trackingType: Value(trackingType),
       displayMode: Value(displayMode),
       icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
       color: color == null && nullToAbsent
@@ -661,13 +748,21 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ? const Value.absent()
           : Value(pauseEndDate),
       isPaused: Value(isPaused),
-      motivationalMessages: Value(motivationalMessages),
       customSuccessMessage: customSuccessMessage == null && nullToAbsent
           ? const Value.absent()
           : Value(customSuccessMessage),
       customFailureMessage: customFailureMessage == null && nullToAbsent
           ? const Value.absent()
           : Value(customFailureMessage),
+      weekendDays: weekendDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weekendDays),
+      goalType: goalType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(goalType),
+      goalValue: goalValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(goalValue),
     );
   }
 
@@ -680,12 +775,13 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       type: serializer.fromJson<int>(json['type']),
+      trackingType: serializer.fromJson<int>(json['trackingType']),
       displayMode: serializer.fromJson<int>(json['displayMode']),
       icon: serializer.fromJson<int?>(json['icon']),
       color: serializer.fromJson<int?>(json['color']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
       notes: serializer.fromJson<String?>(json['notes']),
-      category: serializer.fromJson<String?>(json['category']),
+      category: serializer.fromJson<int?>(json['category']),
       frequency: serializer.fromJson<int>(json['frequency']),
       customDays: serializer.fromJson<List<int>>(json['customDays']),
       targetFrequency: serializer.fromJson<int?>(json['targetFrequency']),
@@ -695,15 +791,17 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       pauseStartDate: serializer.fromJson<DateTime?>(json['pauseStartDate']),
       pauseEndDate: serializer.fromJson<DateTime?>(json['pauseEndDate']),
       isPaused: serializer.fromJson<bool>(json['isPaused']),
-      motivationalMessages: serializer.fromJson<List<String>>(
-        json['motivationalMessages'],
-      ),
       customSuccessMessage: serializer.fromJson<String?>(
         json['customSuccessMessage'],
       ),
       customFailureMessage: serializer.fromJson<String?>(
         json['customFailureMessage'],
       ),
+      weekendDays: $HabitsTable.$converterweekendDaysn.fromJson(
+        serializer.fromJson<int?>(json['weekendDays']),
+      ),
+      goalType: serializer.fromJson<String?>(json['goalType']),
+      goalValue: serializer.fromJson<double?>(json['goalValue']),
     );
   }
   @override
@@ -713,12 +811,13 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
       'type': serializer.toJson<int>(type),
+      'trackingType': serializer.toJson<int>(trackingType),
       'displayMode': serializer.toJson<int>(displayMode),
       'icon': serializer.toJson<int?>(icon),
       'color': serializer.toJson<int?>(color),
       'isArchived': serializer.toJson<bool>(isArchived),
       'notes': serializer.toJson<String?>(notes),
-      'category': serializer.toJson<String?>(category),
+      'category': serializer.toJson<int?>(category),
       'frequency': serializer.toJson<int>(frequency),
       'customDays': serializer.toJson<List<int>>(customDays),
       'targetFrequency': serializer.toJson<int?>(targetFrequency),
@@ -728,11 +827,13 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       'pauseStartDate': serializer.toJson<DateTime?>(pauseStartDate),
       'pauseEndDate': serializer.toJson<DateTime?>(pauseEndDate),
       'isPaused': serializer.toJson<bool>(isPaused),
-      'motivationalMessages': serializer.toJson<List<String>>(
-        motivationalMessages,
-      ),
       'customSuccessMessage': serializer.toJson<String?>(customSuccessMessage),
       'customFailureMessage': serializer.toJson<String?>(customFailureMessage),
+      'weekendDays': serializer.toJson<int?>(
+        $HabitsTable.$converterweekendDaysn.toJson(weekendDays),
+      ),
+      'goalType': serializer.toJson<String?>(goalType),
+      'goalValue': serializer.toJson<double?>(goalValue),
     };
   }
 
@@ -740,12 +841,13 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     String? id,
     String? name,
     int? type,
+    int? trackingType,
     int? displayMode,
     Value<int?> icon = const Value.absent(),
     Value<int?> color = const Value.absent(),
     bool? isArchived,
     Value<String?> notes = const Value.absent(),
-    Value<String?> category = const Value.absent(),
+    Value<int?> category = const Value.absent(),
     int? frequency,
     List<int>? customDays,
     Value<int?> targetFrequency = const Value.absent(),
@@ -755,13 +857,16 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     Value<DateTime?> pauseStartDate = const Value.absent(),
     Value<DateTime?> pauseEndDate = const Value.absent(),
     bool? isPaused,
-    List<String>? motivationalMessages,
     Value<String?> customSuccessMessage = const Value.absent(),
     Value<String?> customFailureMessage = const Value.absent(),
+    Value<WeekendDays?> weekendDays = const Value.absent(),
+    Value<String?> goalType = const Value.absent(),
+    Value<double?> goalValue = const Value.absent(),
   }) => HabitData(
     id: id ?? this.id,
     name: name ?? this.name,
     type: type ?? this.type,
+    trackingType: trackingType ?? this.trackingType,
     displayMode: displayMode ?? this.displayMode,
     icon: icon.present ? icon.value : this.icon,
     color: color.present ? color.value : this.color,
@@ -781,19 +886,24 @@ class HabitData extends DataClass implements Insertable<HabitData> {
         : this.pauseStartDate,
     pauseEndDate: pauseEndDate.present ? pauseEndDate.value : this.pauseEndDate,
     isPaused: isPaused ?? this.isPaused,
-    motivationalMessages: motivationalMessages ?? this.motivationalMessages,
     customSuccessMessage: customSuccessMessage.present
         ? customSuccessMessage.value
         : this.customSuccessMessage,
     customFailureMessage: customFailureMessage.present
         ? customFailureMessage.value
         : this.customFailureMessage,
+    weekendDays: weekendDays.present ? weekendDays.value : this.weekendDays,
+    goalType: goalType.present ? goalType.value : this.goalType,
+    goalValue: goalValue.present ? goalValue.value : this.goalValue,
   );
   HabitData copyWithCompanion(HabitsCompanion data) {
     return HabitData(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       type: data.type.present ? data.type.value : this.type,
+      trackingType: data.trackingType.present
+          ? data.trackingType.value
+          : this.trackingType,
       displayMode: data.displayMode.present
           ? data.displayMode.value
           : this.displayMode,
@@ -825,15 +935,17 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ? data.pauseEndDate.value
           : this.pauseEndDate,
       isPaused: data.isPaused.present ? data.isPaused.value : this.isPaused,
-      motivationalMessages: data.motivationalMessages.present
-          ? data.motivationalMessages.value
-          : this.motivationalMessages,
       customSuccessMessage: data.customSuccessMessage.present
           ? data.customSuccessMessage.value
           : this.customSuccessMessage,
       customFailureMessage: data.customFailureMessage.present
           ? data.customFailureMessage.value
           : this.customFailureMessage,
+      weekendDays: data.weekendDays.present
+          ? data.weekendDays.value
+          : this.weekendDays,
+      goalType: data.goalType.present ? data.goalType.value : this.goalType,
+      goalValue: data.goalValue.present ? data.goalValue.value : this.goalValue,
     );
   }
 
@@ -843,6 +955,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
+          ..write('trackingType: $trackingType, ')
           ..write('displayMode: $displayMode, ')
           ..write('icon: $icon, ')
           ..write('color: $color, ')
@@ -858,9 +971,11 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ..write('pauseStartDate: $pauseStartDate, ')
           ..write('pauseEndDate: $pauseEndDate, ')
           ..write('isPaused: $isPaused, ')
-          ..write('motivationalMessages: $motivationalMessages, ')
           ..write('customSuccessMessage: $customSuccessMessage, ')
-          ..write('customFailureMessage: $customFailureMessage')
+          ..write('customFailureMessage: $customFailureMessage, ')
+          ..write('weekendDays: $weekendDays, ')
+          ..write('goalType: $goalType, ')
+          ..write('goalValue: $goalValue')
           ..write(')'))
         .toString();
   }
@@ -870,6 +985,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     id,
     name,
     type,
+    trackingType,
     displayMode,
     icon,
     color,
@@ -885,9 +1001,11 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     pauseStartDate,
     pauseEndDate,
     isPaused,
-    motivationalMessages,
     customSuccessMessage,
     customFailureMessage,
+    weekendDays,
+    goalType,
+    goalValue,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -896,6 +1014,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           other.id == this.id &&
           other.name == this.name &&
           other.type == this.type &&
+          other.trackingType == this.trackingType &&
           other.displayMode == this.displayMode &&
           other.icon == this.icon &&
           other.color == this.color &&
@@ -911,21 +1030,24 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           other.pauseStartDate == this.pauseStartDate &&
           other.pauseEndDate == this.pauseEndDate &&
           other.isPaused == this.isPaused &&
-          other.motivationalMessages == this.motivationalMessages &&
           other.customSuccessMessage == this.customSuccessMessage &&
-          other.customFailureMessage == this.customFailureMessage);
+          other.customFailureMessage == this.customFailureMessage &&
+          other.weekendDays == this.weekendDays &&
+          other.goalType == this.goalType &&
+          other.goalValue == this.goalValue);
 }
 
 class HabitsCompanion extends UpdateCompanion<HabitData> {
   final Value<String> id;
   final Value<String> name;
   final Value<int> type;
+  final Value<int> trackingType;
   final Value<int> displayMode;
   final Value<int?> icon;
   final Value<int?> color;
   final Value<bool> isArchived;
   final Value<String?> notes;
-  final Value<String?> category;
+  final Value<int?> category;
   final Value<int> frequency;
   final Value<List<int>> customDays;
   final Value<int?> targetFrequency;
@@ -935,14 +1057,17 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
   final Value<DateTime?> pauseStartDate;
   final Value<DateTime?> pauseEndDate;
   final Value<bool> isPaused;
-  final Value<List<String>> motivationalMessages;
   final Value<String?> customSuccessMessage;
   final Value<String?> customFailureMessage;
+  final Value<WeekendDays?> weekendDays;
+  final Value<String?> goalType;
+  final Value<double?> goalValue;
   final Value<int> rowid;
   const HabitsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.type = const Value.absent(),
+    this.trackingType = const Value.absent(),
     this.displayMode = const Value.absent(),
     this.icon = const Value.absent(),
     this.color = const Value.absent(),
@@ -958,15 +1083,18 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.pauseStartDate = const Value.absent(),
     this.pauseEndDate = const Value.absent(),
     this.isPaused = const Value.absent(),
-    this.motivationalMessages = const Value.absent(),
     this.customSuccessMessage = const Value.absent(),
     this.customFailureMessage = const Value.absent(),
+    this.weekendDays = const Value.absent(),
+    this.goalType = const Value.absent(),
+    this.goalValue = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HabitsCompanion.insert({
     required String id,
     required String name,
     required int type,
+    required int trackingType,
     required int displayMode,
     this.icon = const Value.absent(),
     this.color = const Value.absent(),
@@ -982,30 +1110,33 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.pauseStartDate = const Value.absent(),
     this.pauseEndDate = const Value.absent(),
     required bool isPaused,
-    required List<String> motivationalMessages,
     this.customSuccessMessage = const Value.absent(),
     this.customFailureMessage = const Value.absent(),
+    this.weekendDays = const Value.absent(),
+    this.goalType = const Value.absent(),
+    this.goalValue = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
        type = Value(type),
+       trackingType = Value(trackingType),
        displayMode = Value(displayMode),
        isArchived = Value(isArchived),
        frequency = Value(frequency),
        customDays = Value(customDays),
        unit = Value(unit),
-       isPaused = Value(isPaused),
-       motivationalMessages = Value(motivationalMessages);
+       isPaused = Value(isPaused);
   static Insertable<HabitData> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<int>? type,
+    Expression<int>? trackingType,
     Expression<int>? displayMode,
     Expression<int>? icon,
     Expression<int>? color,
     Expression<bool>? isArchived,
     Expression<String>? notes,
-    Expression<String>? category,
+    Expression<int>? category,
     Expression<int>? frequency,
     Expression<String>? customDays,
     Expression<int>? targetFrequency,
@@ -1015,15 +1146,18 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Expression<DateTime>? pauseStartDate,
     Expression<DateTime>? pauseEndDate,
     Expression<bool>? isPaused,
-    Expression<String>? motivationalMessages,
     Expression<String>? customSuccessMessage,
     Expression<String>? customFailureMessage,
+    Expression<int>? weekendDays,
+    Expression<String>? goalType,
+    Expression<double>? goalValue,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (type != null) 'type': type,
+      if (trackingType != null) 'tracking_type': trackingType,
       if (displayMode != null) 'display_mode': displayMode,
       if (icon != null) 'icon': icon,
       if (color != null) 'color': color,
@@ -1039,12 +1173,13 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       if (pauseStartDate != null) 'pause_start_date': pauseStartDate,
       if (pauseEndDate != null) 'pause_end_date': pauseEndDate,
       if (isPaused != null) 'is_paused': isPaused,
-      if (motivationalMessages != null)
-        'motivational_messages': motivationalMessages,
       if (customSuccessMessage != null)
         'custom_success_message': customSuccessMessage,
       if (customFailureMessage != null)
         'custom_failure_message': customFailureMessage,
+      if (weekendDays != null) 'weekend_days': weekendDays,
+      if (goalType != null) 'goal_type': goalType,
+      if (goalValue != null) 'goal_value': goalValue,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1053,12 +1188,13 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Value<String>? id,
     Value<String>? name,
     Value<int>? type,
+    Value<int>? trackingType,
     Value<int>? displayMode,
     Value<int?>? icon,
     Value<int?>? color,
     Value<bool>? isArchived,
     Value<String?>? notes,
-    Value<String?>? category,
+    Value<int?>? category,
     Value<int>? frequency,
     Value<List<int>>? customDays,
     Value<int?>? targetFrequency,
@@ -1068,15 +1204,18 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Value<DateTime?>? pauseStartDate,
     Value<DateTime?>? pauseEndDate,
     Value<bool>? isPaused,
-    Value<List<String>>? motivationalMessages,
     Value<String?>? customSuccessMessage,
     Value<String?>? customFailureMessage,
+    Value<WeekendDays?>? weekendDays,
+    Value<String?>? goalType,
+    Value<double?>? goalValue,
     Value<int>? rowid,
   }) {
     return HabitsCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       type: type ?? this.type,
+      trackingType: trackingType ?? this.trackingType,
       displayMode: displayMode ?? this.displayMode,
       icon: icon ?? this.icon,
       color: color ?? this.color,
@@ -1092,9 +1231,11 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       pauseStartDate: pauseStartDate ?? this.pauseStartDate,
       pauseEndDate: pauseEndDate ?? this.pauseEndDate,
       isPaused: isPaused ?? this.isPaused,
-      motivationalMessages: motivationalMessages ?? this.motivationalMessages,
       customSuccessMessage: customSuccessMessage ?? this.customSuccessMessage,
       customFailureMessage: customFailureMessage ?? this.customFailureMessage,
+      weekendDays: weekendDays ?? this.weekendDays,
+      goalType: goalType ?? this.goalType,
+      goalValue: goalValue ?? this.goalValue,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1110,6 +1251,9 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     }
     if (type.present) {
       map['type'] = Variable<int>(type.value);
+    }
+    if (trackingType.present) {
+      map['tracking_type'] = Variable<int>(trackingType.value);
     }
     if (displayMode.present) {
       map['display_mode'] = Variable<int>(displayMode.value);
@@ -1127,7 +1271,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       map['notes'] = Variable<String>(notes.value);
     }
     if (category.present) {
-      map['category'] = Variable<String>(category.value);
+      map['category'] = Variable<int>(category.value);
     }
     if (frequency.present) {
       map['frequency'] = Variable<int>(frequency.value);
@@ -1158,13 +1302,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     if (isPaused.present) {
       map['is_paused'] = Variable<bool>(isPaused.value);
     }
-    if (motivationalMessages.present) {
-      map['motivational_messages'] = Variable<String>(
-        $HabitsTable.$convertermotivationalMessages.toSql(
-          motivationalMessages.value,
-        ),
-      );
-    }
     if (customSuccessMessage.present) {
       map['custom_success_message'] = Variable<String>(
         customSuccessMessage.value,
@@ -1174,6 +1311,17 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       map['custom_failure_message'] = Variable<String>(
         customFailureMessage.value,
       );
+    }
+    if (weekendDays.present) {
+      map['weekend_days'] = Variable<int>(
+        $HabitsTable.$converterweekendDaysn.toSql(weekendDays.value),
+      );
+    }
+    if (goalType.present) {
+      map['goal_type'] = Variable<String>(goalType.value);
+    }
+    if (goalValue.present) {
+      map['goal_value'] = Variable<double>(goalValue.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1187,6 +1335,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('type: $type, ')
+          ..write('trackingType: $trackingType, ')
           ..write('displayMode: $displayMode, ')
           ..write('icon: $icon, ')
           ..write('color: $color, ')
@@ -1202,9 +1351,11 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
           ..write('pauseStartDate: $pauseStartDate, ')
           ..write('pauseEndDate: $pauseEndDate, ')
           ..write('isPaused: $isPaused, ')
-          ..write('motivationalMessages: $motivationalMessages, ')
           ..write('customSuccessMessage: $customSuccessMessage, ')
           ..write('customFailureMessage: $customFailureMessage, ')
+          ..write('weekendDays: $weekendDays, ')
+          ..write('goalType: $goalType, ')
+          ..write('goalValue: $goalValue, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1303,6 +1454,21 @@ class $HabitEntriesTable extends HabitEntries
       'CHECK ("is_skipped" IN (0, 1))',
     ),
   );
+  static const VerificationMeta _isArchivedMeta = const VerificationMeta(
+    'isArchived',
+  );
+  @override
+  late final GeneratedColumn<bool> isArchived = GeneratedColumn<bool>(
+    'is_archived',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_archived" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1313,6 +1479,7 @@ class $HabitEntriesTable extends HabitEntries
     unit,
     notes,
     isSkipped,
+    isArchived,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1379,6 +1546,12 @@ class $HabitEntriesTable extends HabitEntries
     } else if (isInserting) {
       context.missing(_isSkippedMeta);
     }
+    if (data.containsKey('is_archived')) {
+      context.handle(
+        _isArchivedMeta,
+        isArchived.isAcceptableOrUnknown(data['is_archived']!, _isArchivedMeta),
+      );
+    }
     return context;
   }
 
@@ -1420,6 +1593,10 @@ class $HabitEntriesTable extends HabitEntries
         DriftSqlType.bool,
         data['${effectivePrefix}is_skipped'],
       )!,
+      isArchived: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_archived'],
+      )!,
     );
   }
 
@@ -1438,6 +1615,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
   final String? unit;
   final String? notes;
   final bool isSkipped;
+  final bool isArchived;
   const HabitEntryData({
     required this.id,
     required this.habitId,
@@ -1447,6 +1625,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
     this.unit,
     this.notes,
     required this.isSkipped,
+    required this.isArchived,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1465,6 +1644,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
       map['notes'] = Variable<String>(notes);
     }
     map['is_skipped'] = Variable<bool>(isSkipped);
+    map['is_archived'] = Variable<bool>(isArchived);
     return map;
   }
 
@@ -1482,6 +1662,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
           ? const Value.absent()
           : Value(notes),
       isSkipped: Value(isSkipped),
+      isArchived: Value(isArchived),
     );
   }
 
@@ -1499,6 +1680,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
       unit: serializer.fromJson<String?>(json['unit']),
       notes: serializer.fromJson<String?>(json['notes']),
       isSkipped: serializer.fromJson<bool>(json['isSkipped']),
+      isArchived: serializer.fromJson<bool>(json['isArchived']),
     );
   }
   @override
@@ -1513,6 +1695,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
       'unit': serializer.toJson<String?>(unit),
       'notes': serializer.toJson<String?>(notes),
       'isSkipped': serializer.toJson<bool>(isSkipped),
+      'isArchived': serializer.toJson<bool>(isArchived),
     };
   }
 
@@ -1525,6 +1708,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
     Value<String?> unit = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     bool? isSkipped,
+    bool? isArchived,
   }) => HabitEntryData(
     id: id ?? this.id,
     habitId: habitId ?? this.habitId,
@@ -1534,6 +1718,7 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
     unit: unit.present ? unit.value : this.unit,
     notes: notes.present ? notes.value : this.notes,
     isSkipped: isSkipped ?? this.isSkipped,
+    isArchived: isArchived ?? this.isArchived,
   );
   HabitEntryData copyWithCompanion(HabitEntriesCompanion data) {
     return HabitEntryData(
@@ -1545,6 +1730,9 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
       unit: data.unit.present ? data.unit.value : this.unit,
       notes: data.notes.present ? data.notes.value : this.notes,
       isSkipped: data.isSkipped.present ? data.isSkipped.value : this.isSkipped,
+      isArchived: data.isArchived.present
+          ? data.isArchived.value
+          : this.isArchived,
     );
   }
 
@@ -1558,14 +1746,24 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
           ..write('value: $value, ')
           ..write('unit: $unit, ')
           ..write('notes: $notes, ')
-          ..write('isSkipped: $isSkipped')
+          ..write('isSkipped: $isSkipped, ')
+          ..write('isArchived: $isArchived')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, habitId, date, count, value, unit, notes, isSkipped);
+  int get hashCode => Object.hash(
+    id,
+    habitId,
+    date,
+    count,
+    value,
+    unit,
+    notes,
+    isSkipped,
+    isArchived,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1577,7 +1775,8 @@ class HabitEntryData extends DataClass implements Insertable<HabitEntryData> {
           other.value == this.value &&
           other.unit == this.unit &&
           other.notes == this.notes &&
-          other.isSkipped == this.isSkipped);
+          other.isSkipped == this.isSkipped &&
+          other.isArchived == this.isArchived);
 }
 
 class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
@@ -1589,6 +1788,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
   final Value<String?> unit;
   final Value<String?> notes;
   final Value<bool> isSkipped;
+  final Value<bool> isArchived;
   const HabitEntriesCompanion({
     this.id = const Value.absent(),
     this.habitId = const Value.absent(),
@@ -1598,6 +1798,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
     this.unit = const Value.absent(),
     this.notes = const Value.absent(),
     this.isSkipped = const Value.absent(),
+    this.isArchived = const Value.absent(),
   });
   HabitEntriesCompanion.insert({
     this.id = const Value.absent(),
@@ -1608,6 +1809,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
     this.unit = const Value.absent(),
     this.notes = const Value.absent(),
     required bool isSkipped,
+    this.isArchived = const Value.absent(),
   }) : habitId = Value(habitId),
        date = Value(date),
        count = Value(count),
@@ -1621,6 +1823,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
     Expression<String>? unit,
     Expression<String>? notes,
     Expression<bool>? isSkipped,
+    Expression<bool>? isArchived,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1631,6 +1834,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
       if (unit != null) 'unit': unit,
       if (notes != null) 'notes': notes,
       if (isSkipped != null) 'is_skipped': isSkipped,
+      if (isArchived != null) 'is_archived': isArchived,
     });
   }
 
@@ -1643,6 +1847,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
     Value<String?>? unit,
     Value<String?>? notes,
     Value<bool>? isSkipped,
+    Value<bool>? isArchived,
   }) {
     return HabitEntriesCompanion(
       id: id ?? this.id,
@@ -1653,6 +1858,7 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
       unit: unit ?? this.unit,
       notes: notes ?? this.notes,
       isSkipped: isSkipped ?? this.isSkipped,
+      isArchived: isArchived ?? this.isArchived,
     );
   }
 
@@ -1683,6 +1889,9 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
     if (isSkipped.present) {
       map['is_skipped'] = Variable<bool>(isSkipped.value);
     }
+    if (isArchived.present) {
+      map['is_archived'] = Variable<bool>(isArchived.value);
+    }
     return map;
   }
 
@@ -1696,7 +1905,298 @@ class HabitEntriesCompanion extends UpdateCompanion<HabitEntryData> {
           ..write('value: $value, ')
           ..write('unit: $unit, ')
           ..write('notes: $notes, ')
-          ..write('isSkipped: $isSkipped')
+          ..write('isSkipped: $isSkipped, ')
+          ..write('isArchived: $isArchived')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CategoriesTable extends Categories
+    with TableInfo<$CategoriesTable, CategoryData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _colorMeta = const VerificationMeta('color');
+  @override
+  late final GeneratedColumn<int> color = GeneratedColumn<int>(
+    'color',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<int> icon = GeneratedColumn<int>(
+    'icon',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, color, icon];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CategoryData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('color')) {
+      context.handle(
+        _colorMeta,
+        color.isAcceptableOrUnknown(data['color']!, _colorMeta),
+      );
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CategoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CategoryData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      color: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color'],
+      ),
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}icon'],
+      ),
+    );
+  }
+
+  @override
+  $CategoriesTable createAlias(String alias) {
+    return $CategoriesTable(attachedDatabase, alias);
+  }
+}
+
+class CategoryData extends DataClass implements Insertable<CategoryData> {
+  final int id;
+  final String name;
+  final int? color;
+  final int? icon;
+  const CategoryData({
+    required this.id,
+    required this.name,
+    this.color,
+    this.icon,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || color != null) {
+      map['color'] = Variable<int>(color);
+    }
+    if (!nullToAbsent || icon != null) {
+      map['icon'] = Variable<int>(icon);
+    }
+    return map;
+  }
+
+  CategoriesCompanion toCompanion(bool nullToAbsent) {
+    return CategoriesCompanion(
+      id: Value(id),
+      name: Value(name),
+      color: color == null && nullToAbsent
+          ? const Value.absent()
+          : Value(color),
+      icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
+    );
+  }
+
+  factory CategoryData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CategoryData(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      color: serializer.fromJson<int?>(json['color']),
+      icon: serializer.fromJson<int?>(json['icon']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'color': serializer.toJson<int?>(color),
+      'icon': serializer.toJson<int?>(icon),
+    };
+  }
+
+  CategoryData copyWith({
+    int? id,
+    String? name,
+    Value<int?> color = const Value.absent(),
+    Value<int?> icon = const Value.absent(),
+  }) => CategoryData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    color: color.present ? color.value : this.color,
+    icon: icon.present ? icon.value : this.icon,
+  );
+  CategoryData copyWithCompanion(CategoriesCompanion data) {
+    return CategoryData(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      color: data.color.present ? data.color.value : this.color,
+      icon: data.icon.present ? data.icon.value : this.icon,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoryData(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('icon: $icon')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, color, icon);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CategoryData &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.color == this.color &&
+          other.icon == this.icon);
+}
+
+class CategoriesCompanion extends UpdateCompanion<CategoryData> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int?> color;
+  final Value<int?> icon;
+  const CategoriesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.color = const Value.absent(),
+    this.icon = const Value.absent(),
+  });
+  CategoriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.color = const Value.absent(),
+    this.icon = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<CategoryData> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? color,
+    Expression<int>? icon,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (color != null) 'color': color,
+      if (icon != null) 'icon': icon,
+    });
+  }
+
+  CategoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int?>? color,
+    Value<int?>? icon,
+  }) {
+    return CategoriesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      icon: icon ?? this.icon,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (color.present) {
+      map['color'] = Variable<int>(color.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<int>(icon.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CategoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('color: $color, ')
+          ..write('icon: $icon')
           ..write(')'))
         .toString();
   }
@@ -1707,11 +2207,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $HabitsTable habits = $HabitsTable(this);
   late final $HabitEntriesTable habitEntries = $HabitEntriesTable(this);
+  late final $CategoriesTable categories = $CategoriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [habits, habitEntries];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    habits,
+    habitEntries,
+    categories,
+  ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
     WritePropagation(
@@ -1729,12 +2234,13 @@ typedef $$HabitsTableCreateCompanionBuilder =
       required String id,
       required String name,
       required int type,
+      required int trackingType,
       required int displayMode,
       Value<int?> icon,
       Value<int?> color,
       required bool isArchived,
       Value<String?> notes,
-      Value<String?> category,
+      Value<int?> category,
       required int frequency,
       required List<int> customDays,
       Value<int?> targetFrequency,
@@ -1744,9 +2250,11 @@ typedef $$HabitsTableCreateCompanionBuilder =
       Value<DateTime?> pauseStartDate,
       Value<DateTime?> pauseEndDate,
       required bool isPaused,
-      required List<String> motivationalMessages,
       Value<String?> customSuccessMessage,
       Value<String?> customFailureMessage,
+      Value<WeekendDays?> weekendDays,
+      Value<String?> goalType,
+      Value<double?> goalValue,
       Value<int> rowid,
     });
 typedef $$HabitsTableUpdateCompanionBuilder =
@@ -1754,12 +2262,13 @@ typedef $$HabitsTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> name,
       Value<int> type,
+      Value<int> trackingType,
       Value<int> displayMode,
       Value<int?> icon,
       Value<int?> color,
       Value<bool> isArchived,
       Value<String?> notes,
-      Value<String?> category,
+      Value<int?> category,
       Value<int> frequency,
       Value<List<int>> customDays,
       Value<int?> targetFrequency,
@@ -1769,9 +2278,11 @@ typedef $$HabitsTableUpdateCompanionBuilder =
       Value<DateTime?> pauseStartDate,
       Value<DateTime?> pauseEndDate,
       Value<bool> isPaused,
-      Value<List<String>> motivationalMessages,
       Value<String?> customSuccessMessage,
       Value<String?> customFailureMessage,
+      Value<WeekendDays?> weekendDays,
+      Value<String?> goalType,
+      Value<double?> goalValue,
       Value<int> rowid,
     });
 
@@ -1822,6 +2333,11 @@ class $$HabitsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get trackingType => $composableBuilder(
+    column: $table.trackingType,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get displayMode => $composableBuilder(
     column: $table.displayMode,
     builder: (column) => ColumnFilters(column),
@@ -1847,7 +2363,7 @@ class $$HabitsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get category => $composableBuilder(
+  ColumnFilters<int> get category => $composableBuilder(
     column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
@@ -1898,12 +2414,6 @@ class $$HabitsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
-  get motivationalMessages => $composableBuilder(
-    column: $table.motivationalMessages,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
   ColumnFilters<String> get customSuccessMessage => $composableBuilder(
     column: $table.customSuccessMessage,
     builder: (column) => ColumnFilters(column),
@@ -1911,6 +2421,22 @@ class $$HabitsTableFilterComposer
 
   ColumnFilters<String> get customFailureMessage => $composableBuilder(
     column: $table.customFailureMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<WeekendDays?, WeekendDays, int>
+  get weekendDays => $composableBuilder(
+    column: $table.weekendDays,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get goalType => $composableBuilder(
+    column: $table.goalType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get goalValue => $composableBuilder(
+    column: $table.goalValue,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1964,6 +2490,11 @@ class $$HabitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get trackingType => $composableBuilder(
+    column: $table.trackingType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get displayMode => $composableBuilder(
     column: $table.displayMode,
     builder: (column) => ColumnOrderings(column),
@@ -1989,7 +2520,7 @@ class $$HabitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get category => $composableBuilder(
+  ColumnOrderings<int> get category => $composableBuilder(
     column: $table.category,
     builder: (column) => ColumnOrderings(column),
   );
@@ -2039,11 +2570,6 @@ class $$HabitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get motivationalMessages => $composableBuilder(
-    column: $table.motivationalMessages,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get customSuccessMessage => $composableBuilder(
     column: $table.customSuccessMessage,
     builder: (column) => ColumnOrderings(column),
@@ -2051,6 +2577,21 @@ class $$HabitsTableOrderingComposer
 
   ColumnOrderings<String> get customFailureMessage => $composableBuilder(
     column: $table.customFailureMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get weekendDays => $composableBuilder(
+    column: $table.weekendDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get goalType => $composableBuilder(
+    column: $table.goalType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get goalValue => $composableBuilder(
+    column: $table.goalValue,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2073,6 +2614,11 @@ class $$HabitsTableAnnotationComposer
   GeneratedColumn<int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
+  GeneratedColumn<int> get trackingType => $composableBuilder(
+    column: $table.trackingType,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get displayMode => $composableBuilder(
     column: $table.displayMode,
     builder: (column) => column,
@@ -2092,7 +2638,7 @@ class $$HabitsTableAnnotationComposer
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
-  GeneratedColumn<String> get category =>
+  GeneratedColumn<int> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
 
   GeneratedColumn<int> get frequency =>
@@ -2135,12 +2681,6 @@ class $$HabitsTableAnnotationComposer
   GeneratedColumn<bool> get isPaused =>
       $composableBuilder(column: $table.isPaused, builder: (column) => column);
 
-  GeneratedColumnWithTypeConverter<List<String>, String>
-  get motivationalMessages => $composableBuilder(
-    column: $table.motivationalMessages,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<String> get customSuccessMessage => $composableBuilder(
     column: $table.customSuccessMessage,
     builder: (column) => column,
@@ -2150,6 +2690,18 @@ class $$HabitsTableAnnotationComposer
     column: $table.customFailureMessage,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<WeekendDays?, int> get weekendDays =>
+      $composableBuilder(
+        column: $table.weekendDays,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<String> get goalType =>
+      $composableBuilder(column: $table.goalType, builder: (column) => column);
+
+  GeneratedColumn<double> get goalValue =>
+      $composableBuilder(column: $table.goalValue, builder: (column) => column);
 
   Expression<T> habitEntriesRefs<T extends Object>(
     Expression<T> Function($$HabitEntriesTableAnnotationComposer a) f,
@@ -2208,12 +2760,13 @@ class $$HabitsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> type = const Value.absent(),
+                Value<int> trackingType = const Value.absent(),
                 Value<int> displayMode = const Value.absent(),
                 Value<int?> icon = const Value.absent(),
                 Value<int?> color = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
-                Value<String?> category = const Value.absent(),
+                Value<int?> category = const Value.absent(),
                 Value<int> frequency = const Value.absent(),
                 Value<List<int>> customDays = const Value.absent(),
                 Value<int?> targetFrequency = const Value.absent(),
@@ -2223,14 +2776,17 @@ class $$HabitsTableTableManager
                 Value<DateTime?> pauseStartDate = const Value.absent(),
                 Value<DateTime?> pauseEndDate = const Value.absent(),
                 Value<bool> isPaused = const Value.absent(),
-                Value<List<String>> motivationalMessages = const Value.absent(),
                 Value<String?> customSuccessMessage = const Value.absent(),
                 Value<String?> customFailureMessage = const Value.absent(),
+                Value<WeekendDays?> weekendDays = const Value.absent(),
+                Value<String?> goalType = const Value.absent(),
+                Value<double?> goalValue = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HabitsCompanion(
                 id: id,
                 name: name,
                 type: type,
+                trackingType: trackingType,
                 displayMode: displayMode,
                 icon: icon,
                 color: color,
@@ -2246,9 +2802,11 @@ class $$HabitsTableTableManager
                 pauseStartDate: pauseStartDate,
                 pauseEndDate: pauseEndDate,
                 isPaused: isPaused,
-                motivationalMessages: motivationalMessages,
                 customSuccessMessage: customSuccessMessage,
                 customFailureMessage: customFailureMessage,
+                weekendDays: weekendDays,
+                goalType: goalType,
+                goalValue: goalValue,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2256,12 +2814,13 @@ class $$HabitsTableTableManager
                 required String id,
                 required String name,
                 required int type,
+                required int trackingType,
                 required int displayMode,
                 Value<int?> icon = const Value.absent(),
                 Value<int?> color = const Value.absent(),
                 required bool isArchived,
                 Value<String?> notes = const Value.absent(),
-                Value<String?> category = const Value.absent(),
+                Value<int?> category = const Value.absent(),
                 required int frequency,
                 required List<int> customDays,
                 Value<int?> targetFrequency = const Value.absent(),
@@ -2271,14 +2830,17 @@ class $$HabitsTableTableManager
                 Value<DateTime?> pauseStartDate = const Value.absent(),
                 Value<DateTime?> pauseEndDate = const Value.absent(),
                 required bool isPaused,
-                required List<String> motivationalMessages,
                 Value<String?> customSuccessMessage = const Value.absent(),
                 Value<String?> customFailureMessage = const Value.absent(),
+                Value<WeekendDays?> weekendDays = const Value.absent(),
+                Value<String?> goalType = const Value.absent(),
+                Value<double?> goalValue = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HabitsCompanion.insert(
                 id: id,
                 name: name,
                 type: type,
+                trackingType: trackingType,
                 displayMode: displayMode,
                 icon: icon,
                 color: color,
@@ -2294,9 +2856,11 @@ class $$HabitsTableTableManager
                 pauseStartDate: pauseStartDate,
                 pauseEndDate: pauseEndDate,
                 isPaused: isPaused,
-                motivationalMessages: motivationalMessages,
                 customSuccessMessage: customSuccessMessage,
                 customFailureMessage: customFailureMessage,
+                weekendDays: weekendDays,
+                goalType: goalType,
+                goalValue: goalValue,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2362,6 +2926,7 @@ typedef $$HabitEntriesTableCreateCompanionBuilder =
       Value<String?> unit,
       Value<String?> notes,
       required bool isSkipped,
+      Value<bool> isArchived,
     });
 typedef $$HabitEntriesTableUpdateCompanionBuilder =
     HabitEntriesCompanion Function({
@@ -2373,6 +2938,7 @@ typedef $$HabitEntriesTableUpdateCompanionBuilder =
       Value<String?> unit,
       Value<String?> notes,
       Value<bool> isSkipped,
+      Value<bool> isArchived,
     });
 
 final class $$HabitEntriesTableReferences
@@ -2438,6 +3004,11 @@ class $$HabitEntriesTableFilterComposer
 
   ColumnFilters<bool> get isSkipped => $composableBuilder(
     column: $table.isSkipped,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2509,6 +3080,11 @@ class $$HabitEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$HabitsTableOrderingComposer get habitId {
     final $$HabitsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2562,6 +3138,11 @@ class $$HabitEntriesTableAnnotationComposer
 
   GeneratedColumn<bool> get isSkipped =>
       $composableBuilder(column: $table.isSkipped, builder: (column) => column);
+
+  GeneratedColumn<bool> get isArchived => $composableBuilder(
+    column: $table.isArchived,
+    builder: (column) => column,
+  );
 
   $$HabitsTableAnnotationComposer get habitId {
     final $$HabitsTableAnnotationComposer composer = $composerBuilder(
@@ -2623,6 +3204,7 @@ class $$HabitEntriesTableTableManager
                 Value<String?> unit = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isSkipped = const Value.absent(),
+                Value<bool> isArchived = const Value.absent(),
               }) => HabitEntriesCompanion(
                 id: id,
                 habitId: habitId,
@@ -2632,6 +3214,7 @@ class $$HabitEntriesTableTableManager
                 unit: unit,
                 notes: notes,
                 isSkipped: isSkipped,
+                isArchived: isArchived,
               ),
           createCompanionCallback:
               ({
@@ -2643,6 +3226,7 @@ class $$HabitEntriesTableTableManager
                 Value<String?> unit = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 required bool isSkipped,
+                Value<bool> isArchived = const Value.absent(),
               }) => HabitEntriesCompanion.insert(
                 id: id,
                 habitId: habitId,
@@ -2652,6 +3236,7 @@ class $$HabitEntriesTableTableManager
                 unit: unit,
                 notes: notes,
                 isSkipped: isSkipped,
+                isArchived: isArchived,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -2720,6 +3305,181 @@ typedef $$HabitEntriesTableProcessedTableManager =
       HabitEntryData,
       PrefetchHooks Function({bool habitId})
     >;
+typedef $$CategoriesTableCreateCompanionBuilder =
+    CategoriesCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int?> color,
+      Value<int?> icon,
+    });
+typedef $$CategoriesTableUpdateCompanionBuilder =
+    CategoriesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int?> color,
+      Value<int?> icon,
+    });
+
+class $$CategoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $CategoriesTable> {
+  $$CategoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CategoriesTable> {
+  $$CategoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get color => $composableBuilder(
+    column: $table.color,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CategoriesTable> {
+  $$CategoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get color =>
+      $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<int> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+}
+
+class $$CategoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CategoriesTable,
+          CategoryData,
+          $$CategoriesTableFilterComposer,
+          $$CategoriesTableOrderingComposer,
+          $$CategoriesTableAnnotationComposer,
+          $$CategoriesTableCreateCompanionBuilder,
+          $$CategoriesTableUpdateCompanionBuilder,
+          (
+            CategoryData,
+            BaseReferences<_$AppDatabase, $CategoriesTable, CategoryData>,
+          ),
+          CategoryData,
+          PrefetchHooks Function()
+        > {
+  $$CategoriesTableTableManager(_$AppDatabase db, $CategoriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CategoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CategoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int?> color = const Value.absent(),
+                Value<int?> icon = const Value.absent(),
+              }) => CategoriesCompanion(
+                id: id,
+                name: name,
+                color: color,
+                icon: icon,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<int?> color = const Value.absent(),
+                Value<int?> icon = const Value.absent(),
+              }) => CategoriesCompanion.insert(
+                id: id,
+                name: name,
+                color: color,
+                icon: icon,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CategoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CategoriesTable,
+      CategoryData,
+      $$CategoriesTableFilterComposer,
+      $$CategoriesTableOrderingComposer,
+      $$CategoriesTableAnnotationComposer,
+      $$CategoriesTableCreateCompanionBuilder,
+      $$CategoriesTableUpdateCompanionBuilder,
+      (
+        CategoryData,
+        BaseReferences<_$AppDatabase, $CategoriesTable, CategoryData>,
+      ),
+      CategoryData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2728,4 +3488,6 @@ class $AppDatabaseManager {
       $$HabitsTableTableManager(_db, _db.habits);
   $$HabitEntriesTableTableManager get habitEntries =>
       $$HabitEntriesTableTableManager(_db, _db.habitEntries);
+  $$CategoriesTableTableManager get categories =>
+      $$CategoriesTableTableManager(_db, _db.categories);
 }

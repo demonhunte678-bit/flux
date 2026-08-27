@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flux/providers/index.dart';
 import 'package:flux/data/index.dart';
+import 'package:flux/l10n/generated/app_localizations.dart';
 
 class DashboardPage extends ConsumerWidget {
   final ScrollController scrollController;
@@ -19,7 +20,7 @@ class DashboardPage extends ConsumerWidget {
 
     return habitsAsync.when(
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, stack) => Scaffold(body: Center(child: Text('Error loading habits: $err'))),
+      error: (err, stack) => Scaffold(body: Center(child: Text(L10n.of(context)!.errorLoadingHabits(err.toString())))),
       data: (allHabits) {
         final activeHabits = allHabits.where((h) => !h.isArchived).toList();
 
@@ -46,16 +47,16 @@ class DashboardPage extends ConsumerWidget {
             controller: scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             children: [
-              const Text(
-                'Dashboard',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              Text(
+                L10n.of(context)!.dashboardTab,
+                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
                     child: _buildMetricCard(
-                      'Success Rate',
+                      L10n.of(context)!.successRate,
                       '${overallSuccessRate.toStringAsFixed(0)}%',
                       Icons.trending_up,
                       Colors.green,
@@ -64,11 +65,13 @@ class DashboardPage extends ConsumerWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: _buildMetricCard(
-                      'Best Streak',
-                      '$bestStreak Days',
+                      L10n.of(context)!.bestStreak,
+                      L10n.of(context)!.bestStreakDays(bestStreak.toString()),
                       Icons.flash_on,
                       Colors.orange,
-                      subtitle: bestStreakHabit.isNotEmpty ? 'on $bestStreakHabit' : null,
+                      subtitle: bestStreakHabit.isNotEmpty
+                          ? L10n.of(context)!.bestStreakHabitOn(bestStreakHabit)
+                          : null,
                     ),
                   ),
                 ],
@@ -84,9 +87,9 @@ class DashboardPage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Daily Success Rate History',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        L10n.of(context)!.dailySuccessHistory,
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
                       SizedBox(

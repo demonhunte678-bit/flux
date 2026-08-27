@@ -6,6 +6,7 @@ class HabitEntry {
   String? unit;
   String? notes;
   bool isSkipped;
+  bool isArchived;
 
   HabitEntry({
     required this.date,
@@ -13,6 +14,7 @@ class HabitEntry {
     this.unit,
     this.notes,
     this.isSkipped = false,
+    this.isArchived = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -21,6 +23,7 @@ class HabitEntry {
     'unit': unit,
     'notes': notes,
     'isSkipped': isSkipped,
+    'isArchived': isArchived,
   };
 
   static HabitEntry fromJson(Map<String, dynamic> json) => HabitEntry(
@@ -29,5 +32,6 @@ class HabitEntry {
     unit: json['unit'],
     notes: json['notes'],
     isSkipped: json['isSkipped'] ?? false,
+    isArchived: json['isArchived'] ?? false,
   );
 }

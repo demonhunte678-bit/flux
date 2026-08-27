@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flux/index.dart';
 import 'package:intl/intl.dart';
+import 'package:flux/l10n/index.dart';
 
 class ActivityHeatmap extends StatelessWidget {
   final List<Habit> habits;
@@ -59,6 +60,12 @@ class ActivityHeatmap extends StatelessWidget {
     }
 
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final locale = Localizations.localeOf(context).toString();
+    final format = DateFormat.E(locale);
+    final mondayChar = format.format(DateTime(2023, 1, 2)).substring(0, 1);
+    final wednesdayChar = format.format(DateTime(2023, 1, 4)).substring(0, 1);
+    final fridayChar = format.format(DateTime(2023, 1, 6)).substring(0, 1);
+    final sundayChar = format.format(DateTime(2023, 1, 8)).substring(0, 1);
 
     return Card(
       elevation: 2,
@@ -69,7 +76,7 @@ class ActivityHeatmap extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              habits.length == 1 ? 'Activity Heatmap' : 'Aggregate Activity Heatmap',
+              habits.length == 1 ? context.l10n.activityHeatmap : context.l10n.aggregateActivityHeatmap,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -78,29 +85,29 @@ class ActivityHeatmap extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 14, right: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14, right: 8),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Text(
-                          'M',
-                          style: TextStyle(fontSize: 9, color: Colors.grey),
+                          mondayChar,
+                          style: const TextStyle(fontSize: 9, color: Colors.grey),
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
-                          'W',
-                          style: TextStyle(fontSize: 9, color: Colors.grey),
+                          wednesdayChar,
+                          style: const TextStyle(fontSize: 9, color: Colors.grey),
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
-                          'F',
-                          style: TextStyle(fontSize: 9, color: Colors.grey),
+                          fridayChar,
+                          style: const TextStyle(fontSize: 9, color: Colors.grey),
                         ),
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Text(
-                          'S',
-                          style: TextStyle(fontSize: 9, color: Colors.grey),
+                          sundayChar,
+                          style: const TextStyle(fontSize: 9, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -124,7 +131,7 @@ class ActivityHeatmap extends StatelessWidget {
                               .surfaceContainerHighest
                               .withValues(alpha: 0.3);
                           String tooltipMsg =
-                              '${DateFormat('MMM d, yyyy').format(date)}: No entries';
+                              '${DateFormat('MMM d, yyyy', locale).format(date)}: ${context.l10n.noEntries}';
 
                           if (habits.length == 1) {
                             final habit = habits[0];
@@ -142,9 +149,9 @@ class ActivityHeatmap extends StatelessWidget {
                                     .surfaceContainerHighest
                                     .withValues(alpha: 0.3);
                                 tooltipMsg =
-                                    '${DateFormat('MMM d, yyyy').format(date)}: Skipped';
+                                    '${DateFormat('MMM d, yyyy', locale).format(date)}: ${context.l10n.skippedDay}';
                               } else {
-                                final isFailBased = habit.type == HabitType.FailBased;
+                                final isFailBased = habit.type == HabitType.bad;
                                 final limit = habit.targetValue ?? 0.0;
                                 final actual = entry.value;
 
@@ -156,7 +163,7 @@ class ActivityHeatmap extends StatelessWidget {
                                     }
                                     squareColor = primaryColor.withValues(alpha: opacity);
                                     tooltipMsg =
-                                        '${DateFormat('MMM d, yyyy').format(date)}: Succeeded ($actual/$limit failures)';
+                                        '${DateFormat('MMM d, yyyy', locale).format(date)}: ${context.l10n.succeededFailures(actual.toStringAsFixed(0), limit.toStringAsFixed(0))}';
                                   } else {
                                     final excess = actual - limit;
                                     double opacity = 0.4;
@@ -165,7 +172,7 @@ class ActivityHeatmap extends StatelessWidget {
 
                                     squareColor = Colors.red.withValues(alpha: opacity);
                                     tooltipMsg =
-                                        '${DateFormat('MMM d, yyyy').format(date)}: Failed ($actual/$limit failures)';
+                                        '${DateFormat('MMM d, yyyy', locale).format(date)}: ${context.l10n.failedFailures(actual.toStringAsFixed(0), limit.toStringAsFixed(0))}';
                                   }
                                 } else {
                                   final target = habit.targetValue ?? 1.0;
@@ -188,7 +195,7 @@ class ActivityHeatmap extends StatelessWidget {
                                         .withValues(alpha: 0.3);
                                   }
                                   tooltipMsg =
-                                      '${DateFormat('MMM d, yyyy').format(date)}: ${actual.toStringAsFixed(0)}/${target.toStringAsFixed(0)} ${habit.getUnitDisplayName()} completed';
+                                      '${DateFormat('MMM d, yyyy', locale).format(date)}: ${context.l10n.completedUnit(actual.toStringAsFixed(0), target.toStringAsFixed(0), habit.getUnitDisplayName())}';
                                 }
                               }
                             }
@@ -218,21 +225,23 @@ class ActivityHeatmap extends StatelessWidget {
                               if (successes >= failures) {
                                 final successRate = successes / totalActive;
                                 double opacity = 0.25;
-                                if (successRate >= 0.8) opacity = 1.0;
-                                else if (successRate >= 0.5) opacity = 0.7;
+                                if (successRate >= 0.8) {
+                                  opacity = 1.0;
+                                } else if (successRate >= 0.5) opacity = 0.7;
                                 else if (successRate >= 0.3) opacity = 0.4;
 
                                 squareColor = primaryColor.withValues(alpha: opacity);
                               } else {
                                 final failureRate = failures / totalActive;
                                 double opacity = 0.4;
-                                if (failureRate >= 0.8) opacity = 1.0;
-                                else if (failureRate >= 0.5) opacity = 0.7;
+                                if (failureRate >= 0.8) {
+                                  opacity = 1.0;
+                                } else if (failureRate >= 0.5) opacity = 0.7;
 
                                 squareColor = Colors.red.withValues(alpha: opacity);
                               }
                               tooltipMsg =
-                                  '${DateFormat('MMM d, yyyy').format(date)}: $successes/$totalActive habits completed';
+                                  '${DateFormat('MMM d, yyyy', locale).format(date)}: ${context.l10n.habitsCompleted(successes.toString(), totalActive.toString())}';
                             }
                           }
 

@@ -3,7 +3,7 @@ import 'package:flux/data/index.dart';
 import 'habits_provider.dart';
 
 class HabitsPageState {
-  final String? selectedCategory;
+  final Category? selectedCategory;
   final DateTime selectedDate;
   final List<Habit> habits;
 
@@ -18,16 +18,19 @@ class HabitsPageState {
   List<Habit> get filteredHabits {
     final active = activeHabits;
     if (selectedCategory == null) return active;
-    return active.where((h) => h.category == selectedCategory).toList();
+    return active.where((h) => h.category?.id == selectedCategory?.id).toList();
   }
 
-  List<String> get categories {
-    return activeHabits
-        .where((h) => h.category != null)
-        .map((h) => h.category!)
-        .toSet()
-        .toList()
-      ..sort();
+  List<Category> get categories {
+    final seenIds = <int>{};
+    final uniqueCategories = <Category>[];
+    for (var h in activeHabits) {
+      if (h.category != null && !seenIds.contains(h.category!.id)) {
+        seenIds.add(h.category!.id);
+        uniqueCategories.add(h.category!);
+      }
+    }
+    return uniqueCategories;
   }
 
   double get overallSuccessRate {
@@ -43,7 +46,7 @@ class HabitsPageState {
   }
 
   HabitsPageState copyWith({
-    String? Function()? selectedCategory,
+    Category? Function()? selectedCategory,
     DateTime? selectedDate,
     List<Habit>? habits,
   }) {
@@ -78,7 +81,7 @@ class HabitsPageNotifier extends StateNotifier<HabitsPageState> {
     );
   }
 
-  void setSelectedCategory(String? category) {
+  void setSelectedCategory(Category? category) {
     state = state.copyWith(selectedCategory: () => category);
   }
 

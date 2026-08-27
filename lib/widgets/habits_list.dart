@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flux/data/index.dart';
 import 'habit_list_item.dart';
+import 'package:flux/l10n/index.dart';
 
 class HabitsList extends StatelessWidget {
   final List<Habit> filteredHabits;
@@ -28,7 +29,7 @@ class HabitsList extends StatelessWidget {
             Icon(Icons.explore_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No habits for today',
+              context.l10n.noHabitsForToday,
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey[600],
@@ -37,7 +38,7 @@ class HabitsList extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Create a habit to get started!',
+              context.l10n.createHabitToGetStarted,
               style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],

@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons:
   fl_chart:
@@ -42,6 +44,8 @@ dependencies:
   sqflite_common_ffi: ^2.4.2
   drift_sqflite: ^2.0.1
   sqlite3: any
+  google_fonts: ^8.2.1
+  flutter_colorpicker: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,6 +55,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - icon.svg
